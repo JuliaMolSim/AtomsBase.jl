@@ -1,0 +1,88 @@
+# This file is machine-generated - editing it directly is not advised
+
+[[AtomsBase]]
+deps = ["PeriodicTable", "StaticArrays", "Unitful", "UnitfulAtomic"]
+path = ".."
+uuid = "a963bdd2-2df7-4f54-a1ee-49d51e6be12a"
+version = "0.1.0"
+
+[[Base64]]
+uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[ConstructionBase]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "f74e9d5388b8620b4cee35d4c5a618dd4dc547f4"
+uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
+version = "1.3.0"
+
+[[Dates]]
+deps = ["Printf"]
+uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[InteractiveUtils]]
+deps = ["Markdown"]
+uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[Libdl]]
+uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+
+[[LinearAlgebra]]
+deps = ["Libdl"]
+uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
+[[Logging]]
+uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
+
+[[Markdown]]
+deps = ["Base64"]
+uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
+
+[[PeriodicTable]]
+deps = ["Base64", "Test", "Unitful"]
+git-tree-sha1 = "067ef5738ef3157f29749c32b64f0ff9b3d07ab2"
+uuid = "7b2266bf-644c-5ea3-82d8-af4bbd25a884"
+version = "1.1.0"
+
+[[Printf]]
+deps = ["Unicode"]
+uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[[Random]]
+deps = ["Serialization"]
+uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[[Serialization]]
+uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
+[[SparseArrays]]
+deps = ["LinearAlgebra", "Random"]
+uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+
+[[StaticArrays]]
+deps = ["LinearAlgebra", "Random", "Statistics"]
+git-tree-sha1 = "3240808c6d463ac46f1c1cd7638375cd22abbccb"
+uuid = "90137ffa-7385-5640-81b9-e52037218182"
+version = "1.2.12"
+
+[[Statistics]]
+deps = ["LinearAlgebra", "SparseArrays"]
+uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+
+[[Test]]
+deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
+uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[Unicode]]
+uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[Unitful]]
+deps = ["ConstructionBase", "Dates", "LinearAlgebra", "Random"]
+git-tree-sha1 = "a981a8ef8714cba2fd9780b22fd7a469e7aaf56d"
+uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
+version = "1.9.0"
+
+[[UnitfulAtomic]]
+deps = ["Unitful"]
+git-tree-sha1 = "903be579194534af1c4b4778d1ace676ca042238"
+uuid = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
+version = "1.0.0"

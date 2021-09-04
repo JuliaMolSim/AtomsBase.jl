@@ -1,7 +1,14 @@
 using Unitful
-using Unitful: Velocity
 using UnitfulAtomic
 using PeriodicTable
+
+export AbstractParticle, AbstractAtom, AbstractSystem
+export BoundaryCondition, DirichletZero, Periodic
+export get_atomic_mass, get_atomic_number, get_atomic_symbol,
+    get_cell, get_identifier, get_position, get_velocity,
+    get_boundary_conditions, get_periodic
+export get_atomic_property, has_atomic_property, atomic_propertynames
+export n_dimensions
 
 #
 # A distinguishable particle, can be anything associated with coordinate
@@ -11,8 +18,8 @@ using PeriodicTable
 # IdType:  Type used to identify the particle
 #
 abstract type AbstractParticle{IdType} end
-get_velocity(::AbstractParticle)::AbstractVector{<: Velocity} = missing
-get_position(::AbstractParticle)::AbstractVector{<: Length}   = error("Implement me")
+get_velocity(::AbstractParticle)::AbstractVector{<: Unitful.Velocity} = missing
+get_position(::AbstractParticle)::AbstractVector{<: Unitful.Length}   = error("Implement me")
 function get_identifier(::AbstractParticle{IdType})::IdType where {IdType}
     error("Implement me")
 end
@@ -43,8 +50,8 @@ atomic_propertynames(::AbstractAtom) = Symbol[]
 # Identifier for boundary conditions per dimension
 #
 abstract type BoundaryCondition end
-struct Dirichlet <: BoundaryCondition end  # Dirichlet zero boundary (i.e. molecular context)
-struct Periodic  <: BoundaryCondition end  # Periodic BCs
+struct DirichletZero <: BoundaryCondition end  # Dirichlet zero boundary (i.e. molecular context)
+struct Periodic  <: BoundaryCondition end      # Periodic BCs
 
 
 #
@@ -56,9 +63,12 @@ get_cell(::AbstractSystem)::Vector{<:AbstractVector} = error("Implement me")
 get_boundary_conditions(::AbstractSystem)::AbstractVector{BoundaryCondition} = error("Implement me")
 get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
 
-getindex(::AbstractSystem, ::Int)  = error("Implement me")
-size(::AbstractSystem)             = error("Implement me")
-setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not mutable.")
+# Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
+n_dimensions(sys::AbstractSystem) = length(get_boundary_conditions(sys))
+
+Base.getindex(::AbstractSystem, ::Int)  = error("Implement me")
+Base.size(::AbstractSystem)             = error("Implement me")
+Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not mutable.")
 
 # TODO Support similar, push, ...
 
@@ -77,3 +87,18 @@ get_atomic_number(sys::AbstractSystem{<: AbstractAtom}) = get_atomic_number.(sys
 get_atomic_mass(sys::AbstractSystem{<: AbstractAtom})   = get_atomic_mass.(sys)
 get_atomic_property(sys::AbstractSystem{<: AbstractAtom}, property::Symbol)::Vector{Any} = get_atomic_property.(sys, property)
 atomic_propertiesnames(sys::AbstractSystem{<: AbstractAtom}) = unique(sort(atomic_propertynames.(sys)))
+
+# Just to make testing a little easier for now
+function Base.show(io::IO, ::MIME"text/plain", part::AbstractParticle)
+    print(io, "Particle (", get_identifier(part), ")  @ ", get_position(part))
+end
+function Base.show(io::IO, mime::MIME"text/plain", sys::AbstractSystem)
+    println(io, "System:")
+    println(io, "    BCs:        ", get_boundary_conditions(sys))
+    println(io, "    Cell:       ", get_cell(sys))
+    println(io, "    Particles:  ")
+    for particle in sys
+        Base.show(io, mime, particle)
+        println(io)
+    end
+end
