@@ -9,8 +9,8 @@ struct SimpleAtom{N} <: AbstractAtom
     element::Element
 end
 SimpleAtom(position, element)  = SimpleAtom{length(position)}(position, element)
-get_position(atom::SimpleAtom) = atom.position
-get_element(atom::SimpleAtom)  = atom.element
+position(atom::SimpleAtom) = atom.position
+element(atom::SimpleAtom)  = atom.element
 
 function SimpleAtom{N}(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector}) where N
     SimpleAtom{N}(position, Element(symbol))
@@ -22,8 +22,8 @@ struct SimpleSystem{N, AT <: AbstractParticle} <: AbstractSystem{AT}
     boundary_conditions::SVector{N, BoundaryCondition}
     particles::Vector{AT}
 end
-get_box(sys::SimpleSystem) = sys.box
-get_boundary_conditions(sys::SimpleSystem) = sys.boundary_conditions
+box(sys::SimpleSystem) = sys.box
+boundary_conditions(sys::SimpleSystem) = sys.boundary_conditions
 
 Base.size(sys::SimpleSystem) = size(sys.particles)
 Base.getindex(sys::SimpleSystem, i::Int) = getindex(sys.particles, i)
