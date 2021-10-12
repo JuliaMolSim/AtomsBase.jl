@@ -81,7 +81,8 @@ get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_co
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
 n_dimensions(sys::AbstractSystem) = length(get_boundary_conditions(sys))
 
-Base.getindex(::AbstractSystem, ::Int)  = error("Implement me")
+Base.getindex(::AbstractSystem{AT}, ::Int)::AT  = error("Implement me")
+Base.getindex(::AbstractSystem, ::AbstractArray)::AbstractSystem  = error("Implement me")
 Base.size(::AbstractSystem)             = error("Implement me")
 Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not mutable.")
 
