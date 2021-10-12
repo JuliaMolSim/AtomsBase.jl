@@ -1,6 +1,7 @@
 using Unitful
 using UnitfulAtomic
 using PeriodicTable
+using StaticArrays
 
 export AbstractElement, AbstractParticle, AbstractAtom, AbstractSystem
 export Element
@@ -73,9 +74,9 @@ struct Periodic      <: BoundaryCondition end  # Periodic BCs
 # The system type
 #     Again readonly.
 #
-abstract type AbstractSystem{AT <: AbstractParticle,D} <: AbstractArray{AT,D} end
-get_box(::AbstractSystem)::Vector{<:AbstractVector} = error("Implement me")
-get_boundary_conditions(::AbstractSystem)::AbstractVector{BoundaryCondition} = error("Implement me")
+abstract type AbstractSystem{AT <: AbstractParticle, D} <: AbstractArray{AT,D} end
+get_box(::AbstractSystem)::SVector{D, SVector{D, Unitful.Length}} = error("Implement me")
+get_boundary_conditions(::AbstractSystem)::SVector{D,BoundaryCondition} = error("Implement me")
 get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
