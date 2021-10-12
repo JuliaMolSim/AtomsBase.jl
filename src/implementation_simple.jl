@@ -17,7 +17,7 @@ function SimpleAtom{N}(position, symbol::Union{Integer,AbstractString,Symbol,Abs
 end
 
 # TODO Switch order of type arguments?
-struct SimpleSystem{N, AT <: AbstractParticle} <: AbstractSystem{AT}
+struct SimpleSystem{AT <: AbstractParticle,N} <: AbstractSystem{AT,N}
     box::SVector{N, SVector{N, Unitful.Length}}
     boundary_conditions::SVector{N, BoundaryCondition}
     particles::Vector{AT}
@@ -26,6 +26,7 @@ get_box(sys::SimpleSystem) = sys.box
 get_boundary_conditions(sys::SimpleSystem) = sys.boundary_conditions
 
 Base.size(sys::SimpleSystem) = size(sys.particles)
+Base.length(sys::SimpleSystem) = length(sys.particles)
 Base.getindex(sys::SimpleSystem, i::Int) = getindex(sys.particles, i)
 
 SimpleAtomicSystem{N} = SimpleSystem{N, SimpleAtom{N}}

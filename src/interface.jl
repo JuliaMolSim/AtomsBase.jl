@@ -73,16 +73,17 @@ struct Periodic      <: BoundaryCondition end  # Periodic BCs
 # The system type
 #     Again readonly.
 #
-abstract type AbstractSystem{AT <: AbstractParticle} <: AbstractVector{AT} end
+abstract type AbstractSystem{AT <: AbstractParticle,D} <: AbstractArray{AT,D} end
 get_box(::AbstractSystem)::Vector{<:AbstractVector} = error("Implement me")
 get_boundary_conditions(::AbstractSystem)::AbstractVector{BoundaryCondition} = error("Implement me")
 get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
-n_dimensions(sys::AbstractSystem) = length(get_boundary_conditions(sys))
+n_dimensions(::AbstractSystem{T,N}) where {T,N} = N
 
 Base.getindex(::AbstractSystem, ::Int)  = error("Implement me")
 Base.size(::AbstractSystem)             = error("Implement me")
+Base.length(::AbstractSystem)           = error("Implement me")
 Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not mutable.")
 
 # TODO Support similar, push, ...
