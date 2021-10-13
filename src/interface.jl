@@ -80,7 +80,7 @@ get_boundary_conditions(::AbstractSystem)::SVector{D,BoundaryCondition} = error(
 get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
-n_dimensions(::AbstractSystem{T,N}) where {T,N} = N
+n_dimensions(::AbstractSystem{T,D}) where {T,D} = D
 
 Base.getindex(::AbstractSystem, ::Int)  = error("Implement me")
 Base.size(::AbstractSystem)             = error("Implement me")
