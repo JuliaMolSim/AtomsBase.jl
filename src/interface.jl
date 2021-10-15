@@ -107,6 +107,7 @@ element(sys::AbstractSystem)  = element.(sys)
 #
 # Extra stuff only for Systems composed of atoms
 #
+AbstractAtomicSystem{D,AT<:AbstractAtom} = AbstractSystem{D,ChemicalElement,AT}
 atomic_symbol(sys::AbstractAtomicSystem) = atomic_symbol.(sys)
 atomic_number(sys::AbstractAtomicSystem) = atomic_number.(sys)
 atomic_mass(sys::AbstractAtomicSystem)   = atomic_mass.(sys)
