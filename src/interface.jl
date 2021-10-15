@@ -1,6 +1,7 @@
 using Unitful
 using UnitfulAtomic
 using PeriodicTable
+using StaticArrays
 
 export AbstractElement, AbstractParticle, AbstractAtom, AbstractSystem
 export Element
@@ -73,17 +74,23 @@ struct Periodic      <: BoundaryCondition end  # Periodic BCs
 # The system type
 #     Again readonly.
 #
-abstract type AbstractSystem{AT <: AbstractParticle} <: AbstractVector{AT} end
-bounding_box(::AbstractSystem)::Vector{<:AbstractVector} = error("Implement me")
-boundary_conditions(::AbstractSystem)::AbstractVector{BoundaryCondition} = error("Implement me")
-periodic_dims(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditions(sys)]
+
+abstract type AbstractSystem{AT <: AbstractParticle, D} end
+get_box(::AbstractSystem)::SVector{D, SVector{D, <:Unitful.Length}} = error("Implement me")
+get_boundary_conditions(::AbstractSystem)::SVector{D,BoundaryCondition} = error("Implement me")
+get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
-n_dimensions(sys::AbstractSystem) = length(boundary_conditions(sys))
+n_dimensions(::AbstractSystem{T,D}) where {T,D} = D
 
+
+# indexing interface
 Base.getindex(::AbstractSystem, ::Int)  = error("Implement me")
 Base.size(::AbstractSystem)             = error("Implement me")
+Base.length(::AbstractSystem)           = error("Implement me")
 Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not mutable.")
+Base.firstindex(::AbstractSystem) = 1
+Base.lastindex(s::AbstractSystem) = length(s)
 
 # TODO Support similar, push, ...
 
