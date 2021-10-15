@@ -22,7 +22,7 @@ struct SimpleSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: Abstrac
     boundary_conditions::SVector{D, BoundaryCondition}
     particles::Vector{AT}
 end
-box(sys::SimpleSystem) = sys.box
+bounding_box(sys::SimpleSystem) = sys.box
 boundary_conditions(sys::SimpleSystem) = sys.boundary_conditions
 
 Base.size(sys::SimpleSystem) = size(sys.particles)
