@@ -4,8 +4,8 @@ using StaticArrays
 
 export SimpleAtom, SimpleSystem, SimpleAtomicSystem
 
-struct SimpleAtom{D} <: AbstractAtom
-    position::SVector{D, Unitful.Length}
+struct SimpleAtom{D, T<:Unitful.Length} <: AbstractAtom
+    position::SVector{D, T}
     element::ChemicalElement
 end
 SimpleAtom(position, element)  = SimpleAtom{length(position)}(position, element)
@@ -17,8 +17,8 @@ function SimpleAtom(position, symbol::Union{Integer,AbstractString,Symbol,Abstra
 end
 
 # TODO Switch order of type arguments?
-struct SimpleSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
-    box::SVector{D, SVector{D, Unitful.Length}}
+struct SimpleSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}, T<:Unitful.Length} <: AbstractSystem{D,ET,AT}
+    box::SVector{D, SVector{D, T}}
     boundary_conditions::SVector{D, BoundaryCondition}
     particles::Vector{AT}
 end
