@@ -34,10 +34,10 @@ get_atomic_mass(el::ChemicalElement)   = el.data.atomic_mass
 #
 # IdType:  Type used to identify the particle
 #
-abstract type AbstractParticle{E<:AbstractElement} end
+abstract type AbstractParticle{ET<:AbstractElement} end
 get_velocity(::AbstractParticle)::AbstractVector{<: Unitful.Velocity} = missing
 get_position(::AbstractParticle)::AbstractVector{<: Unitful.Length}   = error("Implement me")
-(get_element(::AbstractParticle{E})::E) where {E<:AbstractElement} = error("Implement me")
+(get_element(::AbstractParticle{ET})::ET) where {ET<:AbstractElement} = error("Implement me")
 
 
 #
@@ -74,13 +74,13 @@ struct Periodic      <: BoundaryCondition end  # Periodic BCs
 # The system type
 #     Again readonly.
 #
-abstract type AbstractSystem{E, AT <: AbstractParticle{E}, D} end
-get_box(::AbstractSystem)::SVector{D, SVector{D, <:Unitful.Length}} = error("Implement me")
-get_boundary_conditions(::AbstractSystem)::SVector{D,BoundaryCondition} = error("Implement me")
+abstract type AbstractSystem{D<:Unsigned, ET<:AbstractElement, AT<:AbstractParticle{ET}} end
+(get_box(::AbstractSystem{D,ET,AT})::SVector{D, SVector{D, <:Unitful.Length}}) where {D,ET,AT} = error("Implement me")
+(get_boundary_conditions(::AbstractSystem{D,ET,AT})::SVector{D,BoundaryCondition}) where {D,ET,AT} = error("Implement me")
 get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
-n_dimensions(::AbstractSystem{T,D}) where {T,D} = D
+n_dimensions(::AbstractSystem{D,ET,AT}) where {D,ET,AT} = D
 
 # indexing interface
 Base.getindex(::AbstractSystem, ::Int)  = error("Implement me")
