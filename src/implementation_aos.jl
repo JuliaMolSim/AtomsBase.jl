@@ -9,8 +9,8 @@ struct AoSAtom{D} <: AbstractAtom
     element::ChemicalElement
 end
 AoSAtom(position, element)  = AoSAtom{length(position)}(position, element)
-get_position(atom::AoSAtom) = atom.position
-get_element(atom::AoSAtom)  = atom.element
+position(atom::AoSAtom) = atom.position
+element(atom::AoSAtom)  = atom.element
 
 function AoSAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector})
     AoSAtom(position, ChemicalElement(symbol))
@@ -22,8 +22,8 @@ struct AoSSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSy
     boundary_conditions::SVector{D, BoundaryCondition}
     particles::Vector{AT}
 end
-get_box(sys::AoSSystem) = sys.box
-get_boundary_conditions(sys::AoSSystem) = sys.boundary_conditions
+bounding_box(sys::AoSSystem) = sys.box
+boundary_conditions(sys::AoSSystem) = sys.boundary_conditions
 
 Base.size(sys::AoSSystem) = size(sys.particles)
 Base.length(sys::AoSSystem) = length(sys.particles)
