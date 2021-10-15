@@ -6,7 +6,7 @@ export AbstractElement, AbstractParticle, AbstractAtom, AbstractSystem
 export Element
 export BoundaryCondition, DirichletZero, Periodic
 export atomic_mass, atomic_number, atomic_symbol,
-    box, element, position, velocity,
+    bounding_box, element, position, velocity,
     boundary_conditions, periodic_dims
 export atomic_property, has_atomic_property, atomic_propertynames
 export n_dimensions
@@ -74,7 +74,7 @@ struct Periodic      <: BoundaryCondition end  # Periodic BCs
 #     Again readonly.
 #
 abstract type AbstractSystem{AT <: AbstractParticle} <: AbstractVector{AT} end
-box(::AbstractSystem)::Vector{<:AbstractVector} = error("Implement me")
+bounding_box(::AbstractSystem)::Vector{<:AbstractVector} = error("Implement me")
 boundary_conditions(::AbstractSystem)::AbstractVector{BoundaryCondition} = error("Implement me")
 periodic_dims(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditions(sys)]
 
@@ -113,7 +113,7 @@ end
 function Base.show(io::IO, mime::MIME"text/plain", sys::AbstractSystem)
     println(io, "System:")
     println(io, "    BCs:        ", boundary_conditions(sys))
-    println(io, "    Box:        ", box(sys))
+    println(io, "    Box:        ", bounding_box(sys))
     println(io, "    Particles:  ")
     for particle in sys
         Base.show(io, mime, particle)
