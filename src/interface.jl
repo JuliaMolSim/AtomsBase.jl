@@ -37,7 +37,7 @@ get_atomic_mass(el::ChemicalElement)   = el.data.atomic_mass
 abstract type AbstractParticle{ET<:AbstractElement} end
 get_velocity(::AbstractParticle)::AbstractVector{<: Unitful.Velocity} = missing
 get_position(::AbstractParticle)::AbstractVector{<: Unitful.Length}   = error("Implement me")
-get_element(::AbstractParticle{ET})::ET where {ET<:AbstractElement} = error("Implement me")
+(get_element(::AbstractParticle{ET})::ET) where {ET<:AbstractElement} = error("Implement me")
 
 
 #
@@ -75,8 +75,8 @@ struct Periodic      <: BoundaryCondition end  # Periodic BCs
 #     Again readonly.
 #
 abstract type AbstractSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} end
-get_box(::AbstractSystem{D})::SVector{D, SVector{D, <:Unitful.Length}} where {D} = error("Implement me")
-get_boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition} where {D} = error("Implement me")
+(get_box(::AbstractSystem{D})::SVector{D, SVector{D, <:Unitful.Length}}) where {D} = error("Implement me")
+(get_boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition}) where {D} = error("Implement me")
 get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
