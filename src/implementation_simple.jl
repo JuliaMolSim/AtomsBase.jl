@@ -28,5 +28,3 @@ get_boundary_conditions(sys::SimpleSystem) = sys.boundary_conditions
 Base.size(sys::SimpleSystem) = size(sys.particles)
 Base.length(sys::SimpleSystem) = length(sys.particles)
 Base.getindex(sys::SimpleSystem, i::Int) = getindex(sys.particles, i)
-
-SimpleAtomicSystem{D} = SimpleSystem{D, ChemicalElement, SimpleAtom{D}}
