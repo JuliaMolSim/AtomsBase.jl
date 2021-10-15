@@ -9,8 +9,8 @@ struct SoAAtom{D} <: AbstractAtom
     element::ChemicalElement
 end
 SoAAtom(position, element)  = SoAAtom{length(position)}(position, element)
-get_position(atom::SoAAtom) = atom.position
-get_element(atom::SoAAtom)  = atom.element
+position(atom::SoAAtom) = atom.position
+element(atom::SoAAtom)  = atom.element
 
 function SoAAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector})
     SoAAtom(position, ChemicalElement(symbol))
@@ -23,8 +23,8 @@ struct SoASystem{N<:Integer, D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <
     positions::SMatrix{N,D,Unitful.Length}
     elements::SVector{N,ET}
 end
-get_box(sys::SoASystem) = sys.box
-get_boundary_conditions(sys::SoASystem) = sys.boundary_conditions
+bounding_box(sys::SoASystem) = sys.box
+boundary_conditions(sys::SoASystem) = sys.boundary_conditions
 
 # Base.size(sys::SoASystem) = size(sys.particles)
 Base.length(::SoASystem{N,D,ET,AT}) where {N,D,ET,AT} = N
