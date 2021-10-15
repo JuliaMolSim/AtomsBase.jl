@@ -74,7 +74,7 @@ struct Periodic      <: BoundaryCondition end  # Periodic BCs
 # The system type
 #     Again readonly.
 #
-abstract type AbstractSystem{AT <: AbstractParticle, D} end
+abstract type AbstractSystem{E, AT <: AbstractParticle{E}, D} end
 get_box(::AbstractSystem)::SVector{D, SVector{D, <:Unitful.Length}} = error("Implement me")
 get_boundary_conditions(::AbstractSystem)::SVector{D,BoundaryCondition} = error("Implement me")
 get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
