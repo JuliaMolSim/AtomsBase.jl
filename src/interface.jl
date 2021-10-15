@@ -37,7 +37,7 @@ get_atomic_mass(el::ChemicalElement)   = el.data.atomic_mass
 abstract type AbstractParticle{ET<:AbstractElement} end
 get_velocity(::AbstractParticle)::AbstractVector{<: Unitful.Velocity} = missing
 get_position(::AbstractParticle)::AbstractVector{<: Unitful.Length}   = error("Implement me")
-(get_element(::AbstractParticle{ET})::ET) where {ET<:AbstractElement} = error("Implement me")
+get_element(::AbstractParticle{ET})::ET where {ET<:AbstractElement} = error("Implement me")
 
 
 #
@@ -47,7 +47,7 @@ get_position(::AbstractParticle)::AbstractVector{<: Unitful.Length}   = error("I
 #     - The inferface is only in Cartesian coordinates.
 #     - Has atom-specific defaults (i.e. assumes every entity represents an atom or ion)
 #
-abstract type AbstractAtom <: AbstractParticle{ChemicalElement} end
+const AbstractAtom = AbstractParticle{ChemicalElement}
 get_element(::AbstractAtom)::ChemicalElement = error("Implement me")
 
 
@@ -102,7 +102,7 @@ get_element(sys::AbstractSystem)  = get_element.(sys)
 #
 # Extra stuff only for Systems composed of atoms
 #
-AbstractAtomicSystem{D,AT<:AbstractAtom} = AbstractSystem{D,ChemicalElement,AT}
+const AbstractAtomicSystem{D,AT<:AbstractAtom} = AbstractSystem{D,ChemicalElement,AT}
 get_atomic_symbol(sys::AbstractAtomicSystem) = get_atomic_symbol.(sys)
 get_atomic_number(sys::AbstractAtomicSystem) = get_atomic_number.(sys)
 get_atomic_mass(sys::AbstractAtomicSystem)   = get_atomic_mass.(sys)
