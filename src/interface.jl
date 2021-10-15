@@ -34,10 +34,10 @@ get_atomic_mass(el::Element)   = el.data.atomic_mass
 #
 # IdType:  Type used to identify the particle
 #
-abstract type AbstractParticle end
+abstract type AbstractParticle{E<:AbstractElement} end
 get_velocity(::AbstractParticle)::AbstractVector{<: Unitful.Velocity} = missing
 get_position(::AbstractParticle)::AbstractVector{<: Unitful.Length}   = error("Implement me")
-get_element(::AbstractParticle)::AbstractElement = error("Implement me")
+(get_element(::AbstractParticle{E})::E) where {E<:AbstractElement} = error("Implement me")
 
 
 #
