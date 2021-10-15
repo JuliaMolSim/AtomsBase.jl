@@ -4,7 +4,7 @@ using PeriodicTable
 using StaticArrays
 
 export AbstractElement, AbstractParticle, AbstractAtom, AbstractSystem
-export Element
+export ChemicalElement
 export BoundaryCondition, DirichletZero, Periodic
 export get_atomic_mass, get_atomic_number, get_atomic_symbol,
     get_box, get_element, get_position, get_velocity,
@@ -14,16 +14,16 @@ export n_dimensions
 
 
 abstract type AbstractElement end
-struct Element <: AbstractElement
+struct ChemicalElement <: AbstractElement
     data::PeriodicTable.Element
 end
-Element(symbol::Union{Symbol,Integer,AbstractString}) = Element(PeriodicTable.elements[symbol])
-Base.show(io::IO, elem::Element) = print(io, "Element(", get_atomic_symbol(elem), ")")
+ChemicalElement(symbol::Union{Symbol,Integer,AbstractString}) = ChemicalElement(PeriodicTable.elements[symbol])
+Base.show(io::IO, elem::ChemicalElement) = print(io, "Element(", get_atomic_symbol(elem), ")")
 
 # These are always only read-only ... and allow look-up into a database
-get_atomic_symbol(el::Element) = el.data.symbol
-get_atomic_number(el::Element) = el.data.number
-get_atomic_mass(el::Element)   = el.data.atomic_mass
+get_atomic_symbol(el::ChemicalElement) = el.data.symbol
+get_atomic_number(el::ChemicalElement) = el.data.number
+get_atomic_mass(el::ChemicalElement)   = el.data.atomic_mass
 
 
 
@@ -47,8 +47,8 @@ get_position(::AbstractParticle)::AbstractVector{<: Unitful.Length}   = error("I
 #     - The inferface is only in Cartesian coordinates.
 #     - Has atom-specific defaults (i.e. assumes every entity represents an atom or ion)
 #
-abstract type AbstractAtom <: AbstractParticle end
-get_element(::AbstractAtom)::Element = error("Implement me")
+abstract type AbstractAtom <: AbstractParticle{ChemicalElement} end
+get_element(::AbstractAtom)::ChemicalElement = error("Implement me")
 
 
 # Extracting things ... it might make sense to make some of them writable in concrete
