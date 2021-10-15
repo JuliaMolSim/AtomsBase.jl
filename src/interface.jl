@@ -3,8 +3,8 @@ using UnitfulAtomic
 using PeriodicTable
 using StaticArrays
 
-export AbstractElement, AbstractParticle, AbstractAtom, AbstractSystem
-export Element
+export AbstractElement, AbstractParticle, AbstractAtom, AbstractSystem, AbstractAtomicSystem
+export ChemicalElement
 export BoundaryCondition, DirichletZero, Periodic
 export atomic_mass, atomic_number, atomic_symbol,
     bounding_box, element, position, velocity,
@@ -14,16 +14,17 @@ export n_dimensions
 
 
 abstract type AbstractElement end
-struct Element <: AbstractElement
+struct ChemicalElement <: AbstractElement
     data::PeriodicTable.Element
 end
-Element(symbol::Union{Symbol,Integer,AbstractString}) = Element(PeriodicTable.elements[symbol])
-Base.show(io::IO, elem::Element) = print(io, "Element(", atomic_symbol(elem), ")")
+
+ChemicalElement(symbol::Union{Symbol,Integer,AbstractString}) = ChemicalElement(PeriodicTable.elements[symbol])
+Base.show(io::IO, elem::ChemicalElement) = print(io, "Element(", atomic_symbol(elem), ")")
 
 # These are always only read-only ... and allow look-up into a database
-atomic_symbol(el::Element) = el.data.symbol
-atomic_number(el::Element) = el.data.number
-atomic_mass(el::Element)   = el.data.atomic_mass
+atomic_symbol(el::ChemicalElement) = el.data.symbol
+atomic_number(el::ChemicalElement) = el.data.number
+atomic_mass(el::ChemicalElement)   = el.data.atomic_mass
 
 
 
@@ -34,10 +35,10 @@ atomic_mass(el::Element)   = el.data.atomic_mass
 #
 # IdType:  Type used to identify the particle
 #
-abstract type AbstractParticle end
+abstract type AbstractParticle{ET<:AbstractElement} end
 velocity(::AbstractParticle)::AbstractVector{<: Unitful.Velocity} = missing
 position(::AbstractParticle)::AbstractVector{<: Unitful.Length}   = error("Implement me")
-element(::AbstractParticle)::AbstractElement = error("Implement me")
+(element(::AbstractParticle{ET})::ET) where {ET<:AbstractElement} = error("Implement me")
 
 
 #
@@ -47,8 +48,9 @@ element(::AbstractParticle)::AbstractElement = error("Implement me")
 #     - The inferface is only in Cartesian coordinates.
 #     - Has atom-specific defaults (i.e. assumes every entity represents an atom or ion)
 #
-abstract type AbstractAtom <: AbstractParticle end
-element(::AbstractAtom)::Element = error("Implement me")
+
+abstract type AbstractAtom <: AbstractParticle{ChemicalElement} end
+element(::AbstractAtom)::ChemicalElement = error("Implement me")
 
 
 # Extracting things ... it might make sense to make some of them writable in concrete
@@ -75,13 +77,14 @@ struct Periodic      <: BoundaryCondition end  # Periodic BCs
 #     Again readonly.
 #
 
-abstract type AbstractSystem{AT <: AbstractParticle, D} end
-get_box(::AbstractSystem)::SVector{D, SVector{D, <:Unitful.Length}} = error("Implement me")
-get_boundary_conditions(::AbstractSystem)::SVector{D,BoundaryCondition} = error("Implement me")
+abstract type AbstractSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} end
+(bounding_box(::AbstractSystem{D,ET,AT})::SVector{D, SVector{D, <:Unitful.Length}}) where {D,ET,AT} = error("Implement me")
+(boundary_conditions(::AbstractSystem{D,ET,AT})::SVector{D,BoundaryCondition}) where {D,ET,AT} = error("Implement me")
+
 get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
-n_dimensions(::AbstractSystem{T,D}) where {T,D} = D
+n_dimensions(::AbstractSystem{D,ET,AT}) where {D,ET,AT} = D
 
 
 # indexing interface
@@ -104,11 +107,11 @@ element(sys::AbstractSystem)  = element.(sys)
 #
 # Extra stuff only for Systems composed of atoms
 #
-atomic_symbol(sys::AbstractSystem{<: AbstractAtom}) = atomic_symbol.(sys)
-atomic_number(sys::AbstractSystem{<: AbstractAtom}) = atomic_number.(sys)
-atomic_mass(sys::AbstractSystem{<: AbstractAtom})   = atomic_mass.(sys)
-atomic_property(sys::AbstractSystem{<: AbstractAtom}, property::Symbol)::Vector{Any} = atomic_property.(sys, property)
-atomic_propertiesnames(sys::AbstractSystem{<: AbstractAtom}) = unique(sort(atomic_propertynames.(sys)))
+atomic_symbol(sys::AbstractAtomicSystem) = atomic_symbol.(sys)
+atomic_number(sys::AbstractAtomicSystem) = atomic_number.(sys)
+atomic_mass(sys::AbstractAtomicSystem)   = atomic_mass.(sys)
+atomic_property(sys::AbstractAtomicSystem, property::Symbol)::Vector{Any} = atomic_property.(sys, property)
+atomic_propertiesnames(sys::AbstractAtomicSystem) = unique(sort(atomic_propertynames.(sys)))
 
 # Just to make testing a little easier for now
 function Base.show(io::IO, ::MIME"text/plain", part::AbstractParticle)
