@@ -75,12 +75,12 @@ struct Periodic      <: BoundaryCondition end  # Periodic BCs
 #     Again readonly.
 #
 abstract type AbstractSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} end
-(get_box(::AbstractSystem{D,ET,AT})::SVector{D, SVector{D, <:Unitful.Length}}) where {D,ET,AT} = error("Implement me")
-(get_boundary_conditions(::AbstractSystem{D,ET,AT})::SVector{D,BoundaryCondition}) where {D,ET,AT} = error("Implement me")
+get_box(::AbstractSystem{D})::SVector{D, SVector{D, <:Unitful.Length}} where {D} = error("Implement me")
+get_boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition} where {D} = error("Implement me")
 get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
-n_dimensions(::AbstractSystem{D,ET,AT}) where {D,ET,AT} = D
+n_dimensions(::AbstractSystem{D}) where {D} = D
 
 # indexing interface
 Base.getindex(::AbstractSystem, ::Int)  = error("Implement me")
