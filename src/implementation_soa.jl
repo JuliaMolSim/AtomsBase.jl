@@ -27,7 +27,7 @@ bounding_box(sys::SoASystem) = sys.box
 boundary_conditions(sys::SoASystem) = sys.boundary_conditions
 
 # Base.size(sys::SoASystem) = size(sys.particles)
-Base.length(::SoASystem{N,D,ET,AT}) where {N,D,ET,AT} = N
+Base.length(::SoASystem{N}) where {N} = N
 
 # first piece of trickiness: can't do a totally abstract dispatch here because we need to know the signature of the constructor for AT
 Base.getindex(sys::SoASystem{SoAAtom{D},D,N}, i::Int) where {D,N} = SoAAtom{D}(sys.positions[i,:],sys.elements[i])
