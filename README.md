@@ -25,11 +25,11 @@ A way to think about this broadly is that the difference amounts to the ordering
 ### System
 An object describing a system should be a subtype of `AbstractSystem` and will in general store identifiers, positions, and (if relevant) velocities of the particles that make it up, as well as a set of coordinate bounds.
 
-An `AbstractSystem` takes a type parameter (which must be `<:AbstractParticle`, see below) to indicate what types of particles these are, and requires dispatch of the following functions:
-* `box(::AbstractSystem)::Vector{<:AbstractVector}`: should return a set of basis vectors describing the boundaries of the coordinates in which the system resides
-* `boundary_conditions(::AbstractSystem)::AbstractVector{BoundaryCondition}`: returns the boundary conditions corresponding to each spatial dimension of the system (see below for more on the `BoundaryCondition` type)
+An `AbstractSystem` takes several type parameters: `D` (an integer representing the dimensionality of the system), `ET<:AbstractElement`, and `AT<:AbstractParticle` (see below) to indicate what types of particles these are, and requires dispatch of the following functions:
+* `bounding_box(::AbstractSystem{D})::SVector{D, SVector{D, <:Unitful.Length}}`: should return a set of basis vectors describing the boundaries of the coordinates in which the system resides
+* `boundary_conditions(::AbstractSystem{D})::SVector{D, BoundaryCondition}`: returns the boundary conditions corresponding to each spatial dimension of the system (see below for more on the `BoundaryCondition` type)
 
-`AbstractSystem` subtypes `AbstractVector`, thus the following functions must also be dispatched:
+`AbstractSystem` implements [Julia's indexing interface](https://docs.julialang.org/en/v1/manual/interfaces/#Indexing), thus the following functions must also be dispatched:
 * `Base.getindex(::AbstractSystem, ::Int)`
 * `Base.size(::AbstractSystem)`
 
