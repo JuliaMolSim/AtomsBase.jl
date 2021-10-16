@@ -9,7 +9,7 @@ function ase_to_simple(atoms)
     boundary_conditions = [(isperiodic ? Periodic() : DirichletZero()) for isperiodic in atoms.pbc]
     simple_atoms = [SimpleAtom(atom.position * 1u"Å", Symbol(atom.symbol))
                     for atom in atoms]
-    SimpleAtomicSystem{3}(box, boundary_conditions, simple_atoms)
+    SimpleSystem(box, boundary_conditions, simple_atoms)
 end
 
 load_using_ase(filename; kwargs...) = ase_to_simple(pyimport("ase.io").read(filename; kwargs...))
