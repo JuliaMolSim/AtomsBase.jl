@@ -94,6 +94,7 @@ Base.length(::AbstractSystem)           = error("Implement me")
 Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not mutable.")
 Base.firstindex(::AbstractSystem) = 1
 Base.lastindex(s::AbstractSystem) = length(s)
+Base.iterate(S::AbstractSystem, i::Int=1) = (1 <= i <= length(S)) ? (@inbounds S[i], i+1) : nothing
 
 # TODO Support similar, push, ...
 
