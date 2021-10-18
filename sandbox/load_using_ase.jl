@@ -7,9 +7,12 @@ using AtomsBase
 function ase_to_simple(atoms)
     box = [vec * 1u"Å" for vec in atoms.cell]  # Check this picks up the vectors in the right order
     boundary_conditions = [(isperiodic ? Periodic() : DirichletZero()) for isperiodic in atoms.pbc]
-    simple_atoms = [SimpleAtom(atom.position * 1u"Å", Symbol(atom.symbol))
-                    for atom in atoms]
-    SimpleAtomicSystem{3}(box, boundary_conditions, simple_atoms)
+
+    pos = atoms.positions * 1u"Å"
+    symbols = atoms.get_chemical_symbols()
+    simple_atoms = SimpleAtom.(eachrow(pos), Symbol.(symbols))
+
+    return SimpleSystem(box, boundary_conditions, simple_atoms)
 end
 
 load_using_ase(filename; kwargs...) = ase_to_simple(pyimport("ase.io").read(filename; kwargs...))
