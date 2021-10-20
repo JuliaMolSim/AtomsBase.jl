@@ -16,13 +16,15 @@ function SoAAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractV
     SoAAtom(position, ChemicalElement(symbol))
 end
 
-# static number of particles (not necessary, but simple)
+# static number of particles
 struct SoASystem{N<:Integer, D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
     box::SVector{D, SVector{D, Unitful.Length}}
-    boundary_conditions::SVector{D, BoundaryCondition}
+    boundary_conditions::SVector{D, <:BoundaryCondition}
     positions::SMatrix{N,D,Unitful.Length}
     elements::SVector{N,ET}
 end
+
+
 bounding_box(sys::SoASystem) = sys.box
 boundary_conditions(sys::SoASystem) = sys.boundary_conditions
 

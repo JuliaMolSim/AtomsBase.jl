@@ -19,7 +19,7 @@ end
 # TODO Switch order of type arguments?
 struct AoSSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
     box::SVector{D, SVector{D, Unitful.Length}}
-    boundary_conditions::SVector{D, BoundaryCondition}
+    boundary_conditions::SVector{D, <:BoundaryCondition}
     particles::Vector{AT}
 end
 bounding_box(sys::AoSSystem) = sys.box
