@@ -5,7 +5,7 @@ using StaticArrays
 export SimpleAtom, AoSSystem
 
 struct SimpleAtom{D} <: AbstractAtom
-    position::SVector{D, Unitful.Length}
+    position::SVector{D, <:Unitful.Length}
     element::ChemicalElement
 end
 SimpleAtom(position, element)  = SimpleAtom{length(position)}(position, element)
@@ -18,7 +18,7 @@ end
 
 # TODO Switch order of type arguments?
 struct AoSSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
-    box::SVector{D, SVector{D, Unitful.Length}}
+    box::SVector{D, <:SVector{D, <:Unitful.Length}}
     boundary_conditions::SVector{D, <:BoundaryCondition}
     particles::Vector{AT}
 end

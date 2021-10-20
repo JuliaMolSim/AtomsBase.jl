@@ -5,7 +5,7 @@ using StaticArrays
 export FastAtom, SoASystem
 
 struct FastAtom{D} <: AbstractAtom
-    position::SVector{D, Unitful.Length}
+    position::SVector{D, <:Unitful.Length}
     element::ChemicalElement
 end
 FastAtom(position, element)  = FastAtom{length(position)}(position, element)
@@ -18,9 +18,9 @@ end
 
 # static number of particles
 struct SoASystem{N<:Integer, D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
-    box::SVector{D, SVector{D, Unitful.Length}}
+    box::SVector{D, SVector{D, <:Unitful.Length}}
     boundary_conditions::SVector{D, <:BoundaryCondition}
-    positions::SMatrix{N,D,Unitful.Length}
+    positions::SMatrix{N,D,<:Unitful.Length}
     elements::SVector{N,ET}
 end
 

@@ -8,8 +8,8 @@ bcs = SVector{3,BoundaryCondition}(Periodic(), Periodic(), Periodic())
 positions = SMatrix{2,3}([0.25u"m" 0.25u"m" 0.25u"m"; 0.75u"m" 0.75u"m" 0.75u"m"])
 elements = [ChemicalElement(:C), ChemicalElement(:C)]
 
-atom1 = AoSAtom(positions[1,:],elements[1])
-atom2 = AoSAtom(positions[2,:],elements[2])
+atom1 = SimpleAtom(positions[1,:],elements[1])
+atom2 = SimpleAtom(positions[2,:],elements[2])
 
 aos = AoSSystem(box, bcs, [atom1, atom2])
 
