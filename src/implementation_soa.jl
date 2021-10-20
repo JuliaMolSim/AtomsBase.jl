@@ -16,12 +16,13 @@ function FastAtom(position, symbol::Union{Integer,AbstractString,Symbol,Abstract
     FastAtom(position, ChemicalElement(symbol))
 end
 
-# static number of particles
-struct SoASystem{N<:Integer, D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
+struct SoASystem{N, D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
     box::SVector{D, SVector{D, <:Unitful.Length}}
     boundary_conditions::SVector{D, <:BoundaryCondition}
     positions::SMatrix{N,D,<:Unitful.Length}
     elements::SVector{N,ET}
+    # janky inner constructor that we need for some reason
+    SoASystem(box, bcs, positions, els) = new{length(els), length(bcs), typeof(els[1]), FastAtom}(box,bcs,positions,els)
 end
 
 
