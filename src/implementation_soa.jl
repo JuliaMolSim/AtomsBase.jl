@@ -2,18 +2,18 @@
 #
 using StaticArrays
 
-export SoAAtom, SoASystem, SoAAtomicSystem
+export FastAtom, SoASystem
 
-struct SoAAtom{D} <: AbstractAtom
+struct FastAtom{D} <: AbstractAtom
     position::SVector{D, Unitful.Length}
     element::ChemicalElement
 end
-SoAAtom(position, element)  = SoAAtom{length(position)}(position, element)
-position(atom::SoAAtom) = atom.position
-element(atom::SoAAtom)  = atom.element
+FastAtom(position, element)  = FastAtom{length(position)}(position, element)
+position(atom::FastAtom) = atom.position
+element(atom::FastAtom)  = atom.element
 
-function SoAAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector})
-    SoAAtom(position, ChemicalElement(symbol))
+function FastAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector})
+    FastAtom(position, ChemicalElement(symbol))
 end
 
 # static number of particles
@@ -32,5 +32,5 @@ boundary_conditions(sys::SoASystem) = sys.boundary_conditions
 Base.length(::SoASystem{N,D,ET,AT}) where {N,D,ET,AT} = N
 
 # first piece of trickiness: can't do a totally abstract dispatch here because we need to know the signature of the constructor for AT
-Base.getindex(sys::SoASystem{SoAAtom{D},D,N}, i::Int) where {D,N} = SoAAtom{D}(sys.positions[i,:],sys.elements[i])
+Base.getindex(sys::SoASystem{FastAtom{D},D,N}, i::Int) where {D,N} = FastAtom{D}(sys.positions[i,:],sys.elements[i])
 
