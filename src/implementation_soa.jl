@@ -24,7 +24,9 @@ struct SoASystem{N, D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: Abstrac
     # janky inner constructor that we need for some reason
     SoASystem(box, bcs, positions, els) = new{length(els), length(bcs), typeof(els[1]), FastAtom}(box,bcs,positions,els)
 end
-
+function Base.show(io::IO, ::MIME"text/plain", sys::SoASystem)
+    print(io, "SoASystem with ", length(sys), " particles")
+end
 
 bounding_box(sys::SoASystem) = sys.box
 boundary_conditions(sys::SoASystem) = sys.boundary_conditions

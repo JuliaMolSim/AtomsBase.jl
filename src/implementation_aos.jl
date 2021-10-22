@@ -24,6 +24,9 @@ struct AoSSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSy
 end
 bounding_box(sys::AoSSystem) = sys.box
 boundary_conditions(sys::AoSSystem) = sys.boundary_conditions
+function Base.show(io::IO, ::MIME"text/plain", sys::AoSSystem)
+    print(io, "AoSSystem with ", length(sys), " particles")
+end
 
 Base.size(sys::AoSSystem) = size(sys.particles)
 Base.length(sys::AoSSystem) = length(sys.particles)
