@@ -2,19 +2,7 @@
 #
 using StaticArrays
 
-export SimpleAtom, AoSSystem
-
-struct SimpleAtom{D} <: AbstractAtom
-    position::SVector{D, <:Unitful.Length}
-    element::ChemicalElement
-end
-SimpleAtom(position, element)  = SimpleAtom{length(position)}(position, element)
-position(atom::SimpleAtom) = atom.position
-element(atom::SimpleAtom)  = atom.element
-
-function SimpleAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector})
-    SimpleAtom(position, ChemicalElement(symbol))
-end
+export AoSSystem
 
 # TODO Switch order of type arguments?
 struct AoSSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
