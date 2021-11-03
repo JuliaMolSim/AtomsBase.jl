@@ -10,8 +10,18 @@ struct AoSSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSy
     boundary_conditions::SVector{D, <:BoundaryCondition}
     particles::Vector{AT}
 end
+# convenience constructor where we don't have to preconstruct all the static stuff...
+function AoSSystem(box::Vector{Vector{L}}, bcs::Vector{BC}, particles::Vector{AT}) where {BC<:BoundaryCondition, L<:Unitful.Length, AT<:AbstractParticle}
+    D = length(box)
+    @assert all(length.(box) .== D)
+    sbox = SVector{D, SVector{D, L}}(box)
+    sbcs = SVector{D, BoundaryCondition}(bcs)
+    AoSSystem(sbox, sbcs, particles)
+end
+
 bounding_box(sys::AoSSystem) = sys.box
 boundary_conditions(sys::AoSSystem) = sys.boundary_conditions
+
 function Base.show(io::IO, ::MIME"text/plain", sys::AoSSystem)
     print(io, "AoSSystem with ", length(sys), " particles")
 end
