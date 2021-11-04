@@ -37,4 +37,4 @@ boundary_conditions(sys::SoASystem) = sys.boundary_conditions
 Base.length(::SoASystem{N,D,ET,AT}) where {N,D,ET,AT} = N
 
 # first piece of trickiness: can't do a totally abstract dispatch here because we need to know the signature of the constructor for AT
-Base.getindex(sys::SoASystem{N,D,ET,SimpleAtom}, i::Int) where {N,D,ET} = SimpleAtom{D}(sys.positions[i,:],sys.elements[i])
+Base.getindex(sys::SoASystem{N,D,ET,SimpleAtom}, i::Int) where {N,D,ET} = SimpleAtom{D}(sys.positions[i],sys.elements[i])

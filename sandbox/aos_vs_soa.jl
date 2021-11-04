@@ -11,5 +11,7 @@ atom1 = SimpleAtom(SVector{3}(positions[1,:]),elements[1])
 atom2 = SimpleAtom(SVector{3}(positions[2,:]),elements[2])
 
 aos = AoSSystem(box, bcs, [atom1, atom2])
-
 soa = SoASystem(box, bcs, positions, elements)
+
+# And now we can ask questions like...
+soa .== aos

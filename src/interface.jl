@@ -95,8 +95,8 @@ Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not 
 Base.firstindex(::AbstractSystem) = 1
 Base.lastindex(s::AbstractSystem) = length(s)
 
-# iteration interface, needed for default broadcast dispatches below to work – maybe Int64 is too restrictive here?
-(Base.iterate(sys::AbstractSystem{D,ET,AT}, state::Int64=firstindex(sys))::Union{Nothing,Tuple{AT,Int64}}) where {D,ET,AT} = state > length(sys) ? nothing : (sys[state], state+1)
+# iteration interface, needed for default broadcast dispatches below to work
+Base.iterate(sys::AbstractSystem{D,ET,AT}, state=firstindex(sys)) where {D,ET,AT} = state > length(sys) ? nothing : (sys[state], state+1)
 
 # TODO Support similar, push, ...
 
