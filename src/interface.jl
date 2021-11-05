@@ -2,6 +2,7 @@ using Unitful
 using UnitfulAtomic
 using PeriodicTable
 using StaticArrays
+import Base.position
 
 export AbstractElement, AbstractParticle, AbstractAtom, AbstractSystem, AbstractAtomicSystem
 export ChemicalElement, SimpleAtom
