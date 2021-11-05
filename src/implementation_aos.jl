@@ -20,9 +20,7 @@ function AoSSystem(
     if !all(length.(box) .== D)
         throw(ArgumentError("box must have D vectors of length D"))
     end
-    sbox = SVector{D,SVector{D,L}}(box)
-    sbcs = SVector{D,BoundaryCondition}(bcs)
-    AoSSystem(sbox, sbcs, particles)
+    AoSSystem(SVector{D,SVector{D,L}}(box), SVector{D,BoundaryCondition}(bcs), particles)
 end
 
 bounding_box(sys::AoSSystem) = sys.box
