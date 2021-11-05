@@ -5,19 +5,23 @@ using StaticArrays
 export AoSSystem
 
 # TODO Switch order of type arguments?
-struct AoSSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
-    box::SVector{D, <:SVector{D, <:Unitful.Length}}
-    boundary_conditions::SVector{D, <:BoundaryCondition}
+struct AoSSystem{D,ET<:AbstractElement,AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
+    box::SVector{D,<:SVector{D,<:Unitful.Length}}
+    boundary_conditions::SVector{D,<:BoundaryCondition}
     particles::Vector{AT}
 end
 # convenience constructor where we don't have to preconstruct all the static stuff...
-function AoSSystem(box::Vector{Vector{L}}, bcs::Vector{BC}, particles::Vector{AT}) where {BC<:BoundaryCondition, L<:Unitful.Length, AT<:AbstractParticle}
+function AoSSystem(
+    box::Vector{Vector{L}},
+    bcs::Vector{BC},
+    particles::Vector{AT},
+) where {BC<:BoundaryCondition,L<:Unitful.Length,AT<:AbstractParticle}
     D = length(box)
     if !all(length.(box) .== D)
         throw(ArgumentError("box must have D vectors of length D"))
     end
-    sbox = SVector{D, SVector{D, L}}(box)
-    sbcs = SVector{D, BoundaryCondition}(bcs)
+    sbox = SVector{D,SVector{D,L}}(box)
+    sbcs = SVector{D,BoundaryCondition}(bcs)
     AoSSystem(sbox, sbcs, particles)
 end
 
