@@ -4,7 +4,7 @@ using StaticArrays
 
 export SoASystem
 
-struct SoASystem{N, D, ET<:AbstractElement, AT<:AbstractParticle{ET}, L<:Unitful.Length} <: AbstractSystem{D,ET,AT}
+struct SoASystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}, L<:Unitful.Length} <: AbstractSystem{D,ET,AT}
     box::SVector{D, SVector{D, L}}
     boundary_conditions::SVector{D, BoundaryCondition}
     positions::Vector{SVector{D,L}}
@@ -34,7 +34,7 @@ bounding_box(sys::SoASystem) = sys.box
 boundary_conditions(sys::SoASystem) = sys.boundary_conditions
 
 # Base.size(sys::SoASystem) = size(sys.particles)
-Base.length(::SoASystem{N,D,ET,AT}) where {N,D,ET,AT} = N
+Base.length(::SoASystem{D,ET,AT}) where {D,ET,AT} = N
 
 # first piece of trickiness: can't do a totally abstract dispatch here because we need to know the signature of the constructor for AT
-Base.getindex(sys::SoASystem{N,D,ET,SimpleAtom}, i::Int) where {N,D,ET} = SimpleAtom{D}(sys.positions[i],sys.elements[i])
+Base.getindex(sys::SoASystem{D,ET,SimpleAtom}, i::Int) where {D,ET} = SimpleAtom{D}(sys.positions[i],sys.elements[i])
