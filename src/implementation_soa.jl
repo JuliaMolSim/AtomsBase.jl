@@ -11,10 +11,10 @@ struct FastSystem{D,ET<:AbstractElement,AT<:AbstractParticle{ET},L<:Unitful.Leng
     positions::Vector{SVector{D,L}}
     elements::Vector{ET}
     # janky inner constructor that we need for some reason
-    FastSystem(box, bcs, positions, elements) =
-        new{length(bcs),eltype(elements),SimpleAtom,eltype(eltype(positions))}(
+    FastSystem(box, boundary_conditions, positions, elements) =
+        new{length(boundary_conditions),eltype(elements),SimpleAtom,eltype(eltype(positions))}(
             box,
-            bcs,
+            boundary_conditions,
             positions,
             elements,
         )
@@ -23,7 +23,7 @@ end
 # convenience constructor where we don't have to preconstruct all the static stuff...
 function FastSystem(
     box::AbstractVector{Vector{L}},
-    bcs::AbstractVector{BC},
+    boundary_conditions::AbstractVector{BC},
     positions::AbstractMatrix{M},
     elements::AbstractVector{ET},
 ) where {L<:Unitful.Length,BC<:BoundaryCondition,M<:Unitful.Length,ET<:AbstractElement}
@@ -40,7 +40,7 @@ function FastSystem(
     end
     FastSystem(
         SVector{D,SVector{D,L}}(box),
-        SVector{D,BoundaryCondition}(bcs),
+        SVector{D,BoundaryCondition}(boundary_conditions),
         Vector{SVector{D,eltype(positions)}}([positions[i, :] for i = 1:N]),
         elements,
     )

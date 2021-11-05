@@ -13,14 +13,14 @@ end
 # convenience constructor where we don't have to preconstruct all the static stuff...
 function FlexibleSystem(
     box::Vector{Vector{L}},
-    bcs::Vector{BC},
+    boundary_conditions::Vector{BC},
     particles::Vector{AT},
 ) where {BC<:BoundaryCondition,L<:Unitful.Length,AT<:AbstractParticle}
     D = length(box)
     if !all(length.(box) .== D)
         throw(ArgumentError("box must have D vectors of length D"))
     end
-    FlexibleSystem(SVector{D,SVector{D,L}}(box), SVector{D,BoundaryCondition}(bcs), particles)
+    FlexibleSystem(SVector{D,SVector{D,L}}(box), SVector{D,BoundaryCondition}(boundary_conditions), particles)
 end
 
 bounding_box(sys::FlexibleSystem) = sys.box
