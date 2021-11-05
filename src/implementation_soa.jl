@@ -17,9 +17,15 @@ end
 function SoASystem(box::AbstractVector{Vector{L}}, bcs::AbstractVector{BC}, positions::AbstractMatrix{M}, elements::AbstractVector{ET}) where {L<:Unitful.Length, BC<:BoundaryCondition, M<:Unitful.Length, ET<:AbstractElement}
     N = length(elements)
     D = length(box)
-    @assert all(length.(box) .== D)
-    @assert size(positions, 1) == N
-    @assert size(positions, 2) == D
+    if !all(length.(box) .== D)
+        throw(ArgumentError("box must have D vectors of length D"))
+    end
+    if !(size(positions, 1) == N)
+        throw(ArgumentError("box must have D vectors of length D"))
+    end
+    if !(size(positions, 2) == D)
+        throw(ArgumentError("box must have D vectors of length D"))
+    end
     sbox = SVector{D, SVector{D, L}}(box)
     sbcs = SVector{D, BoundaryCondition}(bcs)
     spos = Vector{SVector{D,eltype(positions)}}([positions[i,:] for i in 1:N])
