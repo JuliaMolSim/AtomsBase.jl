@@ -2,16 +2,16 @@
 #
 using StaticArrays
 
-export AoSSystem
+export FlexibleSystem
 
 # TODO Switch order of type arguments?
-struct AoSSystem{D,ET<:AbstractElement,AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
+struct FlexibleSystem{D,ET<:AbstractElement,AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
     box::SVector{D,<:SVector{D,<:Unitful.Length}}
     boundary_conditions::SVector{D,<:BoundaryCondition}
     particles::Vector{AT}
 end
 # convenience constructor where we don't have to preconstruct all the static stuff...
-function AoSSystem(
+function FlexibleSystem(
     box::Vector{Vector{L}},
     bcs::Vector{BC},
     particles::Vector{AT},
@@ -20,16 +20,16 @@ function AoSSystem(
     if !all(length.(box) .== D)
         throw(ArgumentError("box must have D vectors of length D"))
     end
-    AoSSystem(SVector{D,SVector{D,L}}(box), SVector{D,BoundaryCondition}(bcs), particles)
+    FlexibleSystem(SVector{D,SVector{D,L}}(box), SVector{D,BoundaryCondition}(bcs), particles)
 end
 
-bounding_box(sys::AoSSystem) = sys.box
-boundary_conditions(sys::AoSSystem) = sys.boundary_conditions
+bounding_box(sys::FlexibleSystem) = sys.box
+boundary_conditions(sys::FlexibleSystem) = sys.boundary_conditions
 
-function Base.show(io::IO, ::MIME"text/plain", sys::AoSSystem)
-    print(io, "AoSSystem with ", length(sys), " particles")
+function Base.show(io::IO, ::MIME"text/plain", sys::FlexibleSystem)
+    print(io, "FlexibleSystem with ", length(sys), " particles")
 end
 
-Base.size(sys::AoSSystem) = size(sys.particles)
-Base.length(sys::AoSSystem) = length(sys.particles)
-Base.getindex(sys::AoSSystem, i::Int) = getindex(sys.particles, i)
+Base.size(sys::FlexibleSystem) = size(sys.particles)
+Base.length(sys::FlexibleSystem) = length(sys.particles)
+Base.getindex(sys::FlexibleSystem, i::Int) = getindex(sys.particles, i)
