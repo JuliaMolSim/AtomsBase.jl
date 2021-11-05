@@ -10,7 +10,7 @@ struct SoASystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}, L<:Unitful.Le
     positions::Vector{SVector{D,L}}
     elements::Vector{ET}
     # janky inner constructor that we need for some reason
-    SoASystem(box, bcs, positions, els) = new{length(els), length(bcs), eltype(els), SimpleAtom, eltype(eltype(positions))}(box, bcs, positions, els)
+    SoASystem(box, bcs, positions, elements) = new{length(elements), length(bcs), eltype(elements), SimpleAtom, eltype(eltype(positions))}(box, bcs, positions, elements)
 end
 
 # convenience constructor where we don't have to preconstruct all the static stuff...
