@@ -4,7 +4,7 @@ using PeriodicTable
 using StaticArrays
 
 export AbstractElement, AbstractParticle, AbstractAtom, AbstractSystem, AbstractAtomicSystem
-export ChemicalElement
+export ChemicalElement, SimpleAtom
 export BoundaryCondition, DirichletZero, Periodic
 export atomic_mass, atomic_number, atomic_symbol,
     bounding_box, element, position, velocity,
@@ -95,6 +95,9 @@ Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not 
 Base.firstindex(::AbstractSystem) = 1
 Base.lastindex(s::AbstractSystem) = length(s)
 
+# iteration interface, needed for default broadcast dispatches below to work
+Base.iterate(sys::AbstractSystem{D,ET,AT}, state=firstindex(sys)) where {D,ET,AT} = state > length(sys) ? nothing : (sys[state], state+1)
+
 # TODO Support similar, push, ...
 
 # Some implementations might prefer to store data in the System as a flat list and
@@ -113,6 +116,18 @@ atomic_number(sys::AbstractAtomicSystem) = atomic_number.(sys)
 atomic_mass(sys::AbstractAtomicSystem)   = atomic_mass.(sys)
 atomic_property(sys::AbstractAtomicSystem, property::Symbol)::Vector{Any} = atomic_property.(sys, property)
 atomic_propertiesnames(sys::AbstractAtomicSystem) = unique(sort(atomic_propertynames.(sys)))
+
+struct SimpleAtom{D} <: AbstractAtom
+    position::SVector{D, <:Unitful.Length}
+    element::ChemicalElement
+end
+SimpleAtom(position, element)  = SimpleAtom{length(position)}(position, element)
+position(atom::SimpleAtom) = atom.position
+element(atom::SimpleAtom)  = atom.element
+
+function SimpleAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector})
+    SimpleAtom(position, ChemicalElement(symbol))
+end
 
 # Just to make testing a little easier for now
 function Base.show(io::IO, ::MIME"text/plain", part::AbstractParticle)
