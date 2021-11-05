@@ -26,10 +26,7 @@ function SoASystem(box::AbstractVector{Vector{L}}, bcs::AbstractVector{BC}, posi
     if !(size(positions, 2) == D)
         throw(ArgumentError("box must have D vectors of length D"))
     end
-    sbox = SVector{D, SVector{D, L}}(box)
-    sbcs = SVector{D, BoundaryCondition}(bcs)
-    spos = Vector{SVector{D,eltype(positions)}}([positions[i,:] for i in 1:N])
-    SoASystem(sbox, sbcs, spos, elements)
+    SoASystem(SVector{D, SVector{D, L}}(box), SVector{D, BoundaryCondition}(bcs), Vector{SVector{D,eltype(positions)}}([positions[i,:] for i in 1:N]), elements)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", sys::SoASystem)
