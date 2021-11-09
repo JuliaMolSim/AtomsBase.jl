@@ -49,7 +49,7 @@ position(::AbstractParticle)::AbstractVector{<: Unitful.Length}   = error("Imple
 #     - Has atom-specific defaults (i.e. assumes every entity represents an atom or ion)
 #
 
-abstract type AbstractAtom <: AbstractParticle{ChemicalElement} end
+const AbstractAtom = AbstractParticle{ChemicalElement}
 element(::AbstractAtom)::ChemicalElement = error("Implement me")
 
 
@@ -78,13 +78,13 @@ struct Periodic      <: BoundaryCondition end  # Periodic BCs
 #
 
 abstract type AbstractSystem{D, ET<:AbstractElement, AT<:AbstractParticle{ET}} end
-(bounding_box(::AbstractSystem{D,ET,AT})::SVector{D, SVector{D, <:Unitful.Length}}) where {D,ET,AT} = error("Implement me")
-(boundary_conditions(::AbstractSystem{D,ET,AT})::SVector{D,BoundaryCondition}) where {D,ET,AT} = error("Implement me")
+(bounding_box(::AbstractSystem{D})::SVector{D, SVector{D, <:Unitful.Length}}) where {D} = error("Implement me")
+(boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition}) where {D} = error("Implement me")
 
 get_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
-n_dimensions(::AbstractSystem{D,ET,AT}) where {D,ET,AT} = D
+n_dimensions(::AbstractSystem{D}) where {D} = D
 
 
 # indexing interface
@@ -94,6 +94,7 @@ Base.length(::AbstractSystem)           = error("Implement me")
 Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not mutable.")
 Base.firstindex(::AbstractSystem) = 1
 Base.lastindex(s::AbstractSystem) = length(s)
+Base.iterate(S::AbstractSystem, i::Int=1) = (1 <= i <= length(S)) ? (@inbounds S[i], i+1) : nothing
 
 # iteration interface, needed for default broadcast dispatches below to work
 Base.iterate(sys::AbstractSystem{D,ET,AT}, state=firstindex(sys)) where {D,ET,AT} = state > length(sys) ? nothing : (sys[state], state+1)
@@ -110,7 +111,7 @@ element(sys::AbstractSystem)  = element.(sys)
 #
 # Extra stuff only for Systems composed of atoms
 #
-AbstractAtomicSystem{D,AT<:AbstractAtom} = AbstractSystem{D,ChemicalElement,AT}
+const AbstractAtomicSystem{D,AT<:AbstractAtom} = AbstractSystem{D,ChemicalElement,AT}
 atomic_symbol(sys::AbstractAtomicSystem) = atomic_symbol.(sys)
 atomic_number(sys::AbstractAtomicSystem) = atomic_number.(sys)
 atomic_mass(sys::AbstractAtomicSystem)   = atomic_mass.(sys)
