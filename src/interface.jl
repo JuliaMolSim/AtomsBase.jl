@@ -4,7 +4,7 @@ using PeriodicTable
 using StaticArrays
 import Base.position
 
-export AbstractSystem, AbstractAtomicSystem
+export AbstractParticle, AbstractAtom, AbstractSystem, AbstractAtomicSystem
 export ChemicalElement, SimpleAtom
 export BoundaryCondition, DirichletZero, Periodic
 export atomic_mass,
