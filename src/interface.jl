@@ -4,7 +4,7 @@ using PeriodicTable
 using StaticArrays
 import Base.position
 
-export AbstractParticle, AbstractAtom, AbstractSystem, AbstractAtomicSystem
+export AbstractSystem, AbstractAtomicSystem
 export ChemicalElement, SimpleAtom
 export BoundaryCondition, DirichletZero, Periodic
 export atomic_mass,
@@ -19,36 +19,8 @@ export atomic_mass,
 export atomic_property, has_atomic_property, atomic_propertynames
 export n_dimensions
 
-#
-# A distinguishable particle, can be anything associated with coordinate
-# information (position, velocity, etc.)
-# most importantly: Can have any identifier type
-#
-# IdType:  Type used to identify the particle
-#
-abstract type AbstractParticle{ET} end
-velocity(::AbstractParticle)::AbstractVector{<:Unitful.Velocity} = missing
-position(::AbstractParticle)::AbstractVector{<:Unitful.Length} = error("Implement me")
-(element(::AbstractParticle{ET})::ET) where {ET} = error("Implement me")
-
-
-#
-# The atom type itself
-#     - The atom interface is read-only (to allow as simple as possible implementation)
-#       Writability may be supported in derived or concrete types.
-#     - The inferface is only in Cartesian coordinates.
-#     - Has atom-specific defaults (i.e. assumes every entity represents an atom or ion)
-#
-
-const AbstractAtom = AbstractParticle{Element}
-element(::AbstractAtom)::Element = error("Implement me")
-
-
-# Extracting things ... it might make sense to make some of them writable in concrete
-# implementations, therefore these interfaces are forwarded from the Element object.
-atomic_symbol(atom::AbstractAtom) = element(atom).symbol
-atomic_number(atom::AbstractAtom) = element(atom).number
-atomic_mass(atom::AbstractAtom) = element(atom).atomic_mass
+velocity(p)::AbstractVector{<:Unitful.Velocity} = missing
+position(p)::AbstractVector{<:Unitful.Length} = error("Implement me")
 
 #
 # Identifier for boundary conditions per dimension
@@ -63,7 +35,7 @@ struct Periodic <: BoundaryCondition end  # Periodic BCs
 #     Again readonly.
 #
 
-abstract type AbstractSystem{D,ET,AT<:AbstractParticle{ET}} end
+abstract type AbstractSystem{D,ET} end
 (bounding_box(::AbstractSystem{D})::SVector{D,SVector{D,<:Unitful.Length}}) where {D} =
     error("Implement me")
 (boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition}) where {D} =
@@ -86,7 +58,7 @@ Base.lastindex(s::AbstractSystem) = length(s)
 Base.iterate(S::AbstractSystem, i::Int=1) = (1 <= i <= length(S)) ? (@inbounds S[i], i+1) : nothing
 
 # iteration interface, needed for default broadcast dispatches below to work
-Base.iterate(sys::AbstractSystem{D,ET,AT}, state = firstindex(sys)) where {D,ET,AT} =
+Base.iterate(sys::AbstractSystem{D,ET}, state = firstindex(sys)) where {D,ET} =
     state > length(sys) ? nothing : (sys[state], state + 1)
 
 # TODO Support similar, push, ...
@@ -101,7 +73,7 @@ element(sys::AbstractSystem) = element.(sys)
 #
 # Extra stuff only for Systems composed of atoms
 #
-const AbstractAtomicSystem{D,AT<:AbstractAtom} = AbstractSystem{D,Element,AT}
+const AbstractAtomicSystem{D} = AbstractSystem{D,Element}
 atomic_symbol(sys::AbstractAtomicSystem) = atomic_symbol.(sys)
 atomic_number(sys::AbstractAtomicSystem) = atomic_number.(sys)
 atomic_mass(sys::AbstractAtomicSystem) = atomic_mass.(sys)
@@ -109,7 +81,7 @@ atomic_property(sys::AbstractAtomicSystem, property::Symbol)::Vector{Any} =
     atomic_property.(sys, property)
 atomic_propertiesnames(sys::AbstractAtomicSystem) = unique(sort(atomic_propertynames.(sys)))
 
-struct SimpleAtom{D} <: AbstractAtom
+struct SimpleAtom{D}
     position::SVector{D,<:Unitful.Length}
     element::Element
 end
@@ -122,12 +94,6 @@ function SimpleAtom(position, symbol::Union{Integer,AbstractString,Symbol,Abstra
 end
 
 # Just to make testing a little easier for now
-function Base.show(io::IO, ::MIME"text/plain", part::AbstractParticle)
-    print(io, "Particle(", element(part), ") @ ", position(part))
-end
-function Base.show(io::IO, ::MIME"text/plain", part::AbstractAtom)
-    print(io, "Atom(", atomic_symbol(part), ") @ ", position(part))
-end
 function Base.show(io::IO, mime::MIME"text/plain", sys::AbstractSystem)
     println(io, "System:")
     println(io, "    BCs:        ", boundary_conditions(sys))
