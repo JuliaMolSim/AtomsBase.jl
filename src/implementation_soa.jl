@@ -4,8 +4,7 @@ using StaticArrays
 
 export FastSystem
 
-struct FastSystem{D,ET,L<:Unitful.Length} <:
-       AbstractSystem{D,ET}
+struct FastSystem{D,ET,L<:Unitful.Length}
     box::SVector{D,SVector{D,L}}
     boundary_conditions::SVector{D,BoundaryCondition}
     positions::Vector{SVector{D,L}}
@@ -53,9 +52,9 @@ end
 bounding_box(sys::FastSystem) = sys.box
 boundary_conditions(sys::FastSystem) = sys.boundary_conditions
 
-# Base.size(sys::FastSystem) = size(sys.particles)
-Base.length(sys::FastSystem{D,ET}) where {D,ET} = length(sys.elements)
-
-# first piece of trickiness: can't do a totally abstract dispatch here because we need to know the signature of the constructor for AT
 Base.getindex(sys::FastSystem{D,ET}, i::Int) where {D,ET} =
     SimpleAtom{D}(sys.positions[i], sys.elements[i])
+Base.length(sys::FastSystem{D,ET}) where {D,ET} = length(sys.elements)
+Base.firstindex(::FastSystem) = 1
+Base.lastindex(s::FastSystem) = length(s.elements)
+Base.iterate(s::FastSystem, i=1) = (1 <= i <= length(s)) ? (@inbounds s[i], i+1) : nothing
