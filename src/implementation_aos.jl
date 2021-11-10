@@ -5,7 +5,7 @@ using StaticArrays
 export FlexibleSystem
 
 # TODO Switch order of type arguments?
-struct FlexibleSystem{D,ET<:AbstractElement,AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
+struct FlexibleSystem{D,ET,AT<:AbstractParticle{ET}} <: AbstractSystem{D,ET,AT}
     box::SVector{D,<:SVector{D,<:Unitful.Length}}
     boundary_conditions::SVector{D,<:BoundaryCondition}
     particles::Vector{AT}

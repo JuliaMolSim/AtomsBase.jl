@@ -4,7 +4,7 @@ using StaticArrays
 
 export FastSystem
 
-struct FastSystem{D,ET<:AbstractElement,AT<:AbstractParticle{ET},L<:Unitful.Length} <:
+struct FastSystem{D,ET,AT<:AbstractParticle{ET},L<:Unitful.Length} <:
        AbstractSystem{D,ET,AT}
     box::SVector{D,SVector{D,L}}
     boundary_conditions::SVector{D,BoundaryCondition}
@@ -26,7 +26,7 @@ function FastSystem(
     boundary_conditions::AbstractVector{BC},
     positions::AbstractMatrix{M},
     elements::AbstractVector{ET},
-) where {L<:Unitful.Length,BC<:BoundaryCondition,M<:Unitful.Length,ET<:AbstractElement}
+) where {L<:Unitful.Length,BC<:BoundaryCondition,M<:Unitful.Length,ET}
     N = length(elements)
     D = length(box)
     if !all(length.(box) .== D)

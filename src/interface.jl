@@ -4,7 +4,7 @@ using PeriodicTable
 using StaticArrays
 import Base.position
 
-export AbstractElement, AbstractParticle, AbstractAtom, AbstractSystem, AbstractAtomicSystem
+export AbstractSystem, AbstractAtomicSystem
 export ChemicalElement, SimpleAtom
 export BoundaryCondition, DirichletZero, Periodic
 export atomic_mass,
@@ -19,23 +19,6 @@ export atomic_mass,
 export atomic_property, has_atomic_property, atomic_propertynames
 export n_dimensions
 
-
-abstract type AbstractElement end
-struct ChemicalElement <: AbstractElement
-    data::PeriodicTable.Element
-end
-
-ChemicalElement(symbol::Union{Symbol,Integer,AbstractString}) =
-    ChemicalElement(PeriodicTable.elements[symbol])
-Base.show(io::IO, elem::ChemicalElement) = print(io, "Element(", atomic_symbol(elem), ")")
-
-# These are always only read-only ... and allow look-up into a database
-atomic_symbol(el::ChemicalElement) = el.data.symbol
-atomic_number(el::ChemicalElement) = el.data.number
-atomic_mass(el::ChemicalElement) = el.data.atomic_mass
-
-
-
 #
 # A distinguishable particle, can be anything associated with coordinate
 # information (position, velocity, etc.)
@@ -43,10 +26,10 @@ atomic_mass(el::ChemicalElement) = el.data.atomic_mass
 #
 # IdType:  Type used to identify the particle
 #
-abstract type AbstractParticle{ET<:AbstractElement} end
+abstract type AbstractParticle{ET} end
 velocity(::AbstractParticle)::AbstractVector{<:Unitful.Velocity} = missing
 position(::AbstractParticle)::AbstractVector{<:Unitful.Length} = error("Implement me")
-(element(::AbstractParticle{ET})::ET) where {ET<:AbstractElement} = error("Implement me")
+(element(::AbstractParticle{ET})::ET) where {ET} = error("Implement me")
 
 
 #
@@ -57,21 +40,15 @@ position(::AbstractParticle)::AbstractVector{<:Unitful.Length} = error("Implemen
 #     - Has atom-specific defaults (i.e. assumes every entity represents an atom or ion)
 #
 
-const AbstractAtom = AbstractParticle{ChemicalElement}
-element(::AbstractAtom)::ChemicalElement = error("Implement me")
+const AbstractAtom = AbstractParticle{Element}
+element(::AbstractAtom)::Element = error("Implement me")
 
 
 # Extracting things ... it might make sense to make some of them writable in concrete
 # implementations, therefore these interfaces are forwarded from the Element object.
-atomic_symbol(atom::AbstractAtom) = atomic_symbol(element(atom))
-atomic_number(atom::AbstractAtom) = atomic_number(element(atom))
-atomic_mass(atom::AbstractAtom) = atomic_mass(element(atom))
-
-# Custom atomic properties:
-atomic_property(::AbstractAtom, ::Symbol, default = missing) = default
-has_atomic_property(atom::AbstractAtom, property::Symbol) =
-    !ismissing(atomic_property(atom, property))
-atomic_propertynames(::AbstractAtom) = Symbol[]
+atomic_symbol(atom::AbstractAtom) = element(atom).symbol
+atomic_number(atom::AbstractAtom) = element(atom).number
+atomic_mass(atom::AbstractAtom) = element(atom).atomic_mass
 
 #
 # Identifier for boundary conditions per dimension
@@ -86,7 +63,7 @@ struct Periodic <: BoundaryCondition end  # Periodic BCs
 #     Again readonly.
 #
 
-abstract type AbstractSystem{D,ET<:AbstractElement,AT<:AbstractParticle{ET}} end
+abstract type AbstractSystem{D,ET,AT<:AbstractParticle{ET}} end
 (bounding_box(::AbstractSystem{D})::SVector{D,SVector{D,<:Unitful.Length}}) where {D} =
     error("Implement me")
 (boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition}) where {D} =
@@ -124,7 +101,7 @@ element(sys::AbstractSystem) = element.(sys)
 #
 # Extra stuff only for Systems composed of atoms
 #
-const AbstractAtomicSystem{D,AT<:AbstractAtom} = AbstractSystem{D,ChemicalElement,AT}
+const AbstractAtomicSystem{D,AT<:AbstractAtom} = AbstractSystem{D,Element,AT}
 atomic_symbol(sys::AbstractAtomicSystem) = atomic_symbol.(sys)
 atomic_number(sys::AbstractAtomicSystem) = atomic_number.(sys)
 atomic_mass(sys::AbstractAtomicSystem) = atomic_mass.(sys)
@@ -134,14 +111,14 @@ atomic_propertiesnames(sys::AbstractAtomicSystem) = unique(sort(atomic_propertyn
 
 struct SimpleAtom{D} <: AbstractAtom
     position::SVector{D,<:Unitful.Length}
-    element::ChemicalElement
+    element::Element
 end
 SimpleAtom(position, element) = SimpleAtom{length(position)}(position, element)
 position(atom::SimpleAtom) = atom.position
 element(atom::SimpleAtom) = atom.element
 
 function SimpleAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector})
-    SimpleAtom(position, ChemicalElement(symbol))
+    SimpleAtom(position, elements[symbol])
 end
 
 # Just to make testing a little easier for now
