@@ -56,7 +56,8 @@ Base.size(s::AbstractSystem) = (length(s),)
 Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not mutable.")
 Base.firstindex(::AbstractSystem) = 1
 Base.lastindex(s::AbstractSystem) = length(s)
-Base.iterate(S::AbstractSystem, state=firstindex(S)) = (firstindex(S) <= i <= length(S)) ? (@inbounds S[i], i+1) : nothing
+# default to 1D indexing
+Base.iterate(S::AbstractSystem, state=firstindex(S)) = (firstindex(S) <= state <= length(S)) ? (@inbounds S[state], state+1) : nothing
 
 # TODO Support similar, push, ...
 
