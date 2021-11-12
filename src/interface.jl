@@ -11,7 +11,7 @@ export bounding_box,
     position,
     velocity,
     boundary_conditions,
-    get_periodic
+    is_periodic
 export n_dimensions
 
 velocity(p)::Union{Unitful.Velocity,Missing} = missing
@@ -37,8 +37,8 @@ abstract type AbstractSystem{D,S} end
 (boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition}) where {D} =
     error("Implement me")
 
-get_periodic(sys::AbstractSystem) =
-    [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
+is_periodic(sys::AbstractSystem) =
+    [isa(bc, Periodic) for bc in boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of indexing interface)
 n_dimensions(::AbstractSystem{D}) where {D} = D
