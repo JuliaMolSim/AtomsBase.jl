@@ -6,16 +6,36 @@ import Base.position
 
 export AbstractSystem
 export BoundaryCondition, DirichletZero, Periodic
-export bounding_box,
-    species,
+export species,
     position,
-    velocity,
+    velocity
+export bounding_box,
     boundary_conditions,
-    is_periodic
-export n_dimensions
+    is_periodic,
+    n_dimensions
 
+"""
+    velocity(p)
+    velocity(sys::AbstractSystem)
+
+Return the velocity of a particle `p` or a vector of velocities of every particle in the system `sys`. Velocities should be vectors containing `D` elements that are `<:Unitful.Velocity`.
+"""
 velocity(p)::Union{Unitful.Velocity,Missing} = missing
+
+"""
+    position(p)
+    position(sys::AbstractSystem{D})
+
+Return the position of a particle `p` or a vector of positions of every particle in the system `sys`. Positions should be vectors containing `D` elements that are `<:Unitful.Length`.
+"""
 position(p)::Unitful.Length = error("Implement me")
+
+"""
+    species(p)
+    species(sys::AbstractSystem{D,S})
+
+Return the species of a particle `p` or a vector of species of every particle in the system `sys`. Return type should be (a vector of) `S`.
+"""
 species(p) = error("Implement me")
 
 #
@@ -26,14 +46,26 @@ struct DirichletZero <: BoundaryCondition end  # Dirichlet zero boundary (i.e. m
 struct Periodic <: BoundaryCondition end  # Periodic BCs
 
 
-#
-# The system type
-#     Again readonly.
-#
+"""
+    AbstractSystem{D,S}
 
+A `D`-dimensional system comprised of particles identified by type `S`.
+"""
 abstract type AbstractSystem{D,S} end
+
+"""
+    bounding_box(sys::AbstractSystem{D})
+
+Return a vector of length `D` of vectors of length `D` that describe the "box" in which the system `sys` is defined.
+"""
 (bounding_box(::AbstractSystem{D})::SVector{D,SVector{D,<:Unitful.Length}}) where {D} =
     error("Implement me")
+
+"""
+    boundary_conditions(sys::AbstractSystem{D})
+
+Return a vector of length `D` of `BoundaryCondition` objects, one for each direction described by `bounding_box(sys)`.
+"""
 (boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition}) where {D} =
     error("Implement me")
 
