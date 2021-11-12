@@ -5,7 +5,7 @@ using StaticArrays
 import Base.position
 
 export AbstractSystem, AbstractAtomicSystem
-export SimpleAtom
+export StaticAtom
 export BoundaryCondition, DirichletZero, Periodic
 export atomic_mass,
     atomic_number,
@@ -44,7 +44,7 @@ abstract type AbstractSystem{D,ET} end
 get_periodic(sys::AbstractSystem) =
     [isa(bc, Periodic) for bc in get_boundary_conditions(sys)]
 
-# Note: Can't use ndims, because that is ndims(sys) == 1 (because of AbstractVector interface)
+# Note: Can't use ndims, because that is ndims(sys) == 1 (because of indexing interface)
 n_dimensions(::AbstractSystem{D}) where {D} = D
 
 
@@ -77,16 +77,16 @@ atomic_property(sys::AbstractAtomicSystem, property::Symbol)::Vector{Any} =
     atomic_property.(sys, property)
 atomic_propertiesnames(sys::AbstractAtomicSystem) = unique(sort(atomic_propertynames.(sys)))
 
-struct SimpleAtom{D}
-    position::SVector{D,<:Unitful.Length}
+struct StaticAtom{D,L<:Unitful.Length}
+    position::SVector{D,L}
     element::Element
 end
-SimpleAtom(position, element) = SimpleAtom{length(position)}(position, element)
-position(atom::SimpleAtom) = atom.position
-element(atom::SimpleAtom) = atom.element
+StaticAtom(position, element) = StaticAtom{length(position)}(position, element)
+position(atom::StaticAtom) = atom.position
+element(atom::StaticAtom) = atom.element
 
-function SimpleAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector})
-    SimpleAtom(position, elements[symbol])
+function StaticAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector})
+    StaticAtom(position, elements[symbol])
 end
 
 # Just to make testing a little easier for now

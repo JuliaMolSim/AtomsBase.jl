@@ -58,4 +58,4 @@ Base.length(sys::FastSystem{D,ET}) where {D,ET} = length(sys.elements)
 
 # first piece of trickiness: can't do a totally abstract dispatch here because we need to know the signature of the constructor for AT
 Base.getindex(sys::FastSystem{D,ET}, i::Int) where {D,ET} =
-    SimpleAtom{D}(sys.positions[i], sys.elements[i])
+    StaticAtom{D}(sys.positions[i], sys.elements[i])
