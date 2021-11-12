@@ -91,13 +91,18 @@ function StaticAtom(position, symbol::Union{Integer,AbstractString,Symbol,Abstra
     StaticAtom(position, elements[symbol])
 end
 
+function Base.show(io::IO, a::StaticAtom)
+    print(io, "StaticAtom: $(a.element.symbol)")
+end
+
 # Just to make testing a little easier for now
 function Base.show(io::IO, mime::MIME"text/plain", sys::AbstractSystem)
-    println(io, "System:")
+    println(io, "$(string(nameof(typeof(sys)))):")
     println(io, "    BCs:        ", boundary_conditions(sys))
     println(io, "    Box:        ", bounding_box(sys))
     println(io, "    Particles:  ")
     for particle in sys
+        print("        ")
         Base.show(io, mime, particle)
         println(io)
     end

@@ -29,7 +29,7 @@ end
 bounding_box(sys::FlexibleSystem) = sys.box
 boundary_conditions(sys::FlexibleSystem) = sys.boundary_conditions
 
-function Base.show(io::IO, ::MIME"text/plain", sys::FlexibleSystem)
+function Base.show(io::IO, sys::FlexibleSystem)
     print(io, "FlexibleSystem with ", length(sys), " particles")
 end
 

@@ -48,7 +48,7 @@ function FastSystem(
     )
 end
 
-function Base.show(io::IO, ::MIME"text/plain", sys::FastSystem)
+function Base.show(io::IO, sys::FastSystem)
     print(io, "FastSystem with ", length(sys), " particles")
 end
 
