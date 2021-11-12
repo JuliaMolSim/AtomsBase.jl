@@ -48,18 +48,14 @@ get_periodic(sys::AbstractSystem) =
 n_dimensions(::AbstractSystem{D}) where {D} = D
 
 
-# indexing interface
+# indexing and iteration interface
 Base.getindex(::AbstractSystem, ::Int) = error("Implement me")
 Base.size(::AbstractSystem) = error("Implement me")
 Base.length(::AbstractSystem) = error("Implement me")
 Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not mutable.")
 Base.firstindex(::AbstractSystem) = 1
 Base.lastindex(s::AbstractSystem) = length(s)
-Base.iterate(S::AbstractSystem, i::Int=1) = (1 <= i <= length(S)) ? (@inbounds S[i], i+1) : nothing
-
-# iteration interface, needed for default broadcast dispatches below to work
-Base.iterate(sys::AbstractSystem{D,ET}, state = firstindex(sys)) where {D,ET} =
-    state > length(sys) ? nothing : (sys[state], state + 1)
+Base.iterate(S::AbstractSystem, state=firstindex(S)) = (firstindex(S) <= i <= length(S)) ? (@inbounds S[i], i+1) : nothing
 
 # TODO Support similar, push, ...
 
