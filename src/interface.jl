@@ -4,19 +4,14 @@ using PeriodicTable
 using StaticArrays
 import Base.position
 
-export AbstractSystem, AbstractAtomicSystem
-export StaticAtom
+export AbstractSystem
 export BoundaryCondition, DirichletZero, Periodic
-export atomic_mass,
-    atomic_number,
-    atomic_symbol,
-    bounding_box,
+export bounding_box,
     species,
     position,
     velocity,
     boundary_conditions,
-    periodic_dims
-export atomic_property, has_atomic_property, atomic_propertynames
+    get_periodic
 export n_dimensions
 
 velocity(p)::Union{Unitful.Velocity,Missing} = missing
@@ -48,7 +43,6 @@ get_periodic(sys::AbstractSystem) =
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of indexing interface)
 n_dimensions(::AbstractSystem{D}) where {D} = D
 
-
 # indexing and iteration interface
 Base.getindex(::AbstractSystem, ::Int) = error("Implement me")
 Base.length(::AbstractSystem) = error("Implement me")
@@ -67,33 +61,6 @@ Base.iterate(S::AbstractSystem, state=firstindex(S)) = (firstindex(S) <= state <
 position(sys::AbstractSystem) = position.(sys)    # in Cartesian coordinates!
 velocity(sys::AbstractSystem) = velocity.(sys)    # in Cartesian coordinates!
 species(sys::AbstractSystem) = species.(sys)
-
-#
-# Extra stuff only for Systems composed of atoms
-#
-const AbstractAtomicSystem{D} = AbstractSystem{D,Element}
-atomic_symbol(sys::AbstractAtomicSystem) = atomic_symbol.(sys)
-atomic_number(sys::AbstractAtomicSystem) = atomic_number.(sys)
-atomic_mass(sys::AbstractAtomicSystem) = atomic_mass.(sys)
-atomic_property(sys::AbstractAtomicSystem, property::Symbol)::Vector{Any} =
-    atomic_property.(sys, property)
-atomic_propertiesnames(sys::AbstractAtomicSystem) = unique(sort(atomic_propertynames.(sys)))
-
-struct StaticAtom{D,L<:Unitful.Length}
-    position::SVector{D,L}
-    element::Element
-end
-StaticAtom(position, element) = StaticAtom{length(position),eltype(position)}(position, element)
-position(atom::StaticAtom) = atom.position
-species(atom::StaticAtom) = atom.element
-
-function StaticAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector})
-    StaticAtom(position, elements[symbol])
-end
-
-function Base.show(io::IO, a::StaticAtom)
-    print(io, "StaticAtom: $(a.element.symbol)")
-end
 
 # Just to make testing a little easier for now
 function Base.show(io::IO, mime::MIME"text/plain", sys::AbstractSystem)
