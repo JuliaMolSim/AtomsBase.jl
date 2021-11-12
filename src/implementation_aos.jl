@@ -1,11 +1,13 @@
-# Example implementation using as few function definitions as possible
-#
+#=
+Implementation of AtomsBase interface in an array-of-structs
+=#
+
 using StaticArrays
 
 export FlexibleSystem
 
 # TODO Switch order of type arguments?
-struct FlexibleSystem{D,ET,L,AT} <: AbstractSystem{D,ET}
+struct FlexibleSystem{D,S,L<:Unitful.Length,AT} <: AbstractSystem{D,S}
     box::SVector{D,<:SVector{D,L}}
     boundary_conditions::SVector{D,<:BoundaryCondition}
     particles::Vector{AT}

@@ -1,15 +1,17 @@
-# Example implementation using as few function definitions as possible
-#
+#=
+Implementation of AtomsBase interface in an struct-of-arrays style.
+=#
+
 using StaticArrays
 
 export FastSystem
 
-struct FastSystem{D,ET,L<:Unitful.Length} <:
-       AbstractSystem{D,ET}
+struct FastSystem{D,S,L<:Unitful.Length} <:
+       AbstractSystem{D,S}
     box::SVector{D,SVector{D,L}}
     boundary_conditions::SVector{D,BoundaryCondition}
     positions::Vector{SVector{D,L}}
-    elements::Vector{ET}
+    elements::Vector{S}
     # janky inner constructor that we need for some reason
     FastSystem(box, boundary_conditions, positions, elements) =
         new{length(boundary_conditions),eltype(elements),eltype(eltype(positions))}(
@@ -25,8 +27,8 @@ function FastSystem(
     box::AbstractVector{Vector{L}},
     boundary_conditions::AbstractVector{BC},
     positions::AbstractMatrix{M},
-    elements::AbstractVector{ET},
-) where {L<:Unitful.Length,BC<:BoundaryCondition,M<:Unitful.Length,ET}
+    elements::AbstractVector{S},
+) where {L<:Unitful.Length,BC<:BoundaryCondition,M<:Unitful.Length,S}
     N = length(elements)
     D = length(box)
     if !all(length.(box) .== D)
@@ -54,8 +56,7 @@ bounding_box(sys::FastSystem) = sys.box
 boundary_conditions(sys::FastSystem) = sys.boundary_conditions
 
 # Base.size(sys::FastSystem) = size(sys.particles)
-Base.length(sys::FastSystem{D,ET}) where {D,ET} = length(sys.elements)
+Base.length(sys::FastSystem{D,S}) where {D,S} = length(sys.elements)
 
-# first piece of trickiness: can't do a totally abstract dispatch here because we need to know the signature of the constructor for AT
-Base.getindex(sys::FastSystem{D,ET}, i::Int) where {D,ET} =
+Base.getindex(sys::FastSystem{D,S}, i::Int) where {D,S} =
     StaticAtom{D}(sys.positions[i], sys.elements[i])
