@@ -5,7 +5,7 @@ using StaticArrays
 import Base.position
 
 export AbstractSystem, AbstractAtomicSystem
-export ChemicalElement, SimpleAtom
+export SimpleAtom
 export BoundaryCondition, DirichletZero, Periodic
 export atomic_mass,
     atomic_number,
