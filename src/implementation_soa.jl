@@ -6,8 +6,7 @@ using StaticArrays
 
 export FastSystem
 
-struct FastSystem{D,S,L<:Unitful.Length} <:
-       AbstractSystem{D,S}
+struct FastSystem{D,S,L<:Unitful.Length} <: AbstractSystem{D,S}
     box::SVector{D,SVector{D,L}}
     boundary_conditions::SVector{D,BoundaryCondition}
     positions::Vector{SVector{D,L}}

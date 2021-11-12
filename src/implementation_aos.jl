@@ -11,7 +11,16 @@ struct FlexibleSystem{D,S,L<:Unitful.Length,AT} <: AbstractSystem{D,S}
     box::SVector{D,<:SVector{D,L}}
     boundary_conditions::SVector{D,<:BoundaryCondition}
     particles::Vector{AT}
-    FlexibleSystem(box, boundary_conditions, particles) = new{length(boundary_conditions),eltype(elements),eltype(eltype(box)),eltype(particles)}(box, boundary_conditions, particles)
+    FlexibleSystem(box, boundary_conditions, particles) = new{
+        length(boundary_conditions),
+        eltype(elements),
+        eltype(eltype(box)),
+        eltype(particles),
+    }(
+        box,
+        boundary_conditions,
+        particles,
+    )
 end
 # convenience constructor where we don't have to preconstruct all the static stuff...
 function FlexibleSystem(
@@ -23,7 +32,11 @@ function FlexibleSystem(
     if !all(length.(box) .== D)
         throw(ArgumentError("box must have D vectors of length D"))
     end
-    FlexibleSystem(SVector{D,SVector{D,L}}(box), SVector{D,BoundaryCondition}(boundary_conditions), particles)
+    FlexibleSystem(
+        SVector{D,SVector{D,L}}(box),
+        SVector{D,BoundaryCondition}(boundary_conditions),
+        particles,
+    )
 end
 
 bounding_box(sys::FlexibleSystem) = sys.box
