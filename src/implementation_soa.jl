@@ -24,7 +24,7 @@ end
 
 # convenience constructor where we don't have to preconstruct all the static stuff...
 function FastSystem(
-    box::AbstractVector{Vector{L}},
+    box::Vector{<:AbstractVector{L}},
     boundary_conditions::AbstractVector{BC},
     positions::AbstractMatrix{M},
     elements::AbstractVector{S},

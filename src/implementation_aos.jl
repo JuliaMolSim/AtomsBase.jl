@@ -15,7 +15,7 @@ struct FlexibleSystem{D,S,L<:Unitful.Length,AT} <: AbstractSystem{D,S}
 end
 # convenience constructor where we don't have to preconstruct all the static stuff...
 function FlexibleSystem(
-    box::Vector{Vector{L}},
+    box::Vector{<:AbstractVector{L}},
     boundary_conditions::Vector{BC},
     particles::Vector{AT},
 ) where {BC<:BoundaryCondition,L<:Unitful.Length,AT}
