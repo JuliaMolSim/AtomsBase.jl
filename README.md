@@ -12,46 +12,49 @@ AtomsBase is an abstract interface for representation of atomic geometries in Ju
 * file I/O with standard formats (.cif, .xyz, ...)
 * numerical tools: sampling, integration schemes, etc.
 * automatic differentiation and machine learning systems
+* visualization (e.g. plot recipes)
 
-Currently, the design philosophy is to be as lightweight as possible, with only a small set of required function dispatches. We will also provide a couple of standard concrete implementations of the interface that we envision could be broadly applicable, but encourage developers to provide their own implementations as needed in new or existing packages.
+Currently, the design philosophy is to be as lightweight as possible, with only a small set of required function dispatches to make adopting the interface into existing packages easy. We also provide a couple of standard concrete implementations of the interface that we envision could be broadly applicable, but encourage developers to provide their own implementations as needed in new or existing packages.
 
 ## Overview
-AtomsBase defines a few abstract types used for specifying an atomic system. We will describe them briefly here, from the "top down." Users and/or prospective developers may also find `implementation_simple.jl` a useful reference for a simple concrete implementation of the interface.
+The main abstract type introduced in AtomsBase `AbstractSystem{D,S}`. The `D` parameter indicates the number of spatial dimensions in the system, and `S` indicates the type identifying an individual species in this system.
 
-**A remark on SoA vs. AoS:** The "struct-of-arrays" (SoA) vs. "array-of-structs" (AoS) is a common design dilemma in representations of systems such as these. We have deliberately designed this interface to be _agnostic_ to how a concrete implementation chooses to structure its data. Some specific notes regarding how implementations might differ for these two paradigms are included below.
+The main power of the interface comes from predictable behavior of several core functions to access information about a system. Various categories of such functions are described below.
+
+### System geometry
+Functions that need to be dispatched:
+* `bounding_box(::AbstractSystem{D})::SVector{D,SVector{D,<:Unitful.Length}}`: returns `D` vectors of length `D` that describe the "box" in which the system lives
+* `boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition})`: returns a vector of length `D` of `BoundaryCondition` objects to describe what happens at the edges of the box
+
+Functions that will work automatically:
+* `get_periodic`: returns a vector of length `D` of `Bool`s for whether each dimension of the system has periodic boundary conditions
+* `n_dimensions`: returns `D`, the number of spatial dimensions of the system
+
+### Iteration and Indexing over systems
+There is a presumption of the ability to somehow extract an individual component (e.g. a single atom or molecule) of this system, though there are no constraints on the type of this component. To achieve this, an `AbstractSystem` object is expected to implement the Julia interfaces for [iteration](https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-iteration) and [indexing](https://docs.julialang.org/en/v1/manual/interfaces/#Indexing) in order to access representations of individual components of the system. Some default dispatches of parts of these interfaces are already included, so the minimal set of functions to dispatch in a concrete implementation is `Base.getindex` and `Base.length`, though it may be desirable to customize additional behavior depending on context.
+
+### System state and properties
+The only required properties to be specified of the system is the species of each component of the system and the positions and velocities associated with each component. These are accessed through the functions `species`, `position`, and `velocity`, respectively. The default dispatch of these functions onto an `AbstractSystem` object is as a broadcast over it, which will "just work" provided the indexing/iteration interfaces have been implemented (see above) and the functions are defined on individual system components.
+
+As a concrete example, AtomsBase provides the `StaticAtom` type as this is anticipated to be a commonly needed representation. Its implementation looks as follows:
+```julia
+struct StaticAtom{D,L<:Unitful.Length}
+    position::SVector{D,L}
+    element::Element
+end
+StaticAtom(position, element) = StaticAtom{length(position)}(position, element)
+position(atom::StaticAtom) = atom.position
+species(atom::StaticAtom) = atom.element
+```
+Note that the default behavior of `velocity` is to return `missing`, so it doesn't need to be explicitly dispatched here.
+
+The two sample implementations provided in this repo are both "composed" of `StaticAtom` objects; refer to them as well as `sandbox/aos_vs_soa.jl` to see how this can work in practice.
+### Struct-of-Arrays vs. Array-of-Structs
+The "struct-of-arrays" (SoA) vs. "array-of-structs" (AoS) is a common design dilemma in representations of systems such as these. We have deliberately designed this interface to be _agnostic_ to how a concrete implementation chooses to structure its data. Some specific notes regarding how implementations might differ for these two paradigms are included below.
 
 A way to think about this broadly is that the difference amounts to the ordering of function calls. For example, to get the position of a single particle in an AoS implementation, the explicit funciton chaining would be `position(getindex(sys))` (i.e. extract the single struct representing the particle of interest and query its position), while for SoA, one should prefer `getindex(position(sys))` (extract the array of positions, then index into it for a single particle). The beauty of an abstract interface in Julia is that these details can be, in large part, abstracted away through method dispatch such that the end user sees the same expected behavior irrespective of how things are implemented "under the hood."
 
-### System
-An object describing a system should be a subtype of `AbstractSystem` and will in general store identifiers, positions, and (if relevant) velocities of the particles that make it up, as well as a set of coordinate bounds.
-
-An `AbstractSystem` takes several type parameters: `D` (an integer representing the dimensionality of the system), `ET<:AbstractElement`, and `AT<:AbstractParticle` (see below) to indicate what types of particles these are, and requires dispatch of the following functions:
-* `bounding_box(::AbstractSystem{D})::SVector{D, SVector{D, <:Unitful.Length}}`: should return a set of basis vectors describing the boundaries of the coordinates in which the system resides
-* `boundary_conditions(::AbstractSystem{D})::SVector{D, BoundaryCondition}`: returns the boundary conditions corresponding to each spatial dimension of the system (see below for more on the `BoundaryCondition` type)
-
-`AbstractSystem` implements [Julia's indexing interface](https://docs.julialang.org/en/v1/manual/interfaces/#Indexing), thus the following functions must also be dispatched:
-* `Base.getindex(::AbstractSystem, ::Int)`
-* `Base.size(::AbstractSystem)`
-
-By default, the `position` and `velocity` functions dispatch onto `AbstractSystem` objects as a broadcast over the system (e.g. `position(sys::AbstractSystem) = position.(sys)`, invoking the dispatch of `position` onto the `AbstractParticle` type parameter of the system). In an SoA implementation, custom dispatches should probably be included to avoid the construction of the particle objects.
-
-**A remark on fractional coordinates:** In many contexts, it is desirable to work with fractional coordinates, i.e. unitless multiples of some reference coordinate system (typically this reference is what would be returned by the `box` function above). Because a focus of this interface is interoperability and unitless, non-Cartesian coordinates introduce ambiguity, we've chosen to impose that coordinates returned by functions in the interface be unitful quantities in a Cartesian frame. Of course, a concrete implementation of the interface could (and likely would need to) also dispatch additional functions for working with fractional coordinates.
-
-### Particles
-Particle objects are subtypes of `AbstractParticle`, and also take a type parameter that is `<:AbstractElement` (see below) to indicate how particles are identified.
-
-In the SoA case, particle objects would only ever be explicitly constructed when `getindex` is invoked on the system, as a "view" into the system.
-
-Particle objects should dispatch methods of the following functions:
-* `position(::AbstractParticle)::AbstractVector{<: Unitful.Length}`
-* `element(::AbstractParticle)::AbstractElement`
-
-And, optionally, 
-* `velocity(::AbstractParticle)::AbstractVector{<: Unitful.Velocity}`, which defaults to returning `nothing` if not dispatched.
-### Elements
-Subtypes of `AbstractElement` serve as identifiers of particles. As the name suggests, a common case would be a chemical element (e.g. for a DFT simulation). However, it could also contain more detailed isotopic/spin information if that is necessary, or be a molecule (e.g. in MD), or even a much larger-scale object!
-
-For simulation purposes, the utility of this object would be to serve as a sufficiently specific "index" into a database of simulation parameters (e.g. a pseudopotential library for DFT, or interparticle potential parameters for MD). Because we envision a chemical element being an extremely common case, we provide an explicit subtype in the form of `Element`, which makes use of [PeriodicTable.jl](https://github.com/JuliaPhysics/PeriodicTable.jl) to access information such as atomic numbers and masses.
+To demonstrate this, we provide two simple concrete implementations of the interface in `implementation_soa.jl` and `implementation_aos.jl` to show how analogous systems could be constructed within these paradigms. See also `sandbox/aos_vs_soa.jl` for how they can actually be constructed and queried.
 
 ### Boundary Conditions
 Finally, we include support for defining boundary conditions. Currently included are `Periodic` and `DirichletZero`. There should be one boundary condition specified for each spatial dimension represented.

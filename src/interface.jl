@@ -83,7 +83,7 @@ struct StaticAtom{D,L<:Unitful.Length}
     position::SVector{D,L}
     element::Element
 end
-StaticAtom(position, element) = StaticAtom{length(position)}(position, element)
+StaticAtom(position, element) = StaticAtom{length(position),eltype(position)}(position, element)
 position(atom::StaticAtom) = atom.position
 species(atom::StaticAtom) = atom.element
 

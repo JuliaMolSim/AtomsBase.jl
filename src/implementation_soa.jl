@@ -58,5 +58,9 @@ boundary_conditions(sys::FastSystem) = sys.boundary_conditions
 # Base.size(sys::FastSystem) = size(sys.particles)
 Base.length(sys::FastSystem{D,S}) where {D,S} = length(sys.elements)
 
-Base.getindex(sys::FastSystem{D,S}, i::Int) where {D,S} =
-    StaticAtom{D}(sys.positions[i], sys.elements[i])
+Base.getindex(sys::FastSystem{D,S,L}, i::Int) where {D,S,L} =
+    StaticAtom{D,L}(sys.positions[i], sys.elements[i])
+
+# these dispatches aren't strictly necessary, but they make these functions ~2x faster
+position(s::FastSystem) = s.positions
+species(s::FastSystem) = s.elements
