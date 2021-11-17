@@ -3,10 +3,7 @@
 #
 
 export StaticAtom, AbstractAtomicSystem
-export atomic_mass,
-    atomic_number,
-    atomic_symbol
-export atomic_property, has_atomic_property, atomic_propertynames
+export atomic_mass, atomic_number, atomic_symbol, atomic_property
 
 struct StaticAtom{D,L<:Unitful.Length}
     position::SVector{D,L}

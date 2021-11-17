@@ -6,13 +6,8 @@ import Base.position
 
 export AbstractSystem
 export BoundaryCondition, DirichletZero, Periodic
-export species,
-    position,
-    velocity
-export bounding_box,
-    boundary_conditions,
-    is_periodic,
-    n_dimensions
+export species, position, velocity
+export bounding_box, boundary_conditions, is_periodic, n_dimensions
 
 """
     velocity(p)
@@ -69,8 +64,7 @@ Return a vector of length `D` of `BoundaryCondition` objects, one for each direc
 (boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition}) where {D} =
     error("Implement me")
 
-is_periodic(sys::AbstractSystem) =
-    [isa(bc, Periodic) for bc in boundary_conditions(sys)]
+is_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of indexing interface)
 n_dimensions(::AbstractSystem{D}) where {D} = D
@@ -83,7 +77,8 @@ Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not 
 Base.firstindex(::AbstractSystem) = 1
 Base.lastindex(s::AbstractSystem) = length(s)
 # default to 1D indexing
-Base.iterate(S::AbstractSystem, state=firstindex(S)) = (firstindex(S) <= state <= length(S)) ? (@inbounds S[state], state+1) : nothing
+Base.iterate(S::AbstractSystem, state = firstindex(S)) =
+    (firstindex(S) <= state <= length(S)) ? (@inbounds S[state], state + 1) : nothing
 
 # TODO Support similar, push, ...
 

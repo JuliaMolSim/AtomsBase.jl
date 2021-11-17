@@ -1,6 +1,6 @@
-#=
-Implementation of AtomsBase interface in an array-of-structs
-=#
+#
+# Implementation of AtomsBase interface in an array-of-structs style
+#
 
 using StaticArrays
 
