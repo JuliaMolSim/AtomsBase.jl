@@ -66,9 +66,7 @@ is_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditi
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of indexing interface)
 n_dimensions(::AbstractSystem{D}) where {D} = D
 
-# indexing and iteration interface
-Base.getindex(::AbstractSystem, ::Int) = error("Implement me")
-Base.length(::AbstractSystem) = error("Implement me")
+# indexing and iteration interface...need to implement getindex and length, here are default dispatches for others
 Base.size(s::AbstractSystem) = (length(s),)
 Base.setindex!(::AbstractSystem, ::Int) = error("AbstractSystem objects are not mutable.")
 Base.firstindex(::AbstractSystem) = 1
