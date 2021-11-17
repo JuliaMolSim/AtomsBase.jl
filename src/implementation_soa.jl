@@ -63,3 +63,6 @@ Base.getindex(sys::FastSystem{D,S,L}, i::Int) where {D,S,L} =
 # these dispatches aren't strictly necessary, but they make these functions ~2x faster
 position(s::FastSystem) = s.positions
 species(s::FastSystem) = s.elements
+
+position(s::FastSystem, i) = s.positions[i]
+species(s::FastSystem, i) = s.species[i]

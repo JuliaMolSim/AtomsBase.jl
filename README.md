@@ -49,6 +49,14 @@ species(atom::StaticAtom) = atom.element
 Note that the default behavior of `velocity` is to return `missing`, so it doesn't need to be explicitly dispatched here.
 
 The two sample implementations provided in this repo are both "composed" of `StaticAtom` objects; refer to them as well as `sandbox/aos_vs_soa.jl` to see how this can work in practice.
+
+The `position`, `velocity`, and `species` functions also have indexed signatures to extract a given element directly, as in, for example:
+
+```julia
+position(sys, i) # position of `i`th particle in `sys`
+```
+Currently, this syntax only supports linear indexing.
+
 ### Struct-of-Arrays vs. Array-of-Structs
 The "struct-of-arrays" (SoA) vs. "array-of-structs" (AoS) is a common design dilemma in representations of systems such as these. We have deliberately designed this interface to be _agnostic_ to how a concrete implementation chooses to structure its data. Some specific notes regarding how implementations might differ for these two paradigms are included below.
 
