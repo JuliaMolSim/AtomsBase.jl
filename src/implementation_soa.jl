@@ -65,4 +65,4 @@ position(s::FastSystem) = s.positions
 species(s::FastSystem) = s.elements
 
 position(s::FastSystem, i) = s.positions[i]
-species(s::FastSystem, i) = s.species[i]
+species(s::FastSystem, i) = s.elements[i]

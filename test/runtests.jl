@@ -32,9 +32,11 @@ using PeriodicTable
         @test boundary_conditions(aos) == [Periodic(), Periodic(), DirichletZero()]
         @test is_periodic(aos) == [1, 1, 0]
         @test n_dimensions(aos) == 3
-        @test position(aos) == [[0.25, 0.25, 0.25]u"m", [0.75, 0.75, 0.75]u"m"]
+        @test position(aos) == [[0.25, 0.25, 0.25], [0.75, 0.75, 0.75]]u"m"
+        @test position(aos, 1) == [0.25, 0.25, 0.25]u"m"
         @test all(ismissing.(velocity(aos)))
         @test species(aos) == [elements[:C], elements[:C]]
+        @test species(soa, 1) == elements[:C]
         @test all(soa .== aos)
     end
 
