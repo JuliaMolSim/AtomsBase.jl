@@ -7,28 +7,28 @@ import Base.position
 export AbstractSystem
 export BoundaryCondition, DirichletZero, Periodic
 export species, position, velocity
-export bounding_box, boundary_conditions, is_periodic, n_dimensions
+export bounding_box, boundary_conditions, periodicity, n_dimensions
 
 """
     velocity(p)
 
 Return the velocity of a particle `p`.
 """
-velocity(p)::Union{Unitful.Velocity,Missing} = missing
+function velocity end
 
 """
     position(p)
 
 Return the position of a particle `p`.
 """
-position(p)::Unitful.Length = error("Implement me")
+function position end
 
 """
     species(p)
 
 Return the species of a particle `p`.
 """
-species(p) = error("Implement me")
+function species end
 
 #
 # Identifier for boundary conditions per dimension
@@ -50,18 +50,16 @@ abstract type AbstractSystem{D,S} end
 
 Return a vector of length `D` of vectors of length `D` that describe the "box" in which the system `sys` is defined.
 """
-(bounding_box(::AbstractSystem{D})::SVector{D,SVector{D,<:Unitful.Length}}) where {D} =
-    error("Implement me")
+function bounding_box end
 
 """
     boundary_conditions(sys::AbstractSystem{D})
 
 Return a vector of length `D` of `BoundaryCondition` objects, one for each direction described by `bounding_box(sys)`.
 """
-(boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition}) where {D} =
-    error("Implement me")
+function boundary_conditions end
 
-is_periodic(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditions(sys)]
+periodicity(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditions(sys)]
 
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of indexing interface)
 n_dimensions(::AbstractSystem{D}) where {D} = D

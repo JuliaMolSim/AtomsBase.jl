@@ -30,7 +30,7 @@ using PeriodicTable
     @testset "System" begin
         @test bounding_box(aos) == [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
         @test boundary_conditions(aos) == [Periodic(), Periodic(), DirichletZero()]
-        @test is_periodic(aos) == [1, 1, 0]
+        @test periodicity(aos) == [1, 1, 0]
         @test n_dimensions(aos) == 3
         @test position(aos) == [[0.25, 0.25, 0.25], [0.75, 0.75, 0.75]]u"m"
         @test position(aos, 1) == [0.25, 0.25, 0.25]u"m"

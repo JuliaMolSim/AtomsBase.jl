@@ -12,6 +12,7 @@ end
 StaticAtom(position, element) = StaticAtom{length(position)}(position, element)
 position(atom::StaticAtom) = atom.position
 species(atom::StaticAtom) = atom.element
+velocity(::StaticAtom) = missing
 
 function StaticAtom(position, symbol::Union{Integer,AbstractString,Symbol,AbstractVector})
     StaticAtom(position, elements[symbol])
