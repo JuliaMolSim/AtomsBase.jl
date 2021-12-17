@@ -101,16 +101,3 @@ Return a vector of species of every particle in the system `sys`. Return type sh
 """
 species(sys::AbstractSystem) = species.(sys)
 (species(sys::AbstractSystem{D,S}, index)::S) where {D,S} = species(sys[index])
-
-# Just to make testing a little easier for now
-function Base.show(io::IO, mime::MIME"text/plain", sys::AbstractSystem)
-    println(io, "$(string(nameof(typeof(sys)))):")
-    println(io, "    BCs:        ", boundary_conditions(sys))
-    println(io, "    Box:        ", bounding_box(sys))
-    println(io, "    Particles:  ")
-    for particle in sys
-        print("        ")
-        Base.show(io, mime, particle)
-        println(io)
-    end
-end
