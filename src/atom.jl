@@ -2,6 +2,7 @@
 # A simple and flexible atom implementation
 #
 export Atom
+export AtomicSystem
 
 struct Atom{D, L<:Unitful.Length, M<:Unitful.Mass}
     position::SVector{D, L}
@@ -29,7 +30,7 @@ function Base.propertynames(at::Atom, private::Bool=false)
 end
 
 function Atom(identifier::Union{Symbol,AbstractString,Integer}, position::AbstractVector{L};
-              atomic_symbol=elements[identifier].symbol,
+              atomic_symbol=Symbol(elements[identifier].symbol),
               atomic_number=elements[identifier].number,
               atomic_mass::M=elements[identifier].atomic_mass,
               kwargs...) where {L <: Unitful.Length, M <: Unitful.Mass}

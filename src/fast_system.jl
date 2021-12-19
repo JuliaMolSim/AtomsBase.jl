@@ -14,22 +14,34 @@ end
 
 # Constructor to fetch the types
 function FastSystem(box, boundary_conditions, positions, atomic_symbols, atomic_numbers, atomic_masses)
-    FastSystem{length(box),eltype(eltype(box)),eltype(atomic_masses)}(
+    FastSystem{length(box),eltype(eltype(positions)),eltype(atomic_masses)}(
         box, boundary_conditions, positions, atomic_symbols, atomic_numbers, atomic_masses
     )
 end
 
+# Convenience constructor for atomic systems
+function FastSystem(box,
+                    atoms::AbstractVector{<:Union{Symbol,AbstractString,Integer}},
+                    positions::AbstractVector{<:AbstractVector},
+                    boundary_conditions=fill(DirichletZero(), length(box)),
+                   )
+    atnums   = [elements[at].number         for at in atoms]
+    symbols  = [Symbol(elements[at].symbol) for at in atoms]
+    atmasses = [elements[at].atomic_mass    for at in atoms]
+    FastSystem(box, boundary_conditions, positions, symbols, atnums, atmasses)
+end
+
 # Convenience constructor where we don't have to preconstruct all the static stuff...
-function FastSystem(box, boundary_conditions, particles)
+function FastSystem(box, particles, boundary_conditions=fill(DirichletZero(), length(box)))
     D = length(box)
     if !all(length.(box) .== D)
-        throw(ArgumentError("Box must have D vectors of length D."))
+        throw(ArgumentError("Box must have D vectors of length D=$D."))
     end
-    if length(boundary_conditions) == D
-        throw(ArgumentError("Boundary conditions be of length D."))
+    if length(boundary_conditions) != D
+        throw(ArgumentError("Boundary conditions should be of length D=$D."))
     end
     if !all(n_dimensions.(particles) .== D)
-        throw(ArgumentError("Particles must have positions of length D."))
+        throw(ArgumentError("Particles must have positions of length D=$D."))
     end
     FastSystem(box, boundary_conditions, position.(particles), atomic_symbol.(particles),
                atomic_number.(particles), atomic_mass.(particles))
@@ -41,7 +53,7 @@ Base.length(sys::FastSystem)         = length(sys.positions)
 Base.size(sys::FastSystem)           = size(sys.positions)
 
 species_type(sys::FS) where {FS <: FastSystem} = AtomView{FS}
-Base.getindex(sys::FlexibleSystem, index::Int) = AtomView(sys, index)
+Base.getindex(sys::FastSystem, index::Int)     = AtomView(sys, index)
 
 position(s::FastSystem)       = s.positions
 atomic_symbol(s::FastSystem)  = s.atomic_symbols
