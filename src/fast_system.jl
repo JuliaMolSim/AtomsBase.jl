@@ -19,20 +19,14 @@ function FastSystem(box, boundary_conditions, positions, atomic_symbols, atomic_
     )
 end
 
-# Convenience constructor for atomic systems
-function FastSystem(box,
-                    atoms::AbstractVector{<:Union{Symbol,AbstractString,Integer}},
-                    positions::AbstractVector{<:AbstractVector},
-                    boundary_conditions=fill(DirichletZero(), length(box)),
-                   )
-    atnums   = [elements[at].number         for at in atoms]
-    symbols  = [Symbol(elements[at].symbol) for at in atoms]
-    atmasses = [elements[at].atomic_mass    for at in atoms]
-    FastSystem(box, boundary_conditions, positions, symbols, atnums, atmasses)
+# Constructor to take data from another system
+function FastSystem(system::AbstractSystem)
+    FastSystem(bounding_box(system), boundary_conditions(system), position(system),
+               atomic_symbol(system), atomic_number(system), atomic_mass(system))
 end
 
 # Convenience constructor where we don't have to preconstruct all the static stuff...
-function FastSystem(box, particles, boundary_conditions=fill(DirichletZero(), length(box)))
+function FastSystem(partiles, box, boundary_conditions)
     D = length(box)
     if !all(length.(box) .== D)
         throw(ArgumentError("Box must have D vectors of length D=$D."))

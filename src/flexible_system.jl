@@ -4,21 +4,30 @@
 export FlexibleSystem
 
 struct FlexibleSystem{D, S, L<:Unitful.Length} <: AbstractSystem{D}
+    particles::AbstractVector{S}
     box::SVector{D, SVector{D, L}}
     boundary_conditions::SVector{D, BoundaryCondition}
-    particles::AbstractVector{S}
 end
 
 function FlexibleSystem(
-    box::AbstractVector{<:AbstractVector{L}},
     particles::AbstractVector{S},
-    boundary_conditions::AbstractVector{BC}=fill(DirichletZero(), length(box)),
+    box::AbstractVector{<:AbstractVector{L}},
+    boundary_conditions::AbstractVector{BC}
 ) where {BC<:BoundaryCondition, L<:Unitful.Length, S}
     D = length(box)
     if !all(length.(box) .== D)
         throw(ArgumentError("Box must have D vectors of length D"))
     end
-    FlexibleSystem{D, S, L}(box, boundary_conditions, particles)
+    FlexibleSystem{D, S, L}(particles, box, boundary_conditions)
+end
+
+# Update constructor
+function FlexibleSystem(system::AbstractSystem;
+                        particles=nothing, atoms=nothing,
+                        box=bounding_box(system),
+                        boundary_conditions=boundary_conditions(system))
+    particles = something(particles, atoms, collect(system))
+    FlexibleSystem(particles, box, boundary_conditions)
 end
 
 bounding_box(sys::FlexibleSystem)        = sys.box

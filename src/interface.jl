@@ -1,7 +1,7 @@
 import Base.position
 
 export AbstractSystem
-export BoundaryCondition, DirichletZero, Periodic
+export BoundaryCondition, DirichletZero, Periodic, infinite_box
 export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type
 export position, velocity, element, atomic_mass, atomic_number, atomic_symbol
 
@@ -11,6 +11,11 @@ export position, velocity, element, atomic_mass, atomic_number, atomic_symbol
 abstract type BoundaryCondition end
 struct DirichletZero <: BoundaryCondition end  # Dirichlet zero boundary (i.e. molecular context)
 struct Periodic <: BoundaryCondition end  # Periodic BCs
+
+infinite_box(::Val{1}) = [[Inf]]u"bohr"
+infinite_box(::Val{2}) = [[Inf, 0], [0, Inf]]u"bohr"
+infinite_box(::Val{3}) = [[Inf, 0, 0], [0, Inf, 0], [0, 0, Inf]]u"bohr"
+infinite_box(dim::Int) = infinite_box(Val(dim))
 
 #
 # Species property accessors
