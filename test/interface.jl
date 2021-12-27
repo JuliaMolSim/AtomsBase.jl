@@ -22,6 +22,8 @@ using PeriodicTable
     @testset "System" begin
         flexible = FlexibleSystem(atoms, box, bcs)
         fast     = FastSystem(flexible)
+        @test length(flexible) == 2
+        @test size(flexible)   == (2, )
 
         @test bounding_box(flexible) == [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
         @test boundary_conditions(flexible) == [Periodic(), Periodic(), DirichletZero()]
@@ -34,6 +36,8 @@ using PeriodicTable
         @test atomic_number(fast) == [6, 6]
         @test atomic_number(fast, 1) == 6
         @test atomic_symbol(flexible, 2) == :C
+        @test atomic_number(flexible, 2) == 6
+        @test atomic_mass(flexible, 1)   == 12.011u"u"
 
         @test all(position(fast)      .== position(flexible))
         @test all(atomic_symbol(fast) .== atomic_symbol(flexible))

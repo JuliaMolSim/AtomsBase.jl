@@ -26,7 +26,7 @@ function FastSystem(system::AbstractSystem)
 end
 
 # Convenience constructor where we don't have to preconstruct all the static stuff...
-function FastSystem(partiles, box, boundary_conditions)
+function FastSystem(particles, box, boundary_conditions)
     D = length(box)
     if !all(length.(box) .== D)
         throw(ArgumentError("Box must have D vectors of length D=$D."))
