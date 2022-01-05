@@ -14,12 +14,25 @@ AtomsBase is an abstract interface for representation of atomic geometries in Ju
 * automatic differentiation and machine learning systems
 * visualization (e.g. plot recipes)
 
-Currently, the design philosophy is to be as lightweight as possible, with only a small set of required function dispatches to make adopting the interface into existing packages easy. We also provide a couple of standard concrete implementations of the interface that we envision could be broadly applicable, but encourage developers to provide their own implementations as needed in new or existing packages.
+Currently, the design philosophy is to be as lightweight as possible, with only
+a small set of required function dispatches to make adopting the interface into
+existing packages easy. We also provide a couple of
+[standard flexible implementations of the interface](#atomic-systems)
+that we envision to be broadly applicable.
+If features beyond these are required we
+we encourage developers to open PRs or provide their own implementations.
 
 ## Overview
-The main abstract type introduced in AtomsBase `AbstractSystem{D,S}`. The `D` parameter indicates the number of spatial dimensions in the system, and `S` indicates the type identifying an individual species in this system.
+The main abstract type introduced in AtomsBase `AbstractSystem{D}`. The `D`
+parameter indicates the number of spatial dimensions in the system.
+Contained inside the system are species, which may have an arbitrary type,
+accessible via the `species_type(system)` function.
+While AtomsBase provides some default species types (e.g. `Atom` and `AtomView`
+for standard atoms) in principle no constraints are made on this species type.
 
-The main power of the interface comes from predictable behavior of several core functions to access information about a system. Various categories of such functions are described below.
+The main power of the interface comes from predictable behavior of several core
+functions to access information about a system and the species.
+Various categories of such functions are described below.
 
 ### System geometry
 Functions that need to be dispatched:
@@ -31,38 +44,136 @@ Functions that will work automatically:
 * `n_dimensions`: returns `D`, the number of spatial dimensions of the system
 
 ### Iteration and Indexing over systems
-There is a presumption of the ability to somehow extract an individual component (e.g. a single atom or molecule) of this system, though there are no constraints on the type of this component. To achieve this, an `AbstractSystem` object is expected to implement the Julia interfaces for [iteration](https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-iteration) and [indexing](https://docs.julialang.org/en/v1/manual/interfaces/#Indexing) in order to access representations of individual components of the system. Some default dispatches of parts of these interfaces are already included, so the minimal set of functions to dispatch in a concrete implementation is `Base.getindex` and `Base.length`, though it may be desirable to customize additional behavior depending on context.
+There is a presumption of the ability to somehow extract an individual
+component (e.g. a single atom or molecule) of this system, though there are no
+constraints on the type of this component. To achieve this, an `AbstractSystem`
+object is expected to implement the Julia interfaces for
+[iteration](https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-iteration)
+and [indexing](https://docs.julialang.org/en/v1/manual/interfaces/#Indexing) in
+order to access representations of individual components of the system. Some
+default dispatches of parts of these interfaces are already included, so the
+minimal set of functions to dispatch in a concrete implementation is
+`Base.getindex` and `Base.length`, though it may be desirable to customize
+additional behavior depending on context.
 
 ### System state and properties
-The only required properties to be specified of the system is the species of each component of the system and the positions and velocities associated with each component. These are accessed through the functions `species`, `position`, and `velocity`, respectively. The default dispatch of these functions onto an `AbstractSystem` object is as a broadcast over it, which will "just work" provided the indexing/iteration interfaces have been implemented (see above) and the functions are defined on individual system components.
-
-As a concrete example, AtomsBase provides the `StaticAtom` type as this is anticipated to be a commonly needed representation. Its implementation looks as follows:
-```julia
-struct StaticAtom{D,L<:Unitful.Length}
-    position::SVector{D,L}
-    element::Element
-end
-StaticAtom(position, element) = StaticAtom{length(position)}(position, element)
-position(atom::StaticAtom) = atom.position
-species(atom::StaticAtom) = atom.element
-```
-Note that the default behavior of `velocity` is to return `missing`, so it doesn't need to be explicitly dispatched here.
-
-The two sample implementations provided in this repo are both "composed" of `StaticAtom` objects; refer to them as well as `sandbox/aos_vs_soa.jl` to see how this can work in practice.
-
-The `position`, `velocity`, and `species` functions also have indexed signatures to extract a given element directly, as in, for example:
-
+The only required properties to be specified of the system is the species
+and implementations of standard functions accessing the properties of the species,
+currently `position`, `velocity`, `atomic_symbol`, `atomic_mass`, `atomic_number`,
+`n_dimensions`, `element`. The default dispatch of these functions onto an
+`AbstractSystem` object is as a broadcast over it, which will "just work"
+provided the indexing/iteration interfaces have been implemented (see above)
+and the functions are defined on individual system components. Most of the property
+accessors also have indexed signatures to extract a given element directly, for example:
 ```julia
 position(sys, i) # position of `i`th particle in `sys`
 ```
 Currently, this syntax only supports linear indexing.
 
+To simplify working with `AtomsBase`, default implementations for systems
+composed of atoms are provided, [see below](#atomic-systems)
+
 ### Struct-of-Arrays vs. Array-of-Structs
-The "struct-of-arrays" (SoA) vs. "array-of-structs" (AoS) is a common design dilemma in representations of systems such as these. We have deliberately designed this interface to be _agnostic_ to how a concrete implementation chooses to structure its data. Some specific notes regarding how implementations might differ for these two paradigms are included below.
+The "struct-of-arrays" (SoA) vs. "array-of-structs" (AoS) is a common design
+dilemma in representations of systems such as these. We have deliberately
+designed this interface to be _agnostic_ to how a concrete implementation
+chooses to structure its data. Some specific notes regarding how
+implementations might differ for these two paradigms are included below.
 
-A way to think about this broadly is that the difference amounts to the ordering of function calls. For example, to get the position of a single particle in an AoS implementation, the explicit function chaining would be `position(getindex(sys))` (i.e. extract the single struct representing the particle of interest and query its position), while for SoA, one should prefer an implementation like `getindex(position(sys))` (extract the array of positions, then index into it for a single particle). The beauty of an abstract interface in Julia is that these details can be, in large part, abstracted away through method dispatch such that the end user sees the same expected behavior irrespective of how things are implemented "under the hood."
-
-To demonstrate this, we provide two simple concrete implementations of the interface in `implementation_soa.jl` and `implementation_aos.jl` to show how analogous systems could be constructed within these paradigms (including the `getindex` implementations mentioned above). See also `sandbox/aos_vs_soa.jl` for how they can actually be constructed and queried.
+A way to think about this broadly is that the difference amounts to the
+ordering of function calls. For example, to get the position of a single
+particle in an AoS implementation, the explicit function chaining would be
+`position(getindex(sys))` (i.e. extract the single struct representing the
+particle of interest and query its position), while for SoA, one should prefer
+an implementation like `getindex(position(sys))` (extract the array of
+positions, then index into it for a single particle). The beauty of an abstract
+interface in Julia is that these details can be, in large part, abstracted away
+through method dispatch such that the end user sees the same expected behavior
+irrespective of how things are implemented "under the hood".
+For concrete implementations see the section on [atomic systems](#atomic-systems) below.
 
 ### Boundary Conditions
-Finally, we include support for defining boundary conditions. Currently included are `Periodic` and `DirichletZero`. There should be one boundary condition specified for each spatial dimension represented.
+Finally, we include support for defining boundary conditions. Currently
+included are `Periodic` and `DirichletZero`. There should be one boundary
+condition specified for each spatial dimension represented.
+
+## Atomic systems
+For the specific case of atomic systems provides two implementations,
+as this is anticipated to be a commonly needed representation.
+One implementation is a proof-of-priniciple following the struct-of-arrays approach.
+The more flexible implementation is based on an array-of-structs approach
+and can be easily customised, e.g. by adding custom properties or by swapping
+the underlying `Atom` struct by a custom one.
+
+### Struct of Arrays / FastSystem
+The file [src/fast_system.jl](src/fast_system.jl) contains an implementation of
+AtomsBase based on the struct-of-arrays approach. All species data is stored
+as plain arrays, but for convenience indexing of individual atoms is supported
+by a light-weight [`AtomView`](src/atomview.jl). See the implementation files
+as well as the tests for how these can be used.
+
+### Atoms and FlexibleSystem
+A flexible implementation of the interface is provided by the
+[`FlexibleSystem`]( src/flexible_system.jl) and the [`Atom`]( src/atom.jl) structs
+for representing atomic systems.
+
+An `Atom` object can be constructed
+just by passing an identifier (e.g. symbol like `:C`, atomic number like `6`) and a vector
+of positions as
+```julia
+atom = Atoms(:C, [0, 1, 2.]u"bohr")
+```
+This automatically fills the atom with standard data such as the atomic mass. Such data
+can be accessed using the `AtomsBase` interface functions
+such as `atomic_mass(atom)`, `position(atom)`, `velocity(atom)`, `atomic_mass(atom)`, etc.
+See [src/atom.jl](src/atom.jl) for details.
+
+Custom properties can be easily attached to an `Atom` by supplying arbitrary
+keyword arguments upon construction. For example to attach a pseudopotential
+for using the structure with [DFTK](https://dftk.org), construct the atom as
+```julia
+atom = Atoms(:C, [0, 1, 2.]u"bohr", pseudopotential="hgh/lda/c-q4")
+```
+which will make the pseudopotential identifier available as `atom.pseudopotential`.
+Updating an atomic property proceeds similarly. E.g.
+```julia
+newatom = Atoms(;atom=atom, atomic_mass=13u"u")
+```
+makes a new carbon atom with all properties identical to `atom` (including custom ones),
+but setting the `atomic_mass` to 13 units.
+
+Once the atoms are constructed these can be assembled into a system.
+For example to place a hydrogen molecule into a cubic box of `10Å` and periodic
+boundary conditions, use:
+```julia
+bounding_box = [[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]u"Å"
+boundary_conditions = [Periodic(), Periodic(), Periodic()]
+hydrogen = FlexibleSystem([Atom(:H, [0, 0, 1.]u"bohr"),
+                           Atom(:H, [0, 0, 3.]u"bohr")],
+                          bounding_box, boundary_conditions)
+```
+An update constructor is supported as well (see [src/flexible_system.jl](src/flexible_system.jl)).
+
+Oftentimes more convenient are the functions
+`atomic_system`, `isolated_system`, `periodic_system`,
+which cover some standard atomic system setups:
+```julia
+# Same hydrogen system with periodic BCs:
+bounding_box = [[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]u"Å"
+hydrogen = periodic_system([:H => [0, 0, 1.]u"bohr",
+                            :H => [0, 0, 3.]u"bohr"],
+                           bounding_box)
+
+# Silicon unit cell using fractional positions
+# (Common for solid-state simulations)
+bounding_box = 10.26 / 2 * [[0, 0, 1], [1, 0, 1], [1, 1, 0]]u"bohr"
+silicon = periodic_system([:Si =>  ones(3)/8,
+                           :Si => -ones(3)/8],
+                           bounding_box, fractional=true)
+
+# Isolated H2 molecule in vacuum (Infinite box and zero dirichlet BCs)
+# (Standard setup for molecular simulations)
+hydrogen = isolated_system([:H => [0, 0, 1.]u"bohr",
+                            :H => [0, 0, 3.]u"bohr"])
+
+```
