@@ -60,11 +60,11 @@ additional behavior depending on context.
 The only required properties to be specified of the system is the species
 and implementations of standard functions accessing the properties of the species,
 currently `position`, `velocity`, `atomic_symbol`, `atomic_mass`, `atomic_number`,
-`n_dimensions`, `element`. The default dispatch of these functions onto an
-`AbstractSystem` object is as a broadcast over it, which will "just work"
-provided the indexing/iteration interfaces have been implemented (see above)
-and the functions are defined on individual system components. Most of the property
-accessors also have indexed signatures to extract a given element directly, for example:
+`n_dimensions`, `element`. Based on these methods respective equivalent methods acting
+on an `AbstractSystem` will be automatically available, e.g. using the iteration
+interface of the `AbstractSystem` (see above). Most of the property accessors on the
+`AbstractSystem` also have indexed signatures to extract data from a particular species
+directly, for example:
 ```julia
 position(sys, i) # position of `i`th particle in `sys`
 ```
@@ -98,12 +98,16 @@ included are `Periodic` and `DirichletZero`. There should be one boundary
 condition specified for each spatial dimension represented.
 
 ## Atomic systems
-For the specific case of atomic systems provides two implementations,
-as this is anticipated to be a commonly needed representation.
-One implementation is a proof-of-priniciple following the struct-of-arrays approach.
+Since we anticipate atomic systems to be a commonly needed representation,
+`AtomsBase` provides two flexible implementations for this setting.
+One implementation follows the struct-of-arrays approach introducing the `AtomView`
+type to conveniently expose atomic data.
 The more flexible implementation is based on an array-of-structs approach
 and can be easily customised, e.g. by adding custom properties or by swapping
 the underlying `Atom` struct by a custom one.
+In both cases the respective datastructures can be used either fully
+or in parts in downstream packages and we hope these to develop into universally
+useful types within the Julia ecosystem over time.
 
 ### Struct of Arrays / FastSystem
 The file [src/fast_system.jl](src/fast_system.jl) contains an implementation of
