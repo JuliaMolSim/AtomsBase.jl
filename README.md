@@ -40,7 +40,7 @@ Functions that need to be dispatched:
 * `boundary_conditions(::AbstractSystem{D})::SVector{D,BoundaryCondition})`: returns a vector of length `D` of `BoundaryCondition` objects to describe what happens at the edges of the box
 
 Functions that will work automatically:
-* `get_periodic`: returns a vector of length `D` of `Bool`s for whether each dimension of the system has periodic boundary conditions
+* `periodicity`: returns a vector of length `D` of `Bool`s for whether each dimension of the system has periodic boundary conditions
 * `n_dimensions`: returns `D`, the number of spatial dimensions of the system
 
 ### Iteration and Indexing over systems
