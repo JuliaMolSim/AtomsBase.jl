@@ -6,7 +6,7 @@ struct AtomView{FS <: AbstractSystem}
     system::FS
     index::Int
 end
-velocity(v::AtomView)      = missing
+velocity(v::AtomView)      = velocity(v.system, v.index)
 position(v::AtomView)      = position(v.system, v.index)
 atomic_mass(v::AtomView)   = atomic_mass(v.system, v.index)
 atomic_symbol(v::AtomView) = atomic_symbol(v.system, v.index)
