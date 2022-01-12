@@ -9,6 +9,7 @@ using Test
 
         @test n_dimensions(at) == 3
         @test position(at) == zeros(3) * u"m"
+        @test velocity(at) == zeros(3) * u"bohr/s"
         @test at.atomic_symbol == :Si
         @test at.atomic_number == 14
         @test hasproperty(at, :atomic_mass)
@@ -17,8 +18,8 @@ using Test
         @test hasproperty(at, :extradata)
         @test at.extradata == 42
 
-        @test propertynames(at) == (:position, :atomic_symbol, :atomic_number,
-                                    :atomic_mass, :extradata)
+        @test propertynames(at) == (:position, :velocity, :atomic_symbol,
+                                    :atomic_number, :atomic_mass, :extradata)
 
         # Test update constructor
         newatom = Atom(at; extradata=43, atomic_number=15)
@@ -37,12 +38,13 @@ using Test
         bcs = [Periodic(), DirichletZero(), DirichletZero()]
         atoms = [:Si => [0.0, 1.0, 1.5]u"Å",
                  :C  => [0.0, 0.8, 1.7]u"Å",
-                 Atom(:H, zeros(3) * u"Å")]
+                 Atom(:H, zeros(3) * u"Å", ones(3) * u"bohr/s")]
         system = atomic_system(atoms, box, bcs)
         @test length(system) == 3
         @test atomic_symbol(system) == [:Si, :C, :H]
         @test boundary_conditions(system) == [Periodic(), DirichletZero(), DirichletZero()]
         @test position(system) == [[0.0, 1.0, 1.5], [0.0, 0.8, 1.7], [0.0, 0.0, 0.0]]u"Å"
+        @test velocity(system) == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]u"bohr/s"
 
         # Test update constructor
         newatoms  = [system[1], system[2]]
@@ -62,6 +64,7 @@ using Test
         @test atomic_symbol(system) == [:Si, :C, :H]
         @test boundary_conditions(system) == [DirichletZero(), DirichletZero(), DirichletZero()]
         @test position(system) == [[0.0, 1.0, 1.5], [0.0, 0.8, 1.7], [0.0, 0.0, 0.0]]u"Å"
+        @test velocity(system) == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]u"bohr/s"
         @test bounding_box(system) == infinite_box(3)
     end
 

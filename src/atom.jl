@@ -3,14 +3,15 @@
 #
 export Atom, atomic_system, periodic_system, isolated_system
 
-struct Atom{D, L<:Unitful.Length, M<:Unitful.Mass}
+struct Atom{D, L<:Unitful.Length, V<:Unitful.Velocity, M<:Unitful.Mass}
     position::SVector{D, L}
+    velocity::SVector{D, V}
     atomic_symbol::Symbol
     atomic_number::Int
     atomic_mass::M
     data::Dict{Symbol, Any}  # Store arbitrary data about the atom.
 end
-velocity(::Atom)          = missing
+velocity(atom::Atom)      = atom.velocity
 position(atom::Atom)      = atom.position
 atomic_mass(atom::Atom)   = atom.atomic_mass
 atomic_symbol(atom::Atom) = atom.atomic_symbol
@@ -28,19 +29,22 @@ function Base.propertynames(at::Atom, private::Bool=false)
     end
 end
 
-function Atom(identifier::Union{Symbol,AbstractString,Integer}, position::AbstractVector{L};
+function Atom(identifier::Union{Symbol,AbstractString,Integer},
+              position::AbstractVector{L},
+              velocity::AbstractVector{V}=zeros(3)u"bohr/s";
               atomic_symbol=Symbol(elements[identifier].symbol),
               atomic_number=elements[identifier].number,
               atomic_mass::M=elements[identifier].atomic_mass,
-              kwargs...) where {L <: Unitful.Length, M <: Unitful.Mass}
-    Atom{length(position), L, M}(position, atomic_symbol, atomic_number, atomic_mass, Dict(kwargs...))
+              kwargs...) where {L <: Unitful.Length, V <: Unitful.Velocity, M <: Unitful.Mass}
+    Atom{length(position), L, V, M}(position, velocity, atomic_symbol,
+                                    atomic_number, atomic_mass, Dict(kwargs...))
 end
-Atom(id_pos::Pair; kwargs...) = Atom(id_pos...; kwargs...)
+Atom(id_pos::Pair; kwargs...)  = Atom(id_pos...; kwargs...)
 
 # Update constructor: Amend any atom by extra data.
 function Atom(;atom, kwargs...)
     extra = atom isa Atom ? atom.data : (; )
-    Atom(atomic_symbol(atom), position(atom);
+    Atom(atomic_symbol(atom), position(atom), velocity(atom);
          atomic_symbol=atomic_symbol(atom),
          atomic_number=atomic_number(atom),
          atomic_mass=atomic_mass(atom),
