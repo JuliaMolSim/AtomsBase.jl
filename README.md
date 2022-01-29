@@ -20,10 +20,10 @@ existing packages easy. We also provide a couple of
 [standard flexible implementations of the interface](#atomic-systems)
 that we envision to be broadly applicable.
 If features beyond these are required we
-we encourage developers to open PRs or provide their own implementations.
+encourage developers to open PRs or provide their own implementations.
 
 ## Overview
-The main abstract type introduced in AtomsBase `AbstractSystem{D}`. The `D`
+The main abstract type introduced in AtomsBase is `AbstractSystem{D}`. The `D`
 parameter indicates the number of spatial dimensions in the system.
 Contained inside the system are species, which may have an arbitrary type,
 accessible via the `species_type(system)` function.
