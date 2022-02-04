@@ -26,3 +26,12 @@ existing packages easy. We also provide a couple of
 that we envision to be broadly applicable.
 If features beyond these are required we
 encourage developers to open PRs or provide their own implementations.
+
+## Installation
+
+AtomsBase can be installed using the Julia package manager.
+From the Julia REPL, type `]` to enter the Pkg REPL mode and run
+
+```
+pkg> add AtomsBase
+```
