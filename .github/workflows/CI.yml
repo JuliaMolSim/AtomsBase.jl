@@ -24,6 +24,7 @@ jobs:
           - ubuntu-latest
         arch:
           - x64
+    continue-on-error: ${{ matrix.version == 'nightly' }}
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
