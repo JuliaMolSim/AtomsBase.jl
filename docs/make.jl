@@ -19,6 +19,8 @@ makedocs(;
         "atomicsystems.md",
         "apireference.md"
     ],
+    checkdocs=:exports,
+    strict=true,
 )
 
 deploydocs(;
