@@ -3,6 +3,9 @@
 #
 export Atom, atomic_system, periodic_system, isolated_system
 
+# Valid types for atom identifiers
+const AtomId = Union{Symbol,AbstractString,Integer}
+
 struct Atom{D, L<:Unitful.Length, V<:Unitful.Velocity, M<:Unitful.Mass}
     position::SVector{D, L}
     velocity::SVector{D, V}
@@ -29,7 +32,7 @@ function Base.propertynames(at::Atom, private::Bool=false)
     end
 end
 
-function Atom(identifier::Union{Symbol,AbstractString,Integer},
+function Atom(identifier::AtomId,
               position::AbstractVector{L},
               velocity::AbstractVector{V}=zeros(3)u"bohr/s";
               atomic_symbol=Symbol(elements[identifier].symbol),
@@ -39,7 +42,6 @@ function Atom(identifier::Union{Symbol,AbstractString,Integer},
     Atom{length(position), L, V, M}(position, velocity, atomic_symbol,
                                     atomic_number, atomic_mass, Dict(kwargs...))
 end
-Atom(id_pos::Pair; kwargs...)  = Atom(id_pos...; kwargs...)
 
 # Update constructor: Amend any atom by extra data.
 function Atom(;atom, kwargs...)
@@ -52,18 +54,22 @@ function Atom(;atom, kwargs...)
 end
 Atom(atom::Atom; kwargs...) = Atom(; atom, kwargs...)
 
+function Base.convert(::Type{Atom}, id_pos::Pair{<:AtomId,<:AbstractVector{<:Unitful.Length}})
+    Atom(id_pos...)
+end
+
 #
 # Special high-level functions to construct atomic systems
 #
 atomic_system(atoms::AbstractVector{<:Atom}, box, bcs) = FlexibleSystem(atoms, box, bcs)
-atomic_system(atoms::AbstractVector, box, bcs) = atomic_system(Atom.(atoms), box, bcs)
+atomic_system(atoms::AbstractVector, box, bcs) = FlexibleSystem(convert.(Atom, atoms), box, bcs)
 
 function isolated_system(atoms::AbstractVector{<:Atom})
     # Use dummy box and boundary conditions
     D = n_dimensions(first(atoms))
     atomic_system(atoms, infinite_box(D), fill(DirichletZero(), D))
 end
-isolated_system(atoms::AbstractVector) = isolated_system(Atom.(atoms))
+isolated_system(atoms::AbstractVector) = isolated_system(convert.(Atom, atoms))
 
 function periodic_system(atoms::AbstractVector,
                          box::AbstractVector{<:AbstractVector},
@@ -73,7 +79,7 @@ function periodic_system(atoms::AbstractVector,
     !fractional && return atomic_system(atoms, box, boundary_conditions)
 
     parse_fractional(atom::Atom) = atom
-    function parse_fractional(atom::Pair)
+    function parse_fractional(atom::Pair)::Atom
         id, pos_fractional = atom
         Atom(id, lattice * pos_fractional)
     end

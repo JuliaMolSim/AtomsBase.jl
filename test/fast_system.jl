@@ -6,8 +6,8 @@ using PeriodicTable
 @testset "Fast system" begin
     box = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
     bcs = [Periodic(), Periodic(), DirichletZero()]
-    atoms = Atom.([:C => [0.25, 0.25, 0.25]u"m",
-                   :C => [0.75, 0.75, 0.75]u"m"])
+    atoms = Atom[:C => [0.25, 0.25, 0.25]u"m",
+                 :C => [0.75, 0.75, 0.75]u"m"]
     system = FastSystem(atoms, box, bcs)
 
     @test length(system) == 2
