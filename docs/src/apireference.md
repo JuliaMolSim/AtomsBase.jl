@@ -18,6 +18,7 @@ AbstractSystem{D}
 atomic_mass
 atomic_number
 atomic_symbol
+chemical_formula
 boundary_conditions
 bounding_box
 element

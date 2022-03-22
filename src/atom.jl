@@ -58,6 +58,11 @@ function Base.convert(::Type{Atom}, id_pos::Pair{<:AtomId,<:AbstractVector{<:Uni
     Atom(id_pos...)
 end
 
+function Base.show(io::IO, at::Atom{D, L}) where {D, L}
+    pos  = ustrip.(at.position)
+    print(io, "Atom($(at.atomic_symbol), [", join(pos, ", "), "]u\"$(unit(L))\")")
+end
+
 #
 # Special high-level functions to construct atomic systems
 #
