@@ -26,7 +26,7 @@ existing packages easy. We also provide a couple of
 that we envision to be broadly applicable.
 If features beyond these are required we
 encourage developers to open PRs or provide their own implementations.
-For more on how to use the package, see [the documentation](https://juliamolsim.github.io/AtomsBase.jl/stable).
+For more on how to use the package, see [the documentation](https://juliamolsim.github.io/AtomsBase.jl/dev).
 
 ## Installation
 
