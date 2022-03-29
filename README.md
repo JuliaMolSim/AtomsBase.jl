@@ -36,3 +36,15 @@ From the Julia REPL, type `]` to enter the Pkg REPL mode and run
 ```
 pkg> add AtomsBase
 ```
+
+## Packages Using AtomsBase
+The following (not all yet-registered) packages currently make use of this interface (please feel free to send a PR to add to this list!):
+* [ASEPotential](https://github.com/jrdegreeff/ASEPotential.jl)
+* [AtomIO](https://github.com/mfherbst/AtomIO.jl): I/O for atomic structures, also wraps some ASE functionality
+* [Atomistic](https://github.com/cesmix-mit/Atomistic.jl/tree/263ec97b5f380f1b2ba593bf8feaf36e7f7cff9a): integrated workflow for MD simulations, part of [CESMIX](https://computing.mit.edu/cesmix/)
+* [BFPIS](https://github.com/GDufenshuoo/BFPIS.jl)
+* [ChemistryFeaturization](https://github.com/Chemellia/ChemistryFeaturization.jl): Interface for featurization of atomic structures for input into machine learning models, part of [Chemellia](https://chemellia.org)
+* [DFTK](https://github.com/JuliaMolSim/DFTK.jl): density functional theory simulations
+* [InteratomicPotentials](https://github.com/cesmix-mit/InteratomicPotentials.jl): implementations of a variety of interatomic potentials, also part of [CESMIX](https://computing.mit.edu/cesmix/)
+* [Molly](https://github.com/JuliaMolSim/Molly.jl): molecular dynamics simulations
+* [Xtals](https://github.com/SimonEnsemble/Xtals.jl): I/O and structure representation for crystals
