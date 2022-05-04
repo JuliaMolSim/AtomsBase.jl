@@ -41,6 +41,11 @@ function FastSystem(particles, box, boundary_conditions)
                atomic_number.(particles), atomic_mass.(particles))
 end
 
+function Base.show(io::IO, system::FastSystem)
+    print(io, "FastSystem")
+    show_system(io, system)
+end
+
 bounding_box(sys::FastSystem)        = sys.box
 boundary_conditions(sys::FastSystem) = sys.boundary_conditions
 Base.length(sys::FastSystem)         = length(sys.positions)
