@@ -22,7 +22,7 @@ AtomsBase is an abstract interface for representation of atomic geometries in Ju
 Currently, the design philosophy is to be as lightweight as possible, with only
 a small set of required function dispatches to make adopting the interface into
 existing packages easy. We also provide a couple of
-[standard flexible implementations of the interface](https://juliamolsim.github.io/AtomsBase.jl/stable/atomicsystems.html#atomic-systems)
+[standard flexible implementations of the interface](https://juliamolsim.github.io/AtomsBase.jl/stable/atomicsystems/#atomic-systems)
 that we envision to be broadly applicable.
 If features beyond these are required we
 encourage developers to open PRs or provide their own implementations.
