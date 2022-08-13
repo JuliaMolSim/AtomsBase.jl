@@ -66,8 +66,9 @@ end
 #
 # Special high-level functions to construct atomic systems
 #
-atomic_system(atoms::AbstractVector{<:Atom}, box, bcs) = FlexibleSystem(atoms, box, bcs)
-atomic_system(atoms::AbstractVector, box, bcs) = FlexibleSystem(convert.(Atom, atoms), box, bcs)
+atomic_system(atoms::AbstractVector{<:Atom}, box, bcs, kwargs...) = FlexibleSystem(atoms, box, bcs, kwargs...)
+atomic_system(atoms::AbstractVector, box, bcs, kwargs...) = FlexibleSystem(convert.(;Atom, atoms), box, bcs, kwargs...)
+
 
 function isolated_system(atoms::AbstractVector{<:Atom})
     # Use dummy box and boundary conditions
