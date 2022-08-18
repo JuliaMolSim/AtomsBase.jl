@@ -66,22 +66,21 @@ end
 #
 # Special high-level functions to construct atomic systems
 #
-atomic_system(atoms::AbstractVector{<:Atom}, box, bcs, kwargs...) = FlexibleSystem(atoms, box, bcs, kwargs...)
-atomic_system(atoms::AbstractVector, box, bcs, kwargs...) = FlexibleSystem(convert.(Atom, atoms), box, bcs, kwargs...)
+atomic_system(atoms::AbstractVector{<:Atom}, box, bcs; kwargs...) = FlexibleSystem(atoms, box, bcs; kwargs...)
+atomic_system(atoms::AbstractVector, box, bcs; kwargs...) = FlexibleSystem(convert.(Atom, atoms), box, bcs; kwargs...)
 
 
-function isolated_system(atoms::AbstractVector{<:Atom}, kwargs...)
+function isolated_system(atoms::AbstractVector{<:Atom}; kwargs...)
     # Use dummy box and boundary conditions
     D = n_dimensions(first(atoms))
-    atomic_system(atoms, infinite_box(D), fill(DirichletZero(), D), kwargs...)
+    atomic_system(atoms, infinite_box(D), fill(DirichletZero(), D); kwargs...)
 end
-isolated_system(atoms::AbstractVector, kwargs...) = isolated_system(convert.(Atom, atoms), kwargs...)
+isolated_system(atoms::AbstractVector; kwargs...) = isolated_system(convert.(Atom, atoms); kwargs...)
 
 function periodic_system(atoms::AbstractVector,
-                         box::AbstractVector{<:AbstractVector},
-                         #boundary_conditions=fill(Periodic(), length(box)), kwargs...;
-                         kwargs...;
-                         fractional=false)
+                         box::AbstractVector{<:AbstractVector},#;
+                         boundary_conditions=fill(Periodic(), length(box));
+                         fractional=false, kwargs...)
     boundary_conditions=fill(Periodic(), length(box))
     lattice = hcat(box...)
     !fractional && return atomic_system(atoms, box, boundary_conditions; kwargs...)
@@ -91,5 +90,5 @@ function periodic_system(atoms::AbstractVector,
         id, pos_fractional = atom
         Atom(id, lattice * pos_fractional)
     end
-    atomic_system(parse_fractional.(atoms), box, boundary_conditions, kwargs...)
+    atomic_system(parse_fractional.(atoms), box, boundary_conditions; kwargs...)
 end
