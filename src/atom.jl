@@ -79,8 +79,10 @@ isolated_system(atoms::AbstractVector, kwargs...) = isolated_system(convert.(Ato
 
 function periodic_system(atoms::AbstractVector,
                          box::AbstractVector{<:AbstractVector},
-                         boundary_conditions=fill(Periodic(), length(box));
-                         fractional=false, kwargs...)
+                         #boundary_conditions=fill(Periodic(), length(box)), kwargs...;
+                         kwargs...;
+                         fractional=false)
+    boundary_conditions=fill(Periodic(), length(box))
     lattice = hcat(box...)
     !fractional && return atomic_system(atoms, box, boundary_conditions; kwargs...)
 
