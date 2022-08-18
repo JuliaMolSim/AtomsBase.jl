@@ -35,8 +35,10 @@ function FlexibleSystem(system::AbstractSystem;
                         boundary_conditions=boundary_conditions(system),
                         kwargs...)
     particles = something(particles, atoms, collect(system))
-    FlexibleSystem(particles, box, boundary_conditions, kwargs...)
+    extra = system isa FlexibleSystem ? system.data : (; )
+    FlexibleSystem(particles, box, boundary_conditions; extra..., kwargs...)
 end
+FlexibleSystem(;system::FlexibleSystem, kwargs...) = FlexibleSystem(system; kwargs...)
 
 function Base.show(io::IO, system::FlexibleSystem)
     print(io, "FlexibleSystem")
