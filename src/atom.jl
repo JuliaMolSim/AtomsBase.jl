@@ -34,7 +34,7 @@ end
 
 function Atom(identifier::AtomId,
               position::AbstractVector{L},
-              velocity::AbstractVector{V}=zeros(3)u"bohr/s";
+              velocity::AbstractVector{V}=zeros(length(position))u"bohr/s";
               atomic_symbol=Symbol(elements[identifier].symbol),
               atomic_number=elements[identifier].number,
               atomic_mass::M=elements[identifier].atomic_mass,
