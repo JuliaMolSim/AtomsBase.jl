@@ -25,7 +25,7 @@ function FlexibleSystem(
         throw(ArgumentError("Box must have D vectors of length D"))
     end
     FlexibleSystem{D, S, L}(convert.(Atom, particles), box, boundary_conditions, Dict(kwargs...))
-    #FlexibleSystem{D, S, L}(particles, box, boundary_conditions, Dict(kwargs...))
+    
 end
 
 # Update constructor
