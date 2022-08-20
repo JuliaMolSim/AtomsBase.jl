@@ -78,8 +78,7 @@ end
 isolated_system(atoms::AbstractVector; kwargs...) = isolated_system(convert.(Atom, atoms); kwargs...)
 
 function periodic_system(atoms::AbstractVector,
-                         box::AbstractVector{<:AbstractVector},#;
-                         boundary_conditions=fill(Periodic(), length(box));
+                         box::AbstractVector{<:AbstractVector};
                          fractional=false, kwargs...)
     boundary_conditions=fill(Periodic(), length(box))
     lattice = hcat(box...)
