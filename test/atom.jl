@@ -5,6 +5,9 @@ using Test
 
 @testset "atomic systems" begin
     @testset "Atom construction" begin
+        at2D = Atom(:Si, zeros(2) * u"m", extradata=41)
+        @test n_dimensions(at2D) == 2
+
         at = Atom(:Si, zeros(3) * u"m", extradata=42)
 
         @test n_dimensions(at) == 3
