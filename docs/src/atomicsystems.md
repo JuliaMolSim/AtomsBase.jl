@@ -26,7 +26,7 @@ An `Atom` object can be constructed
 just by passing an identifier (e.g. symbol like `:C`, atomic number like `6`) and a vector
 of positions as
 ```julia
-atom = Atoms(:C, [0, 1, 2.]u"bohr")
+atom = Atom(:C, [0, 1, 2.]u"bohr")
 ```
 This automatically fills the atom with standard data such as the atomic mass. Such data
 can be accessed using the `AtomsBase` interface functions
@@ -37,12 +37,12 @@ Custom properties can be easily attached to an `Atom` by supplying arbitrary
 keyword arguments upon construction. For example to attach a pseudopotential
 for using the structure with [DFTK](https://dftk.org), construct the atom as
 ```julia
-atom = Atoms(:C, [0, 1, 2.]u"bohr", pseudopotential="hgh/lda/c-q4")
+atom = Atom(:C, [0, 1, 2.]u"bohr", pseudopotential="hgh/lda/c-q4")
 ```
 which will make the pseudopotential identifier available as `atom.pseudopotential`.
 Updating an atomic property proceeds similarly. E.g.
 ```julia
-newatom = Atoms(;atom=atom, atomic_mass=13u"u")
+newatom = Atom(;atom=atom, atomic_mass=13u"u")
 ```
 makes a new carbon atom with all properties identical to `atom` (including custom ones),
 but setting the `atomic_mass` to 13 units.
@@ -82,4 +82,3 @@ hydrogen = isolated_system([:H => [0, 0, 1.]u"bohr",
                             :H => [0, 0, 3.]u"bohr"])
 
 ```
-
