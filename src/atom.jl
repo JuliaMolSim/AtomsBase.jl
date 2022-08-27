@@ -34,7 +34,7 @@ end
 
 function Atom(identifier::AtomId,
               position::AbstractVector{L},
-              velocity::AbstractVector{V}=zeros(3)u"bohr/s";
+              velocity::AbstractVector{V}=zeros(length(position))u"bohr/s";
               atomic_symbol=Symbol(elements[identifier].symbol),
               atomic_number=elements[identifier].number,
               atomic_mass::M=elements[identifier].atomic_mass,
@@ -66,27 +66,28 @@ end
 #
 # Special high-level functions to construct atomic systems
 #
-atomic_system(atoms::AbstractVector{<:Atom}, box, bcs) = FlexibleSystem(atoms, box, bcs)
-atomic_system(atoms::AbstractVector, box, bcs) = FlexibleSystem(convert.(Atom, atoms), box, bcs)
+atomic_system(atoms::AbstractVector{<:Atom}, box, bcs; kwargs...) = FlexibleSystem(atoms, box, bcs; kwargs...)
+atomic_system(atoms::AbstractVector, box, bcs; kwargs...) = FlexibleSystem(convert.(Atom, atoms), box, bcs; kwargs...)
 
-function isolated_system(atoms::AbstractVector{<:Atom})
+
+function isolated_system(atoms::AbstractVector{<:Atom}; kwargs...)
     # Use dummy box and boundary conditions
     D = n_dimensions(first(atoms))
-    atomic_system(atoms, infinite_box(D), fill(DirichletZero(), D))
+    atomic_system(atoms, infinite_box(D), fill(DirichletZero(), D); kwargs...)
 end
-isolated_system(atoms::AbstractVector) = isolated_system(convert.(Atom, atoms))
+isolated_system(atoms::AbstractVector; kwargs...) = isolated_system(convert.(Atom, atoms); kwargs...)
 
 function periodic_system(atoms::AbstractVector,
-                         box::AbstractVector{<:AbstractVector},
-                         boundary_conditions=fill(Periodic(), length(box));
+                         box::AbstractVector{<:AbstractVector};
                          fractional=false, kwargs...)
+    boundary_conditions=fill(Periodic(), length(box))
     lattice = hcat(box...)
-    !fractional && return atomic_system(atoms, box, boundary_conditions)
+    !fractional && return atomic_system(atoms, box, boundary_conditions; kwargs...)
 
     parse_fractional(atom::Atom) = atom
     function parse_fractional(atom::Pair)::Atom
         id, pos_fractional = atom
         Atom(id, lattice * pos_fractional)
     end
-    atomic_system(parse_fractional.(atoms), box, boundary_conditions)
+    atomic_system(parse_fractional.(atoms), box, boundary_conditions; kwargs...)
 end
