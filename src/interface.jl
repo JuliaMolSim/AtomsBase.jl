@@ -141,3 +141,13 @@ the `i`th species in `sys`.
 """
 atomic_number(sys::AbstractSystem)        = atomic_number.(sys)
 atomic_number(sys::AbstractSystem, index) = atomic_number(sys[index])
+
+"""
+    data(sys::AbstractSystem)
+    data(sys::AbstractSystem, i)
+
+Dictionary of arbitrary data in the system `sys` /
+the `i`th data in `sys`.
+"""
+data(sys::AbstractSystem)                 = data.(sys)
+data(sys::AbstractSystem, index)          = data(sys[index])

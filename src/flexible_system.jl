@@ -48,6 +48,7 @@ end
 bounding_box(sys::FlexibleSystem)        = sys.box
 boundary_conditions(sys::FlexibleSystem) = sys.boundary_conditions
 species_type(sys::FlexibleSystem{D, S, L}) where {D, S, L} = S
+data(sys::FlexibleSystem)                = sys.data
 
 Base.size(sys::FlexibleSystem)   = size(sys.particles)
 Base.length(sys::FlexibleSystem) = length(sys.particles)
