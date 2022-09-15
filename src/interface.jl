@@ -3,7 +3,7 @@ import Base.position
 export AbstractSystem
 export BoundaryCondition, DirichletZero, Periodic, infinite_box
 export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type
-export position, velocity, element, atomic_mass, atomic_number, atomic_symbol
+export position, velocity, element, atomic_mass, atomic_number, atomic_symbol, data
 
 #
 # Identifier for boundary conditions per dimension
