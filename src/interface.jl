@@ -148,6 +148,7 @@ atomic_number(sys::AbstractSystem, index) = atomic_number(sys[index])
 
 Dictionary of arbitrary data in the system `sys` /
 the `i`th data in `sys`.
+Returned value of the function may be missing.
 """
 data(sys::AbstractSystem)                 = data.(sys)
 data(sys::AbstractSystem, index)          = data(sys[index])
