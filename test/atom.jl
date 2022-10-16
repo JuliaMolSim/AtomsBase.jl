@@ -20,6 +20,7 @@ using Test
         @test hasproperty(at, :atomic_number)
         @test hasproperty(at, :extradata)
         @test at.extradata == 42
+        @test data(at) == Dict{Symbol, Any}(:extradata => 42)
 
         @test propertynames(at) == (:position, :velocity, :atomic_symbol,
                                     :atomic_number, :atomic_mass, :extradata)
@@ -39,18 +40,20 @@ using Test
     @testset "flexible atomic systems" begin
         box = [[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"Å"
         bcs = [Periodic(), DirichletZero(), DirichletZero()]
-        dic = Dict{String, Any}("extradata_dic"=>"44")
+        dic = Dict{Symbol, Any}(:extradata1=>"44")
         atoms = [:Si => [0.0, 1.0, 1.5]u"Å",
                  :C  => [0.0, 0.8, 1.7]u"Å",
-                 Atom(:H, zeros(3) * u"Å", ones(3) * u"bohr/s")]
-        system = atomic_system(atoms, box, bcs, extradata=45; dic)
+                 Atom(:H, zeros(3) * u"Å", ones(3) * u"bohr/s", extradata=50)]
+        system = atomic_system(atoms, box, bcs, extradata2=45; dic...)
         @test length(system) == 3
         @test atomic_symbol(system) == [:Si, :C, :H]
         @test boundary_conditions(system) == [Periodic(), DirichletZero(), DirichletZero()]
         @test position(system) == [[0.0, 1.0, 1.5], [0.0, 0.8, 1.7], [0.0, 0.0, 0.0]]u"Å"
         @test velocity(system) == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]u"bohr/s"
-        @test system.extradata == 45
-        @test system.dic["extradata_dic"] == "44"
+        @test system.extradata2 == 45
+        @test system.extradata1 == "44"
+        @test data(system) == Dict{Symbol, Any}(:extradata1 => "44", :extradata2 => 45)
+        @test data(system, 3) == Dict{Symbol, Any}(:extradata => 50)
 
         # Test update constructor
         newatoms  = [system[1], system[2]]

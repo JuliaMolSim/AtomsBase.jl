@@ -15,6 +15,7 @@ using PeriodicTable
     @test atomic_mass(system) == [12.011, 12.011]u"u"
     @test boundary_conditions(system) == bcs
     @test bounding_box(system) == box
+    @test ismissing(data(system))
 
 
     # Test AtomView
