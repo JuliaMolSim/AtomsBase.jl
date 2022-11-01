@@ -53,17 +53,17 @@ Base.size(sys::FastSystem)           = size(sys.positions)
 
 species_type(sys::FS) where {FS <: FastSystem} = AtomView{FS}
 Base.getindex(sys::FastSystem, index::Int)     = AtomView(sys, index)
+Base.getindex(sys::FastSystem, x::Symbol)      = getfield(sys, x)
+Base.getindex(sys::FastSystem, x::Symbol, i::Int) = getindex(sys, x)[i]
 
 position(s::FastSystem)       = s.positions
 atomic_symbol(s::FastSystem)  = s.atomic_symbols
 atomic_number(s::FastSystem)  = s.atomic_numbers
 atomic_mass(s::FastSystem)    = s.atomic_masses
 velocity(s::FastSystem)       = missing
-data(s::FastSystem)           = missing
 
 position(s::FastSystem, i)      = s.positions[i]
 atomic_symbol(s::FastSystem, i) = s.atomic_symbols[i]
 atomic_number(s::FastSystem, i) = s.atomic_numbers[i]
 atomic_mass(s::FastSystem, i)   = s.atomic_masses[i]
 velocity(s::FastSystem, i)      = missing
-data(s::FastSystem, i)          = missing

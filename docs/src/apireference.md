@@ -27,5 +27,4 @@ periodicity
 species_type
 velocity
 position
-data
 ```

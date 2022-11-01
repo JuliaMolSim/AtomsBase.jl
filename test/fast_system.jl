@@ -15,7 +15,9 @@ using PeriodicTable
     @test atomic_mass(system) == [12.011, 12.011]u"u"
     @test boundary_conditions(system) == bcs
     @test bounding_box(system) == box
-    @test ismissing(data(system))
+
+    @test system[:boundary_conditions] == [Periodic(), Periodic(), DirichletZero()]
+    @test system[:positions, 2] == [0.75, 0.75, 0.75]*u"m"
 
 
     # Test AtomView

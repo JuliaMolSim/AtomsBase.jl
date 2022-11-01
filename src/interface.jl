@@ -3,7 +3,7 @@ import Base.position
 export AbstractSystem
 export BoundaryCondition, DirichletZero, Periodic, infinite_box
 export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type
-export position, velocity, element, atomic_mass, atomic_number, atomic_symbol, data
+export position, velocity, element, atomic_mass, atomic_number, atomic_symbol
 
 #
 # Identifier for boundary conditions per dimension
@@ -141,13 +141,3 @@ the `i`th species in `sys`.
 """
 atomic_number(sys::AbstractSystem)        = atomic_number.(sys)
 atomic_number(sys::AbstractSystem, index) = atomic_number(sys[index])
-
-"""
-    data(sys::AbstractSystem)
-    data(sys::AbstractSystem, i)
-
-Dictionary of arbitrary data in the system `sys` /
-the `i`th data in `sys`.
-"""
-data(sys::AbstractSystem)                 = data.(sys)
-data(sys::AbstractSystem, index)          = data(sys[index])

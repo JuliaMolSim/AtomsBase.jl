@@ -21,10 +21,10 @@ atomic_symbol(atom::Atom) = atom.atomic_symbol
 atomic_number(atom::Atom) = atom.atomic_number
 element(atom::Atom)       = elements[atomic_symbol(atom)]
 n_dimensions(atom::Atom{D}) where {D} = D
-data(atom::Atom)          = atom.data
 
 Base.hasproperty(at::Atom, x::Symbol) = hasfield(Atom, x) || haskey(at.data, x)
 Base.getproperty(at::Atom, x::Symbol) = hasfield(Atom, x) ? getfield(at, x) : getindex(at.data, x)
+Base.getindex(at::Atom, x::Symbol) = getproperty(at, x)
 function Base.propertynames(at::Atom, private::Bool=false)
     if private
         (fieldnames(Atom)..., keys(at.data)...)

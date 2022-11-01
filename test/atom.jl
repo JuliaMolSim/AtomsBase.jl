@@ -20,10 +20,10 @@ using Test
         @test hasproperty(at, :atomic_number)
         @test hasproperty(at, :extradata)
         @test at.extradata == 42
-        @test data(at) == Dict{Symbol, Any}(:extradata => 42)
 
         @test propertynames(at) == (:position, :velocity, :atomic_symbol,
                                     :atomic_number, :atomic_mass, :extradata)
+        @test at[:position] == [0.0, 0.0, 0.0]*u"m"
 
         # Test update constructor
         newatom = Atom(at; extradata=43, atomic_number=15)
@@ -52,8 +52,11 @@ using Test
         @test velocity(system) == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]u"bohr/s"
         @test system.extradata2 == 45
         @test system.extradata1 == "44"
-        @test data(system) == Dict{Symbol, Any}(:extradata1 => "44", :extradata2 => 45)
-        @test data(system, 3) == Dict{Symbol, Any}(:extradata => 50)
+        @test propertynames(system) == (:particles, :box, :boundary_conditions, 
+                                        :extradata1, :extradata2)
+        @test system[:boundary_conditions] == [Periodic(), DirichletZero(), DirichletZero()]
+        @test system[:extradata1] == "44"
+        @test all(system[:extradata, 3] == 50 && system[3][:extradata] == 50)
 
         # Test update constructor
         newatoms  = [system[1], system[2]]
@@ -76,7 +79,7 @@ using Test
         @test position(system) == [[0.0, 1.0, 1.5], [0.0, 0.8, 1.7], [0.0, 0.0, 0.0]]u"Å"
         @test velocity(system) == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]u"bohr/s"
         @test bounding_box(system) == infinite_box(3)
-        @test system.extradata == 46
+        @test system[:extradata] == 46
         @test system.dic["extradata_dic"] == "47"
     end
 
@@ -92,7 +95,7 @@ using Test
         @test atomic_symbol(system) == [:Si, :C, :H]
         @test boundary_conditions(system) == [Periodic(), Periodic(), Periodic()]
         @test position(system) == [[0.0, -0.625, 0.0], [1.25, 0.0, 0.0], [0.0, 0.0, 0.0]]u"Å"
-        @test system.extradata == 48
+        @test system[:extradata] == 48
         @test system.dic["extradata_dic"] == "49"
     end
 

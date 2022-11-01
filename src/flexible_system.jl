@@ -13,6 +13,17 @@ end
 
 Base.hasproperty(system::FlexibleSystem, x::Symbol) = hasfield(FlexibleSystem, x) || haskey(system.data, x)
 Base.getproperty(system::FlexibleSystem, x::Symbol) = hasfield(FlexibleSystem, x) ? getfield(system, x) : getindex(system.data, x)
+Base.getindex(sys::FlexibleSystem, i::Integer) = getindex(sys.particles, i)
+Base.getindex(sys::FlexibleSystem, x::Symbol, i::Integer) = getindex(sys.particles[i], x)
+Base.getindex(sys::FlexibleSystem, x::Symbol) = getproperty(sys, x)
+function Base.propertynames(sys::FlexibleSystem, private::Bool=false)
+    if private
+        (fieldnames(FlexibleSystem)..., keys(sys.data)...)
+    else
+        (filter(!isequal(:data), fieldnames(FlexibleSystem))..., keys(sys.data)...)
+    end
+end
+Base.propertynames(sys::FlexibleSystem, i::Integer) = propertynames(sys[i])
 
 function FlexibleSystem(
     particles::AbstractVector{S},
@@ -48,8 +59,6 @@ end
 bounding_box(sys::FlexibleSystem)        = sys.box
 boundary_conditions(sys::FlexibleSystem) = sys.boundary_conditions
 species_type(sys::FlexibleSystem{D, S, L}) where {D, S, L} = S
-data(sys::FlexibleSystem)                = sys.data
 
 Base.size(sys::FlexibleSystem)   = size(sys.particles)
 Base.length(sys::FlexibleSystem) = length(sys.particles)
-Base.getindex(sys::FlexibleSystem, i::Integer) = getindex(sys.particles, i)
