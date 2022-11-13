@@ -11,19 +11,19 @@ struct FlexibleSystem{D, S, L<:Unitful.Length} <: AbstractSystem{D}
     data::Dict{Symbol, Any}  # Store arbitrary data about the atom.
 end
 
-Base.hasproperty(system::FlexibleSystem, x::Symbol) = hasfield(FlexibleSystem, x) || haskey(system.data, x)
-Base.getproperty(system::FlexibleSystem, x::Symbol) = hasfield(FlexibleSystem, x) ? getfield(system, x) : getindex(system.data, x)
+Base.haskey(system::FlexibleSystem, x::Symbol) = hasfield(FlexibleSystem, x) || haskey(system.data, x)
+Base.getkey(system::FlexibleSystem, x::Symbol) = hasfield(FlexibleSystem, x) ? getfield(system, x) : getindex(system.data, x)
 Base.getindex(sys::FlexibleSystem, i::Integer) = getindex(sys.particles, i)
-Base.getindex(sys::FlexibleSystem, x::Symbol, i::Integer) = getindex(sys.particles[i], x)
-Base.getindex(sys::FlexibleSystem, x::Symbol) = getproperty(sys, x)
-function Base.propertynames(sys::FlexibleSystem, private::Bool=false)
+Base.getindex(sys::FlexibleSystem, i::Integer, x::Symbol) = getindex(sys.particles[i], x)
+Base.getindex(sys::FlexibleSystem, x::Symbol) = getkey(sys, x)
+function Base.keys(sys::FlexibleSystem, private::Bool=false)
     if private
         (fieldnames(FlexibleSystem)..., keys(sys.data)...)
     else
         (filter(!isequal(:data), fieldnames(FlexibleSystem))..., keys(sys.data)...)
     end
 end
-Base.propertynames(sys::FlexibleSystem, i::Integer) = propertynames(sys[i])
+Base.keys(sys::FlexibleSystem, i::Integer) = keys(sys[i])
 
 function FlexibleSystem(
     particles::AbstractVector{S},

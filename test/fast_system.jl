@@ -16,6 +16,9 @@ using PeriodicTable
     @test boundary_conditions(system) == bcs
     @test bounding_box(system) == box
 
+    @test keys(system) == (:box, :boundary_conditions, :positions, :atomic_symbols, :atomic_numbers, :atomic_masses)
+    @test haskey(system, :box)
+    @test getkey(system, :atomic_masses) == [12.011, 12.011]u"u"
     @test system[:boundary_conditions] == [Periodic(), Periodic(), DirichletZero()]
     @test system[:positions, 2] == [0.75, 0.75, 0.75]*u"m"
 

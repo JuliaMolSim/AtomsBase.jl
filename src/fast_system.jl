@@ -12,6 +12,13 @@ struct FastSystem{D, L <: Unitful.Length, M <: Unitful.Mass} <: AbstractSystem{D
     atomic_masses::Vector{M}
 end
 
+Base.keys(system::FastSystem) = propertynames(system)
+Base.haskey(system::FastSystem, x::Symbol) = hasfield(FastSystem, x)
+Base.getkey(system::FastSystem, x::Symbol) = getfield(system, x)
+Base.getindex(sys::FastSystem, x::Symbol)  = getkey(sys, x)
+Base.getindex(sys::FastSystem, x::Symbol, i::Int) = getindex(sys, x)[i]
+
+
 # Constructor to fetch the types
 function FastSystem(box, boundary_conditions, positions, atomic_symbols, atomic_numbers, atomic_masses)
     FastSystem{length(box),eltype(eltype(positions)),eltype(atomic_masses)}(
@@ -53,8 +60,6 @@ Base.size(sys::FastSystem)           = size(sys.positions)
 
 species_type(sys::FS) where {FS <: FastSystem} = AtomView{FS}
 Base.getindex(sys::FastSystem, index::Int)     = AtomView(sys, index)
-Base.getindex(sys::FastSystem, x::Symbol)      = getfield(sys, x)
-Base.getindex(sys::FastSystem, x::Symbol, i::Int) = getindex(sys, x)[i]
 
 position(s::FastSystem)       = s.positions
 atomic_symbol(s::FastSystem)  = s.atomic_symbols

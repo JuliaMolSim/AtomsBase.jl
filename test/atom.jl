@@ -15,26 +15,26 @@ using Test
         @test velocity(at) == zeros(3) * u"bohr/s"
         @test at.atomic_symbol == :Si
         @test at.atomic_number == 14
-        @test hasproperty(at, :atomic_mass)
-        @test hasproperty(at, :atomic_symbol)
-        @test hasproperty(at, :atomic_number)
-        @test hasproperty(at, :extradata)
-        @test at.extradata == 42
+        @test haskey(at, :atomic_mass)
+        @test haskey(at, :atomic_symbol)
+        @test haskey(at, :atomic_number)
+        @test haskey(at, :extradata)
+        @test at[:extradata] == 42
 
-        @test propertynames(at) == (:position, :velocity, :atomic_symbol,
+        @test keys(at) == (:position, :velocity, :atomic_symbol,
                                     :atomic_number, :atomic_mass, :extradata)
         @test at[:position] == [0.0, 0.0, 0.0]*u"m"
 
         # Test update constructor
         newatom = Atom(at; extradata=43, atomic_number=15)
-        @test propertynames(at) == propertynames(newatom)
-        @test newatom.extradata == 43
-        @test newatom.atomic_number == 15
+        @test keys(at) == keys(newatom)
+        @test newatom[:extradata] == 43
+        @test newatom[:atomic_number] == 15
 
         newatom = Atom(; atom=at, extradata=43, atomic_number=15)
-        @test propertynames(at) == propertynames(newatom)
-        @test newatom.extradata == 43
-        @test newatom.atomic_number == 15
+        @test keys(at) == keys(newatom)
+        @test newatom[:extradata] == 43
+        @test newatom[:atomic_number] == 15
     end
 
     @testset "flexible atomic systems" begin
@@ -50,13 +50,13 @@ using Test
         @test boundary_conditions(system) == [Periodic(), DirichletZero(), DirichletZero()]
         @test position(system) == [[0.0, 1.0, 1.5], [0.0, 0.8, 1.7], [0.0, 0.0, 0.0]]u"Å"
         @test velocity(system) == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]u"bohr/s"
-        @test system.extradata2 == 45
-        @test system.extradata1 == "44"
-        @test propertynames(system) == (:particles, :box, :boundary_conditions, 
+        @test system[:extradata2] == 45
+        @test system[:extradata1] == "44"
+        @test keys(system) == (:particles, :box, :boundary_conditions, 
                                         :extradata1, :extradata2)
         @test system[:boundary_conditions] == [Periodic(), DirichletZero(), DirichletZero()]
         @test system[:extradata1] == "44"
-        @test all(system[:extradata, 3] == 50 && system[3][:extradata] == 50)
+        @test all(system[3, :extradata] == 50 && system[3][:extradata] == 50)
 
         # Test update constructor
         newatoms  = [system[1], system[2]]
@@ -80,7 +80,7 @@ using Test
         @test velocity(system) == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]u"bohr/s"
         @test bounding_box(system) == infinite_box(3)
         @test system[:extradata] == 46
-        @test system.dic["extradata_dic"] == "47"
+        @test system[:dic]["extradata_dic"] == "47"
     end
 
     @testset "periodic_system" begin
@@ -96,7 +96,7 @@ using Test
         @test boundary_conditions(system) == [Periodic(), Periodic(), Periodic()]
         @test position(system) == [[0.0, -0.625, 0.0], [1.25, 0.0, 0.0], [0.0, 0.0, 0.0]]u"Å"
         @test system[:extradata] == 48
-        @test system.dic["extradata_dic"] == "49"
+        @test system[:dic]["extradata_dic"] == "49"
     end
 
 
