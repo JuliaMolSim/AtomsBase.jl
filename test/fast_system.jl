@@ -15,7 +15,8 @@ using PeriodicTable
     @test atomic_mass(system) == [12.011, 12.011]u"u"
     @test boundary_conditions(system) == bcs
     @test bounding_box(system) == box
-
+    @test !isinfinite(system)
+    @test element(system[1]) == element(:C)
 
     # Test AtomView
     for method in (position, atomic_mass, atomic_symbol, atomic_number)
@@ -24,5 +25,4 @@ using PeriodicTable
     end
     @test ismissing(velocity(system[1]))
     @test n_dimensions(system[1]) == n_dimensions(system)
-    @test element(system[1])      == elements[:C]
 end

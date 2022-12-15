@@ -40,11 +40,6 @@ function FlexibleSystem(system::AbstractSystem;
 end
 FlexibleSystem(;system::FlexibleSystem, kwargs...) = FlexibleSystem(system; kwargs...)
 
-function Base.show(io::IO, system::FlexibleSystem)
-    print(io, "FlexibleSystem")
-    show_system(io, system)
-end
-
 bounding_box(sys::FlexibleSystem)        = sys.box
 boundary_conditions(sys::FlexibleSystem) = sys.boundary_conditions
 species_type(sys::FlexibleSystem{D, S, L}) where {D, S, L} = S

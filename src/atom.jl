@@ -19,8 +19,8 @@ position(atom::Atom)      = atom.position
 atomic_mass(atom::Atom)   = atom.atomic_mass
 atomic_symbol(atom::Atom) = atom.atomic_symbol
 atomic_number(atom::Atom) = atom.atomic_number
-element(atom::Atom)       = elements[atomic_symbol(atom)]
-n_dimensions(atom::Atom{D}) where {D} = D
+element(atom::Atom)       = element(atomic_number(atom))
+n_dimensions(::Atom{D}) where {D} = D
 
 Base.hasproperty(at::Atom, x::Symbol) = hasfield(Atom, x) || haskey(at.data, x)
 Base.getproperty(at::Atom, x::Symbol) = hasfield(Atom, x) ? getfield(at, x) : getindex(at.data, x)
@@ -35,9 +35,9 @@ end
 function Atom(identifier::AtomId,
               position::AbstractVector{L},
               velocity::AbstractVector{V}=zeros(length(position))u"bohr/s";
-              atomic_symbol=Symbol(elements[identifier].symbol),
-              atomic_number=elements[identifier].number,
-              atomic_mass::M=elements[identifier].atomic_mass,
+              atomic_symbol=Symbol(element(identifier).symbol),
+              atomic_number=element(identifier).number,
+              atomic_mass::M=element(identifier).atomic_mass,
               kwargs...) where {L <: Unitful.Length, V <: Unitful.Velocity, M <: Unitful.Mass}
     Atom{length(position), L, V, M}(position, velocity, atomic_symbol,
                                     atomic_number, atomic_mass, Dict(kwargs...))
@@ -61,10 +61,9 @@ function Base.convert(::Type{Atom}, id_pos::Pair{<:AtomId,<:AbstractVector{<:Uni
     Atom(id_pos...)
 end
 
-function Base.show(io::IO, at::Atom{D, L}) where {D, L}
-    pos  = ustrip.(at.position)
-    print(io, "Atom($(at.atomic_symbol), [", join(pos, ", "), "]u\"$(unit(L))\")")
-end
+Base.show(io::IO, at::Atom) = show_atom(io, at)
+Base.show(io::IO, mime::MIME"text/plain", at::Atom) = show_atom(io, mime, at)
+
 
 #
 # Special high-level functions to construct atomic systems

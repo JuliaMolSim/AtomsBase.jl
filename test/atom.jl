@@ -13,6 +13,7 @@ using Test
         @test n_dimensions(at) == 3
         @test position(at) == zeros(3) * u"m"
         @test velocity(at) == zeros(3) * u"bohr/s"
+        @test element(at)  == element(:Si)
         @test at.atomic_symbol == :Si
         @test at.atomic_number == 14
         @test hasproperty(at, :atomic_mass)
