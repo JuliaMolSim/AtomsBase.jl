@@ -22,6 +22,7 @@ chemical_formula
 boundary_conditions
 bounding_box
 element
+isinfinite
 n_dimensions
 periodicity
 species_type
