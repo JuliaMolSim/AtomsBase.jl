@@ -59,7 +59,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
     end
 
     # TODO Better would be some ascii-graphical representation of the structure
-    if length(system) < 20
+    if length(system) < 10
         extra_line && println(io)
         for atom in system
             println(io, "    ", atom)

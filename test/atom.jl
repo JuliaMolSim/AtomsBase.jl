@@ -55,8 +55,9 @@ using Test
 
         # Test update constructor
         newatoms  = [system[1], system[2]]
-        newsystem = FlexibleSystem(system; atoms=newatoms,
+        newsystem = AbstractSystem(system; atoms=newatoms,
                                    boundary_conditions=[Periodic(), Periodic(), Periodic()])
+        @test newsystem isa FlexibleSystem
         @test length(newsystem) == 2
         @test atomic_symbol(newsystem) == [:Si, :C]
         @test boundary_conditions(newsystem) == [Periodic(), Periodic(), Periodic()]
