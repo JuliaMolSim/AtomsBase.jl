@@ -47,6 +47,7 @@ function FlexibleSystem(system::AbstractSystem;
     extra = system isa FlexibleSystem ? system.data : (; )
     FlexibleSystem(particles, bounding_box, boundary_conditions; extra..., kwargs...)
 end
+Base.convert(::Type{FlexibleSystem}, system::AbstractSystem) = FlexibleSystem(system)
 
 """
     AbstractSystem(system::AbstractSystem; kwargs...)
