@@ -109,4 +109,12 @@ using Test
                                      Atom(:H, zeros(3) * u"Å")])
         @test length(system) == 3
     end
+
+    @testset "Nothing or zero velocity" begin
+        at = Atom(:Si, ones(3) * u"Å"; extradata=42)
+        @test velocity(at) == zeros(3)u"Å/s"
+
+        at = Atom(:Si, ones(3) * u"Å", missing; extradata=42)
+        @test velocity(at) == zeros(3)u"Å/s"
+    end
 end
