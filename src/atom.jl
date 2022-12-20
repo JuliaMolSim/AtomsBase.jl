@@ -42,6 +42,9 @@ function Atom(identifier::AtomId,
     Atom{length(position), L, V, M}(position, velocity, atomic_symbol,
                                     atomic_number, atomic_mass, Dict(kwargs...))
 end
+function Atom(id::AtomId, position::AbstractVector, velocity::Missing; kwargs...)
+    Atom(id, position; kwargs...)
+end
 
 # Update constructor: Amend any atom by extra data.
 function Atom(;atom, kwargs...)
