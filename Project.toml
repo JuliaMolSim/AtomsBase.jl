@@ -1,7 +1,7 @@
 name = "AtomsBase"
 uuid = "a963bdd2-2df7-4f54-a1ee-49d51e6be12a"
 authors = ["JuliaMolSim community"]
-version = "0.2.3"
+version = "0.2.4"
 
 [deps]
 PeriodicTable = "7b2266bf-644c-5ea3-82d8-af4bbd25a884"
