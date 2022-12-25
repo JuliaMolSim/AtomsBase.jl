@@ -75,7 +75,8 @@ end
 function show_atom(io::IO, at)
     pos = [(@sprintf "%8.6g" ustrip(p)) for p in position(at)]
     posunit = unit(eltype(position(at)))
-    print(io, "Atom($(atomic_symbol(at)), [", join(pos, ", "), "]u\"$posunit\"")
+    print(io, "Atom(", (@sprintf "%-3s" (string(atomic_symbol(at))) * ","), " [",
+          join(pos, ", "), "]u\"$posunit\"")
     if ismissing(velocity(at)) || iszero(velocity(at))
         print(io, ")")
     else
