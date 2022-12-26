@@ -80,6 +80,20 @@ using Unitful, UnitfulAtomic, AtomsBase  # hide
 deuterium = Atom(1, atomic_symbol=:D, [0, 1, 2.]u"bohr")
 ````
 
+An equivalent dict-like interface based on `keys`, `haskey`, `getkey` and `pairs`
+is also available. For example
+````@example atom
+keys(atom)
+````
+````@example atom
+atom[:atomic_symbol]
+````
+````@example atom
+pairs(atom)
+````
+This interface seamlessly generalises to working with user-specific atomic properties
+as will be discussed next.
+
 ### Optional atomic properties
 Custom properties can be easily attached to an `Atom` by supplying arbitrary
 keyword arguments upon construction. For example to attach a pseudopotential
@@ -88,11 +102,20 @@ for using the structure with [DFTK](https://dftk.org), construct the atom as
 using Unitful, UnitfulAtomic, AtomsBase  # hide
 atom = Atom(:C, [0, 1, 2.]u"bohr", pseudopotential="hgh/lda/c-q4")
 ````
-which will make the pseudopotential identifier available as `atom.pseudopotential`.
+which will make the pseudopotential identifier available as
+````@example atomprop
+atom[:pseudopotential]
+````
+Notice that such custom properties are fully integrated with the standard atomic properties,
+e.g. automatically available from the `keys`, `haskey` and `pairs` functions, e.g.:
+````@example atomprop
+@show haskey(atom, :pseudopotential)
+pairs(atom)
+````
 Updating an atomic property proceeds similarly. E.g.
 ````@example atomprop
 using Unitful, UnitfulAtomic, AtomsBase  # hide
-newatom = Atom(;atom=atom, atomic_mass=13u"u")
+newatom = Atom(atom; atomic_mass=13u"u")
 ````
 makes a new carbon atom with all properties identical to `atom` (including custom ones),
 but setting the `atomic_mass` to 13 units.
@@ -112,6 +135,12 @@ Property name       | Unit / Type        | Description
 `:magnetic_moments` | `Union{Float64,Vector{Float64}}` | Initial magnetic moment
 `:pseudopotential`  | `String`           | Pseudopotential or PAW keyword or `""` if Coulomb potential employed
 
+A convenient way to iterate over all data stored in an atom offers the `pairs` function:
+````@example atomprop
+for (k, v) in pairs(atom)
+    println("$k  =  $v")
+end
+````
 
 ## System interface and conventions
 Once the atoms are constructed these can be assembled into a system.
@@ -119,24 +148,55 @@ For example to place a hydrogen molecule into a cubic box of `10Å` and periodic
 boundary conditions, use:
 ````@example system
 using Unitful, UnitfulAtomic, AtomsBase  # hide
-bounding_box = [[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]u"Å"
+box = [[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]u"Å"
 boundary_conditions = [Periodic(), Periodic(), Periodic()]
 hydrogen = FlexibleSystem([Atom(:H, [0, 0, 1.]u"bohr"),
                            Atom(:H, [0, 0, 3.]u"bohr")],
-                           bounding_box, boundary_conditions)
+                           box, boundary_conditions)
 ````
 An update constructor for systems is supported as well (see [`AbstractSystem`](@ref)). For example
 ````@example system
 AbstractSystem(hydrogen; bounding_box=[[5.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 5.0]]u"Å")
 ````
-Note that `FlexibleSystem( ... )` would have worked as well in this example (since we are
+To update the atomic composition of the system, this function supports an `atoms` (or `particles`)
+keyword argument to supply the new set of atoms to be contained in the system.
+
+Note that in this example `FlexibleSystem( ... )` would have worked as well (since we are
 updating a `FlexibleSystem`). However, using the `AbstractSystem` constructor to update the system
 is more general as it allows for type-specific dispatching when updating other data structures
 implementing the `AbstractSystem` interface.
 
-Oftentimes more convenient are the functions
-[`atomic_system`](@ref), [`isolated_system`](@ref), [`periodic_system`](@ref),
-which cover some standard atomic system setups.
+Similar to the atoms, system objects similarly support a functional-style access to system properties
+as well as a dict-style access:
+````@example system
+bounding_box(hydrogen)
+````
+````@example system
+hydrogen[:boundary_conditions]
+````
+````@example system
+pairs(hydrogen)
+````
+Moreover atomic properties of a specific atom or all atoms can be directly queried using
+the indexing notation:
+````@example system
+hydrogen[1, :position]  # Position of first atom
+````
+````@example system
+hydrogen[:, :position]  # All atomic symbols
+````
+Finally, supported keys of atomic properties can be directly queried at the system level
+using [`atomkeys`](@ref) and [`hasatomkey`](@ref). Note that these functions only apply to atomic
+properties which are supported by *all* atoms of a system. In other words if a custom atomic property is only
+set in a few of the contained atoms, these functions will not consider it.
+````@example system
+atomkeys(hydrogen)
+````
+
+For constructing atomic systems the functions
+[`atomic_system`](@ref), [`isolated_system`](@ref), [`periodic_system`](@ref)
+are oftentimes more convenient as they provide specialisations
+for some standard atomic system setups.
 For example to setup a hydrogen system with periodic BCs, we can issue
 ````@example
 using Unitful, UnitfulAtomic, AtomsBase  # hide
@@ -165,11 +225,16 @@ hydrogen = isolated_system([:H => [0, 0, 1.]u"bohr",
 
 ### Optional system properties
 Similar to atoms, systems also support storing arbitrary data, for example
-```@example
+````@example sysprop
 using Unitful, UnitfulAtomic, AtomsBase  # hide
-hydrogen = isolated_system([:H => [0, 0, 1.]u"bohr", :H => [0, 0, 3.]u"bohr"]; extra_data=42)
-```
-Again to simplify interoperability some optional properties are reserved, namely:
+system = isolated_system([:H => [0, 0, 1.]u"bohr", :H => [0, 0, 3.]u"bohr"]; extra_data=42)
+````
+Again these custom properties are fully integrated with `keys`, `haskey`, `pairs` and `getkey`.
+````@example sysprop
+@show keys(system)
+````
+Some property names are reserved and should be considered by all libraries
+supporting `AtomsBase` if possible:
 
 Property name   | Unit / Type        | Description
 :-------------- | :----------------- | :---------------------
