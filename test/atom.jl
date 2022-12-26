@@ -37,6 +37,9 @@ using Test
         @test keys(at) == keys(newatom)
         @test newatom[:extradata] == 43
         @test newatom[:atomic_number] == 15
+
+        newatom = Atom(:Si, ones(3)u"m", missing)
+        @test iszero(newatom[:velocity])
     end
 
     @testset "flexible atomic systems" begin
