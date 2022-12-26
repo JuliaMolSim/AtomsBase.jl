@@ -5,6 +5,7 @@ export AbstractSystem
 export BoundaryCondition, DirichletZero, Periodic, infinite_box, isinfinite
 export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type
 export position, velocity, element, atomic_mass, atomic_number, atomic_symbol
+export atomkeys, hasatomkey
 
 #
 # Identifier for boundary conditions per dimension
@@ -73,6 +74,7 @@ Base.lastindex(s::AbstractSystem) = length(s)
 # default to 1D indexing
 Base.iterate(sys::AbstractSystem, state = firstindex(sys)) =
     (firstindex(sys) <= state <= length(sys)) ? (@inbounds sys[state], state + 1) : nothing
+Base.eltype(sys::AbstractSystem) = species_type(sys)
 
 # TODO Support similar, push, ...
 
@@ -157,3 +159,26 @@ this may be `:D` while `atomic_number` is still `1`.
 """
 atomic_number(sys::AbstractSystem)        = atomic_number.(sys)
 atomic_number(sys::AbstractSystem, index) = atomic_number(sys[index])
+
+"""
+    atomkeys(sys::AbstractSystem)
+
+Return the atomic properties, which are available in all atoms of the system.
+"""
+function atomkeys(system::AbstractSystem)
+    atkeys = length(system) == 0 ? () : keys(system[1])
+    filter(k -> hasatomkey(system, k), atkeys)
+end
+
+"""
+    hasatomkey(system::AbstractSystem, x::Symbol)
+
+Returns true whether the passed property available in all atoms of the passed system.
+"""
+hasatomkey(system::AbstractSystem, x::Symbol) = all(at -> haskey(at, x), system)
+
+# Defaults for system
+Base.pairs(system::AbstractSystem) = (k => system[k] for k in keys(system))
+function Base.getkey(system::AbstractSystem, x::Symbol, default)
+    haskey(system, x) ? getindex(system, x) : default
+end

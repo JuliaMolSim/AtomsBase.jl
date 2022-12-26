@@ -15,8 +15,29 @@ using PeriodicTable
     @test atomic_mass(system) == [12.011, 12.011]u"u"
     @test boundary_conditions(system) == bcs
     @test bounding_box(system) == box
+    @test system[:boundary_conditions] == bcs
+    @test system[:bounding_box] == box
     @test !isinfinite(system)
     @test element(system[1]) == element(:C)
+    @test keys(system) == (:bounding_box, :boundary_conditions)
+    @test atomkeys(system) == (:position, :atomic_symbol, :atomic_number, :atomic_mass)
+    @test keys(system[1])  == (:position, :atomic_symbol, :atomic_number, :atomic_mass)
+    @test hasatomkey(system, :atomic_symbol)
+    @test system[1, :atomic_number] == 6
+    @test system[:, :atomic_symbol] == [:C, :C]
+    @test system[2][:position] == system[2, :position]
+    @test system[2][:position] == [0.75, 0.75, 0.75]u"m"
+    @test haskey(system[1], :position)
+    @test !haskey(system[1], :abc)
+    @test getkey(system[1], :dagger, 3) == 3
+
+    @test collect(pairs(system)) == [(:bounding_box => box), (:boundary_conditions => bcs)]
+    @test collect(pairs(system[1])) == [
+        :position => position(atoms[1]),
+        :atomic_symbol => :C,
+        :atomic_number => 6,
+        :atomic_mass => atomic_mass(atoms[1]),
+    ]
 
     # Test AtomView
     for method in (position, atomic_mass, atomic_symbol, atomic_number)

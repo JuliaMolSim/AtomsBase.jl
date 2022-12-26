@@ -16,3 +16,11 @@ element(atom::AtomView)    = element(atomic_number(atom))
 
 Base.show(io::IO, at::AtomView) = show_atom(io, at)
 Base.show(io::IO, mime::MIME"text/plain", at::AtomView) = show_atom(io, mime, at)
+
+Base.getindex(v::AtomView, x::Symbol) = getindex(v.system, v.index, x)
+Base.haskey(v::AtomView, x::Symbol)   = hasatomkey(v.system, x)
+function Base.getkey(v::AtomView, x::Symbol, default)
+    hasatomkey(v.system, x) ? v[x] : default
+end
+Base.keys(v::AtomView) = atomkeys(v.system)
+Base.pairs(at::AtomView) = (k => at[k] for k in keys(at))

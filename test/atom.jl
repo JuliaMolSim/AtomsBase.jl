@@ -1,7 +1,7 @@
 using AtomsBase
 using Unitful
+using UnitfulAtomic
 using Test
-
 
 @testset "atomic systems" begin
     @testset "Atom construction" begin
@@ -14,27 +14,29 @@ using Test
         @test position(at) == zeros(3) * u"m"
         @test velocity(at) == zeros(3) * u"bohr/s"
         @test element(at)  == element(:Si)
-        @test at.atomic_symbol == :Si
-        @test at.atomic_number == 14
-        @test hasproperty(at, :atomic_mass)
-        @test hasproperty(at, :atomic_symbol)
-        @test hasproperty(at, :atomic_number)
-        @test hasproperty(at, :extradata)
-        @test at.extradata == 42
+        @test atomic_symbol(at) == :Si
+        @test atomic_number(at) == 14
+        @test at[:atomic_symbol] == :Si
+        @test at[:atomic_number] == 14
+        @test haskey(at, :atomic_mass)
+        @test haskey(at, :atomic_symbol)
+        @test haskey(at, :atomic_number)
+        @test haskey(at, :extradata)
+        @test at[:extradata] == 42
 
-        @test propertynames(at) == (:position, :velocity, :atomic_symbol,
-                                    :atomic_number, :atomic_mass, :extradata)
+        @test keys(at) == (:position, :velocity, :atomic_symbol,
+                           :atomic_number, :atomic_mass, :extradata)
 
         # Test update constructor
         newatom = Atom(at; extradata=43, atomic_number=15)
-        @test propertynames(at) == propertynames(newatom)
-        @test newatom.extradata == 43
-        @test newatom.atomic_number == 15
+        @test keys(at) == keys(newatom)
+        @test newatom[:extradata] == 43
+        @test newatom[:atomic_number] == 15
 
-        newatom = Atom(; atom=at, extradata=43, atomic_number=15)
-        @test propertynames(at) == propertynames(newatom)
-        @test newatom.extradata == 43
-        @test newatom.atomic_number == 15
+        newatom = Atom(at; extradata=43, atomic_number=15)
+        @test keys(at) == keys(newatom)
+        @test newatom[:extradata] == 43
+        @test newatom[:atomic_number] == 15
     end
 
     @testset "flexible atomic systems" begin
@@ -43,15 +45,36 @@ using Test
         dic = Dict{String, Any}("extradata_dic"=>"44")
         atoms = [:Si => [0.0, 1.0, 1.5]u"Å",
                  :C  => [0.0, 0.8, 1.7]u"Å",
-                 Atom(:H, zeros(3) * u"Å", ones(3) * u"bohr/s")]
+                 Atom(:H, zeros(3) * u"Å", ones(3) * u"bohr/s"; dat=3.0)]
         system = atomic_system(atoms, box, bcs, extradata=45; dic)
         @test length(system) == 3
         @test atomic_symbol(system) == [:Si, :C, :H]
         @test boundary_conditions(system) == [Periodic(), DirichletZero(), DirichletZero()]
         @test position(system) == [[0.0, 1.0, 1.5], [0.0, 0.8, 1.7], [0.0, 0.0, 0.0]]u"Å"
         @test velocity(system) == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]u"bohr/s"
-        @test system.extradata == 45
-        @test system.dic["extradata_dic"] == "44"
+        @test system[:extradata] == 45
+        @test system[:dic]["extradata_dic"] == "44"
+        @test system[3] == atoms[3]
+        @test system[3, :dat] == 3.0
+        @test system[2, :atomic_symbol] == :C
+        @test system[:, :atomic_number] == [14, 6, 1]
+        @test atomkeys(system) == (:position, :velocity, :atomic_symbol,
+                                   :atomic_number, :atomic_mass)
+        @test hasatomkey(system, :atomic_mass)
+        @test !hasatomkey(system, :blubber)
+        @test getkey(system, :blubber, :adidi) == :adidi
+
+        @test collect(pairs(system)) == [
+            :bounding_box => box, :boundary_conditions => bcs,
+            :extradata => 45, :dic => dic
+        ]
+        @test collect(pairs(system[1])) == [
+            :position => [0.0, 1.0, 1.5]u"Å",
+            :velocity => zeros(3)u"Å/s",
+            :atomic_symbol => :Si,
+            :atomic_number => 14,
+            :atomic_mass => AtomsBase.element(:Si).atomic_mass,
+        ]
 
         # Test update constructor
         newatoms  = [system[1], system[2]]
@@ -75,8 +98,8 @@ using Test
         @test position(system) == [[0.0, 1.0, 1.5], [0.0, 0.8, 1.7], [0.0, 0.0, 0.0]]u"Å"
         @test velocity(system) == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]u"bohr/s"
         @test bounding_box(system) == infinite_box(3)
-        @test system.extradata == 46
-        @test system.dic["extradata_dic"] == "47"
+        @test system[:extradata] == 46
+        @test system[:dic]["extradata_dic"] == "47"
     end
 
     @testset "periodic_system" begin
@@ -91,8 +114,8 @@ using Test
         @test atomic_symbol(system) == [:Si, :C, :H]
         @test boundary_conditions(system) == [Periodic(), Periodic(), Periodic()]
         @test position(system) == [[0.0, -0.625, 0.0], [1.25, 0.0, 0.0], [0.0, 0.0, 0.0]]u"Å"
-        @test system.extradata == 48
-        @test system.dic["extradata_dic"] == "49"
+        @test system[:extradata] == 48
+        @test system[:dic]["extradata_dic"] == "49"
     end
 
 

@@ -51,11 +51,10 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         end
     end
 
-    if system isa FlexibleSystem
-        for (k, v) in pairs(system.data)
-            extra_line = true
-            @printf io "    %-17s : %s\n" string(k) string(v)
-        end
+    for (k, v) in pairs(system)
+        k in (:bounding_box, :boundary_conditions) && continue
+        extra_line = true
+        @printf io "    %-17s : %s\n" string(k) string(v)
     end
 
     # TODO Better would be some ascii-graphical representation of the structure
@@ -75,7 +74,8 @@ end
 function show_atom(io::IO, at)
     pos = [(@sprintf "%8.6g" ustrip(p)) for p in position(at)]
     posunit = unit(eltype(position(at)))
-    print(io, "Atom(", (@sprintf "%-3s" (string(atomic_symbol(at))) * ","), " [",
+    print(io, typeof(at).name.name, "(")
+    print(io, (@sprintf "%-3s" (string(atomic_symbol(at))) * ","), " [",
           join(pos, ", "), "]u\"$posunit\"")
     if ismissing(velocity(at)) || iszero(velocity(at))
         print(io, ")")
@@ -87,7 +87,8 @@ function show_atom(io::IO, at)
 end
 
 function show_atom(io::IO, ::MIME"text/plain", at)
-    println(io, "Atom(", atomic_symbol(at), ", atomic_number = ", atomic_number(at),
+    print(io, typeof(at).name.name, "(")
+    println(io, atomic_symbol(at), ", atomic_number = ", atomic_number(at),
             ", atomic_mass = ", atomic_mass(at), "):")
 
     pos = [(@sprintf "%.8g" ustrip(p)) for p in position(at)]
@@ -98,9 +99,8 @@ function show_atom(io::IO, ::MIME"text/plain", at)
         velunit = unit(eltype(velocity(at)))
         @printf io "    %-17s : [%s]u\"%s\"\n" "velocity" join(vel, ",") string(velunit)
     end
-    if at isa Atom
-        for (k, v) in pairs(at.data)
-            @printf io "    %-17s : %s\n" string(k) string(v)
-        end
+    for (k, v) in pairs(at)
+        k in (:atomic_number, :atomic_mass, :atomic_symbol, :position, :velocity) && continue
+        @printf io "    %-17s : %s\n" string(k) string(v)
     end
 end

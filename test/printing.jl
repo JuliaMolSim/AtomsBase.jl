@@ -11,7 +11,7 @@ using Test
              :C  => [0.125, 0.0, 0.0]]
     box = [[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"Å"
 
-    flexible_system = periodic_system(atoms, box; fractional=true)
+    flexible_system = periodic_system(atoms, box; fractional=true, data=-12)
     @test repr(flexible_system) == """
     FlexibleSystem(CSi, periodic = TTT, bounding_box = [[10.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 7.0]]u"Å")"""
     show(stdout, MIME("text/plain"), flexible_system)
