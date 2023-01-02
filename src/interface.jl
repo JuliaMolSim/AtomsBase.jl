@@ -1,7 +1,8 @@
 import Base.position
+import PeriodicTable
 
 export AbstractSystem
-export BoundaryCondition, DirichletZero, Periodic, infinite_box
+export BoundaryCondition, DirichletZero, Periodic, infinite_box, isinfinite
 export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type
 export position, velocity, element, atomic_mass, atomic_number, atomic_symbol
 
@@ -52,6 +53,10 @@ function species_type end
 """Return vector indicating whether the system is periodic along a dimension."""
 periodicity(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditions(sys)]
 
+"""Returns true if the given system is infinite"""
+isinfinite(sys::AbstractSystem{D}) where {D} = bounding_box(sys) == infinite_box(D)
+
+
 """
     n_dimensions(::AbstractSystem)
     n_dimensions(atom)
@@ -74,8 +79,9 @@ Base.iterate(sys::AbstractSystem, state = firstindex(sys)) =
 #
 # Species property accessors from systems and species
 #
+
 """The element corresponding to a species/atom (or missing)."""
-function element end
+element(id::Union{Symbol,AbstractString,Integer})  = PeriodicTable.elements[id]
 
 
 """
@@ -126,6 +132,11 @@ atomic_mass(sys::AbstractSystem, index) = atomic_mass(sys[index])
 
 Vector of atomic symbols in the system `sys` or the atomic symbol of a particular `species` /
 the `i`th species in `sys`.
+
+The intention is that [`atomic_number`](@ref) carries the meaning
+of identifying the type of a `species` (e.g. the element for the case of an atom), whereas
+[`atomic_symbol`](@ref) may return a more unique identifier. For example for a deuterium atom
+this may be `:D` while `atomic_number` is still `1`.
 """
 atomic_symbol(sys::AbstractSystem)        = atomic_symbol.(sys)
 atomic_symbol(sys::AbstractSystem, index) = atomic_symbol(sys[index])
@@ -138,6 +149,11 @@ atomic_symbol(sys::AbstractSystem, index) = atomic_symbol(sys[index])
 
 Vector of atomic numbers in the system `sys` or the atomic number of a particular `species` /
 the `i`th species in `sys`.
+
+The intention is that [`atomic_number`](@ref) carries the meaning
+of identifying the type of a `species` (e.g. the element for the case of an atom), whereas
+[`atomic_symbol`](@ref) may return a more unique identifier. For example for a deuterium atom
+this may be `:D` while `atomic_number` is still `1`.
 """
 atomic_number(sys::AbstractSystem)        = atomic_number.(sys)
 atomic_number(sys::AbstractSystem, index) = atomic_number(sys[index])

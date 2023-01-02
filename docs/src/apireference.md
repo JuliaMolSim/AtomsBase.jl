@@ -1,3 +1,7 @@
+```@meta
+CurrentModule = AtomsBase
+```
+
 # API reference
 
 ## Index
@@ -6,25 +10,35 @@
 Pages = ["apireference.md"]
 ```
 
-## Types
-
+## System properties
 ```@docs
-AbstractSystem{D}
+boundary_conditions
+bounding_box
+chemical_formula
+isinfinite
+n_dimensions
+periodicity
+species_type
 ```
 
-## Functions
+## Species / atom properties
 
 ```@docs
 atomic_mass
 atomic_number
 atomic_symbol
-chemical_formula
-boundary_conditions
-bounding_box
-element
-n_dimensions
-periodicity
-species_type
 velocity
 position
+element
+```
+
+## Atom and system constructors
+
+```@docs
+Atom
+FlexibleSystem
+AbstractSystem
+atomic_system
+isolated_system
+periodic_system
 ```

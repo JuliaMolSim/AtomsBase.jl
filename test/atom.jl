@@ -13,6 +13,7 @@ using Test
         @test n_dimensions(at) == 3
         @test position(at) == zeros(3) * u"m"
         @test velocity(at) == zeros(3) * u"bohr/s"
+        @test element(at)  == element(:Si)
         @test at.atomic_symbol == :Si
         @test at.atomic_number == 14
         @test hasproperty(at, :atomic_mass)
@@ -54,8 +55,9 @@ using Test
 
         # Test update constructor
         newatoms  = [system[1], system[2]]
-        newsystem = FlexibleSystem(system; atoms=newatoms,
+        newsystem = AbstractSystem(system; atoms=newatoms,
                                    boundary_conditions=[Periodic(), Periodic(), Periodic()])
+        @test newsystem isa FlexibleSystem
         @test length(newsystem) == 2
         @test atomic_symbol(newsystem) == [:Si, :C]
         @test boundary_conditions(newsystem) == [Periodic(), Periodic(), Periodic()]
@@ -106,5 +108,13 @@ using Test
                                      :C  => [0.0, 0.8, 1.7]u"Å",
                                      Atom(:H, zeros(3) * u"Å")])
         @test length(system) == 3
+    end
+
+    @testset "Nothing or zero velocity" begin
+        at = Atom(:Si, ones(3) * u"Å"; extradata=42)
+        @test velocity(at) == zeros(3)u"Å/s"
+
+        at = Atom(:Si, ones(3) * u"Å", missing; extradata=42)
+        @test velocity(at) == zeros(3)u"Å/s"
     end
 end

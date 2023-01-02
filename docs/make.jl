@@ -11,12 +11,13 @@ makedocs(;
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://juliamolsim.github.io/AtomsBase.jl",
+        edit_link="master",
         assets=String[],
     ),
     pages=[
         "Home" => "index.md",
+        "tutorial.md",
         "overview.md",
-        "atomicsystems.md",
         "apireference.md"
     ],
     checkdocs=:exports,
