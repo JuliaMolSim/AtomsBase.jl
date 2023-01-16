@@ -12,7 +12,17 @@ struct FastSystem{D, L <: Unitful.Length, M <: Unitful.Mass} <: AbstractSystem{D
     atomic_masses::Vector{M}
 end
 
-# Constructor to fetch the types
+# Constructor to fetch the types and numbers/masses
+function FastSystem(box, boundary_conditions, positions, atomic_symbols)
+    elements = element.(atomic_symbols)
+    atomic_numbers = getproperty.(elements, :number)
+    atomic_masses = getproperty.(elements, :atomic_mass)
+    FastSystem{length(box),eltype(eltype(positions)),eltype(atomic_masses)}(
+        box, boundary_conditions, positions, atomic_symbols, atomic_numbers, atomic_masses
+    )
+end
+
+# constructor to fetch the types where numbers/masses are explicitly provided
 function FastSystem(box, boundary_conditions, positions, atomic_symbols, atomic_numbers, atomic_masses)
     FastSystem{length(box),eltype(eltype(positions)),eltype(atomic_masses)}(
         box, boundary_conditions, positions, atomic_symbols, atomic_numbers, atomic_masses
