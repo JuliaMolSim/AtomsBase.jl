@@ -54,7 +54,7 @@ function Atom(identifier::AtomId,
                                     atomic_number, atomic_mass, Dict(kwargs...))
 end
 function Atom(id::AtomId, position::AbstractVector, velocity::Missing; kwargs...)
-    Atom(id, position; kwargs...)
+    Atom(id, position, zeros(length(position))u"bohr/s"; kwargs...)
 end
 function Atom(; atomic_symbol, position, velocity=zeros(length(position))u"bohr/s", kwargs...)
     Atom(atomic_symbol, position, velocity; atomic_symbol, kwargs...)
