@@ -22,19 +22,20 @@ atomic_number(atom::Atom) = atom.atomic_number
 element(atom::Atom)       = element(atomic_number(atom))
 n_dimensions(::Atom{D}) where {D} = D
 
-Base.hasproperty(at::Atom, x::Symbol) = hasfield(Atom, x) || haskey(at.data, x)
-Base.getproperty(at::Atom, x::Symbol) = hasfield(Atom, x) ? getfield(at, x) : getindex(at.data, x)
-function Base.propertynames(at::Atom, private::Bool=false)
-    if private
-        (fieldnames(Atom)..., keys(at.data)...)
-    else
-        (filter(!isequal(:data), fieldnames(Atom))..., keys(at.data)...)
-    end
+Base.getindex(at::Atom, x::Symbol) = hasfield(Atom, x) ? getfield(at, x) : getindex(at.data, x)
+Base.haskey(at::Atom,   x::Symbol) = hasfield(Atom, x) || haskey(at.data, x)
+function Base.getkey(at::Atom, x::Symbol, default)
+    hasfield(Atom, x) ? getfield(at, x) : getkey(at.data, x, default)
 end
+function Base.keys(at::Atom)
+    (:position, :velocity, :atomic_symbol, :atomic_number, :atomic_mass, keys(at.data)...)
+end
+Base.pairs(at::Atom) = (k => at[k] for k in keys(at))
 
 """
     Atom(identifier::AtomId, position::AbstractVector; kwargs...)
     Atom(identifier::AtomId, position::AbstractVector, velocity::AbstractVector; kwargs...)
+    Atom(; atomic_number, position, velocity=zeros(D)u"bohr/s", kwargs...)
 
 Construct an atomic located at the cartesian coordinates `position` with (optionally)
 the given cartesian `velocity`. Note that `AtomId = Union{Symbol,AbstractString,Integer}`.
@@ -53,18 +54,17 @@ function Atom(identifier::AtomId,
                                     atomic_number, atomic_mass, Dict(kwargs...))
 end
 function Atom(id::AtomId, position::AbstractVector, velocity::Missing; kwargs...)
-    Atom(id, position; kwargs...)
+    Atom(id, position, zeros(length(position))u"bohr/s"; kwargs...)
+end
+function Atom(; atomic_symbol, position, velocity=zeros(length(position))u"bohr/s", kwargs...)
+    Atom(atomic_symbol, position, velocity; atomic_symbol, kwargs...)
 end
 
 """
     Atom(atom::Atom; kwargs...)
-    Atom(; atom, kwargs...)
 
 Update constructor. Construct a new `Atom`, by amending the data contained
-in the passed `atom` object. Note that the first version only works if `atom` is an `Atom`,
-while the second version works on arbitrary species adhering to the `AtomsBase` conventions.
-In library code the second version should therefore be preferred.
-
+in the passed `atom` object.
 Supported `kwargs` include `atomic_symbol`, `atomic_number`, `atomic_mass`, `charge`,
 `multiplicity` as well as user-specific custom properties.
 
@@ -75,18 +75,10 @@ julia> hydrogen = Atom(:H, zeros(3)u"Å")
 ```
 and now amend its charge and atomic mass
 ```julia-repl
-julia> Atom(; atom, atomic_mass=1.0u"u", charge=-1.0u"e_au")
+julia> Atom(atom; atomic_mass=1.0u"u", charge=-1.0u"e_au")
 ```
 """
-function Atom(;atom, kwargs...)
-    extra = atom isa Atom ? atom.data : (; )
-    Atom(atomic_number(atom), position(atom), velocity(atom);
-         atomic_symbol=atomic_symbol(atom),
-         atomic_number=atomic_number(atom),
-         atomic_mass=atomic_mass(atom),
-         extra..., kwargs...)
-end
-Atom(atom::Atom; kwargs...) = Atom(; atom, kwargs...)
+Atom(atom::Atom; kwargs...) = Atom(; pairs(atom)..., kwargs...)
 
 function Base.convert(::Type{Atom}, id_pos::Pair{<:AtomId,<:AbstractVector{<:Unitful.Length}})
     Atom(id_pos...)

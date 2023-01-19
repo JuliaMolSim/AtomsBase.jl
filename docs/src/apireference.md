@@ -19,6 +19,8 @@ isinfinite
 n_dimensions
 periodicity
 species_type
+atomkeys
+hasatomkey
 ```
 
 ## Species / atom properties

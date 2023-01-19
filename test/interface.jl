@@ -18,6 +18,10 @@ using PeriodicTable
         @test atomic_number(atoms[1]) == 6
         @test atomic_mass(atoms[1])   == 12.011u"u"
         @test element(atoms[1]) == element(:C)
+        @test atoms[1][:atomic_number] == 6
+        @test keys(atoms[1]) == (:position, :velocity, :atomic_symbol,
+                                 :atomic_number, :atomic_mass)
+        @test getkey(atoms[1], :blubber, :adidi) == :adidi
     end
 
     @testset "System" begin
@@ -42,6 +46,12 @@ using PeriodicTable
         @test atomic_symbol(flexible, 2) == :C
         @test atomic_number(flexible, 2) == 6
         @test atomic_mass(flexible, 1)   == 12.011u"u"
+
+        @test atomkeys(flexible) == (:position, :velocity, :atomic_symbol,
+                                     :atomic_number, :atomic_mass)
+        @test hasatomkey(flexible, :atomic_number)
+        @test flexible[1, :atomic_symbol] == :C
+        @test flexible[:, :atomic_symbol] == [:C, :C]
 
         @test ismissing(velocity(fast))
         @test all(position(fast)      .== position(flexible))
