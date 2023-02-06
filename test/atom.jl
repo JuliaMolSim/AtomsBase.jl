@@ -65,7 +65,7 @@ using Test
                                    :atomic_number, :atomic_mass)
         @test hasatomkey(system, :atomic_mass)
         @test !hasatomkey(system, :blubber)
-        @test getkey(system, :blubber, :adidi) == :adidi
+        @test get(system, :blubber, :adidi) == :adidi
 
         @test collect(pairs(system)) == [
             :bounding_box => box, :boundary_conditions => bcs,

@@ -24,8 +24,8 @@ n_dimensions(::Atom{D}) where {D} = D
 
 Base.getindex(at::Atom, x::Symbol) = hasfield(Atom, x) ? getfield(at, x) : getindex(at.data, x)
 Base.haskey(at::Atom,   x::Symbol) = hasfield(Atom, x) || haskey(at.data, x)
-function Base.getkey(at::Atom, x::Symbol, default)
-    hasfield(Atom, x) ? getfield(at, x) : getkey(at.data, x, default)
+function Base.get(at::Atom, x::Symbol, default)
+    hasfield(Atom, x) ? getfield(at, x) : get(at.data, x, default)
 end
 function Base.keys(at::Atom)
     (:position, :velocity, :atomic_symbol, :atomic_number, :atomic_mass, keys(at.data)...)

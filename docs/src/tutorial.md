@@ -80,7 +80,7 @@ using Unitful, UnitfulAtomic, AtomsBase  # hide
 deuterium = Atom(1, atomic_symbol=:D, [0, 1, 2.]u"bohr")
 ````
 
-An equivalent dict-like interface based on `keys`, `haskey`, `getkey` and `pairs`
+An equivalent dict-like interface based on `keys`, `haskey`, `get` and `pairs`
 is also available. For example
 ````@example atom
 keys(atom)
@@ -229,7 +229,7 @@ Similar to atoms, systems also support storing arbitrary data, for example
 using Unitful, UnitfulAtomic, AtomsBase  # hide
 system = isolated_system([:H => [0, 0, 1.]u"bohr", :H => [0, 0, 3.]u"bohr"]; extra_data=42)
 ````
-Again these custom properties are fully integrated with `keys`, `haskey`, `pairs` and `getkey`.
+Again these custom properties are fully integrated with `keys`, `haskey`, `pairs` and `get`.
 ````@example sysprop
 @show keys(system)
 ````
