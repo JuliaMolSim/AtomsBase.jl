@@ -29,7 +29,7 @@ using PeriodicTable
     @test system[2][:position] == [0.75, 0.75, 0.75]u"m"
     @test haskey(system[1], :position)
     @test !haskey(system[1], :abc)
-    @test getkey(system[1], :dagger, 3) == 3
+    @test get(system[1], :dagger, 3) == 3
 
     @test collect(pairs(system)) == [(:bounding_box => box), (:boundary_conditions => bcs)]
     @test collect(pairs(system[1])) == [

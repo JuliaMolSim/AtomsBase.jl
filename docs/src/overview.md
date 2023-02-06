@@ -38,7 +38,7 @@ and implementations of standard functions accessing the properties of the specie
 currently
   - Geometric information: [`position`](@ref), [`velocity`](@ref), [`n_dimensions`](@ref)
   - Atomic information: [`atomic_symbol`](@ref), [`atomic_mass`](@ref), [`atomic_number`](@ref), [`element`](@ref)
-  - Atomic and system property accessors: `getindex`, `haskey`, `getkey`, `keys`, `pairs`
+  - Atomic and system property accessors: `getindex`, `haskey`, `get`, `keys`, `pairs`
 Based on these methods respective equivalent methods acting
 on an `AbstractSystem` will be automatically available, e.g. using the iteration
 interface of the `AbstractSystem` (see above). Most of the property accessors on the

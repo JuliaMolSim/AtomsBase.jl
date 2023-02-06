@@ -21,7 +21,7 @@ using PeriodicTable
         @test atoms[1][:atomic_number] == 6
         @test keys(atoms[1]) == (:position, :velocity, :atomic_symbol,
                                  :atomic_number, :atomic_mass)
-        @test getkey(atoms[1], :blubber, :adidi) == :adidi
+        @test get(atoms[1], :blubber, :adidi) == :adidi
     end
 
     @testset "System" begin

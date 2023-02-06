@@ -179,6 +179,6 @@ hasatomkey(system::AbstractSystem, x::Symbol) = all(at -> haskey(at, x), system)
 
 # Defaults for system
 Base.pairs(system::AbstractSystem) = (k => system[k] for k in keys(system))
-function Base.getkey(system::AbstractSystem, x::Symbol, default)
+function Base.get(system::AbstractSystem, x::Symbol, default)
     haskey(system, x) ? getindex(system, x) : default
 end
