@@ -58,8 +58,13 @@ using Test
         @test system[:extradata] == 45
         @test system[:dic]["extradata_dic"] == "44"
         @test system[3] == atoms[3]
+        @test system[1:2] == [system[1], system[2]]
+        @test system[[1,3]] == [system[1], system[3]]
+        @test system[:] == [system[1], system[2], system[3]]
         @test system[3, :dat] == 3.0
         @test system[2, :atomic_symbol] == :C
+        @test system[1:2, :atomic_number] == [14, 6]
+        @test system[[1,3], :atomic_number] == [14, 1]
         @test system[:, :atomic_number] == [14, 6, 1]
         @test atomkeys(system) == (:position, :velocity, :atomic_symbol,
                                    :atomic_number, :atomic_mass)

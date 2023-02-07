@@ -23,7 +23,13 @@ using PeriodicTable
     @test atomkeys(system) == (:position, :atomic_symbol, :atomic_number, :atomic_mass)
     @test keys(system[1])  == (:position, :atomic_symbol, :atomic_number, :atomic_mass)
     @test hasatomkey(system, :atomic_symbol)
+    @test system[1] == AtomView(system, 1)
+    @test system[1:2] == [AtomView(system, 1), AtomView(system, 2)]
+    @test system[[1,2]] == [AtomView(system, 1), AtomView(system, 2)]
+    @test system[:] == [AtomView(system, 1), AtomView(system, 2)]
     @test system[1, :atomic_number] == 6
+    @test system[1:2, :atomic_symbol] == [:C, :C]
+    @test system[[1,2], :atomic_symbol] == [:C, :C]
     @test system[:, :atomic_symbol] == [:C, :C]
     @test system[2][:position] == system[2, :position]
     @test system[2][:position] == [0.75, 0.75, 0.75]u"m"
