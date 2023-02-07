@@ -48,6 +48,8 @@ Base.size(sys::FastSystem)           = size(sys.position)
 
 species_type(::FS) where {FS <: FastSystem} = AtomView{FS}
 Base.getindex(sys::FastSystem, i::Integer)  = AtomView(sys, i)
+Base.getindex(sys::FastSystem, rng::AbstractVector)  = [sys[i] for i in rng]
+Base.getindex(sys::FastSystem, rng::Colon)  = collect(sys)
 
 position(s::FastSystem)       = s.position
 atomic_symbol(s::FastSystem)  = s.atomic_symbol
@@ -75,5 +77,5 @@ Base.keys(::FastSystem) = (:bounding_box, :boundary_conditions)
 # Atom and atom property access
 atomkeys(::FastSystem) = (:position, :atomic_symbol, :atomic_number, :atomic_mass)
 hasatomkey(system::FastSystem, x::Symbol) = x in atomkeys(system)
-Base.getindex(system::FastSystem, i::Integer, x::Symbol) = getfield(system, x)[i]
+Base.getindex(system::FastSystem, i::Union{Integer,AbstractVector}, x::Symbol) = getfield(system, x)[i]
 Base.getindex(system::FastSystem, ::Colon, x::Symbol) = getfield(system, x)
