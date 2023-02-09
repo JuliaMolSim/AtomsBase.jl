@@ -75,6 +75,9 @@ Base.lastindex(s::AbstractSystem) = length(s)
 Base.iterate(sys::AbstractSystem, state = firstindex(sys)) =
     (firstindex(sys) <= state <= length(sys)) ? (@inbounds sys[state], state + 1) : nothing
 Base.eltype(sys::AbstractSystem) = species_type(sys)
+Base.getindex(s::AbstractSystem, rng::AbstractArray) = getindex.(Ref(s), rng)
+Base.getindex(s::AbstractSystem, ::Colon) = collect(s)
+Base.getindex(s::AbstractSystem, r::AbstractVector{<:Bool}) = s[ (firstindex(s):lastindex(s))[r] ]
 
 # TODO Support similar, push, ...
 

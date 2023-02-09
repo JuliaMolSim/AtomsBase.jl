@@ -24,9 +24,10 @@ using PeriodicTable
     @test keys(system[1])  == (:position, :atomic_symbol, :atomic_number, :atomic_mass)
     @test hasatomkey(system, :atomic_symbol)
     @test system[1] == AtomView(system, 1)
-    @test system[1:2] == [AtomView(system, 1), AtomView(system, 2)]
-    @test system[[1,2]] == [AtomView(system, 1), AtomView(system, 2)]
-    @test system[:] == [AtomView(system, 1), AtomView(system, 2)]
+    @test system[1:2] == [system[1], system[2]]
+    @test system[[2,1]] == [system[2], system[1]]
+    @test system[[1 2; 2 1]] == [system[1] system[2]; system[2] system[1]]
+    @test system[:] == [system[1], system[2]]
     @test system[[false,true]] == [AtomView(system, 2)]
     @test system[1, :atomic_number] == 6
     @test system[1:2, :atomic_symbol] == [:C, :C]

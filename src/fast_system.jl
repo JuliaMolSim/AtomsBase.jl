@@ -48,9 +48,6 @@ Base.size(sys::FastSystem)           = size(sys.position)
 
 species_type(::FS) where {FS <: FastSystem} = AtomView{FS}
 Base.getindex(sys::FastSystem, i::Integer)  = AtomView(sys, i)
-Base.getindex(sys::FastSystem, rng::AbstractVector)  = [sys[i] for i in rng]
-Base.getindex(sys::FastSystem, rng::AbstractVector{<:Bool})  = sys[(1:length(sys))[rng]]
-Base.getindex(sys::FastSystem, rng::Colon)  = collect(sys)
 
 position(s::FastSystem)       = s.position
 atomic_symbol(s::FastSystem)  = s.atomic_symbol

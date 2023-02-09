@@ -60,6 +60,7 @@ using Test
         @test system[3] == atoms[3]
         @test system[1:2] == [system[1], system[2]]
         @test system[[1,3]] == [system[1], system[3]]
+        @test system[[1 3; 2 1]] == [system[1] system[3]; system[2] system[1]]
         @test system[:] == [system[1], system[2], system[3]]
         @test system[[false,false,true]] == [system[3]]
         @test system[3, :dat] == 3.0

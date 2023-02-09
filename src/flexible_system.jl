@@ -25,7 +25,7 @@ end
 Base.keys(system::FlexibleSystem) = (:bounding_box, :boundary_conditions, keys(system.data)...)
 
 # Atom and atom property access
-Base.getindex(system::FlexibleSystem, i::Union{Integer, AbstractVector, Colon}) = system.particles[i]
+Base.getindex(system::FlexibleSystem, i::Integer) = system.particles[i]
 Base.getindex(system::FlexibleSystem, i::Integer, x::Symbol) = system.particles[i][x]
 Base.getindex(system::FlexibleSystem, rng::AbstractVector, x::Symbol) = [at[x] for at in system.particles[rng]]
 Base.getindex(system::FlexibleSystem, ::Colon, x::Symbol) = [at[x] for at in system.particles]
