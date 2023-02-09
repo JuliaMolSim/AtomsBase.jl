@@ -25,15 +25,15 @@ using PeriodicTable
     @test hasatomkey(system, :atomic_symbol)
     @test system[1] == AtomView(system, 1)
     @test system[1:2] == [system[1], system[2]]
-    @test system[[2,1]] == [system[2], system[1]]
+    @test system[[2, 1]] == [system[2], system[1]]
     @test system[[1 2; 2 1]] == [system[1] system[2]; system[2] system[1]]
     @test system[:] == [system[1], system[2]]
-    @test system[[false,true]] == [AtomView(system, 2)]
+    @test system[[false, true]] == [AtomView(system, 2)]
     @test system[1, :atomic_number] == 6
     @test system[1:2, :atomic_symbol] == [:C, :C]
-    @test system[[1,2], :atomic_symbol] == [:C, :C]
+    @test system[[1, 2], :atomic_symbol] == [:C, :C]
     @test system[:, :atomic_symbol] == [:C, :C]
-    @test system[[false,true], :atomic_number] == [6]
+    @test system[[false, true], :atomic_number] == [6]
     @test system[2][:position] == system[2, :position]
     @test system[2][:position] == [0.75, 0.75, 0.75]u"m"
     @test haskey(system[1], :position)

@@ -75,5 +75,7 @@ Base.keys(::FastSystem) = (:bounding_box, :boundary_conditions)
 # Atom and atom property access
 atomkeys(::FastSystem) = (:position, :atomic_symbol, :atomic_number, :atomic_mass)
 hasatomkey(system::FastSystem, x::Symbol) = x in atomkeys(system)
-Base.getindex(system::FastSystem, i::Union{Integer,AbstractVector}, x::Symbol) = getfield(system, x)[i]
+function Base.getindex(system::FastSystem, i::Union{Integer,AbstractVector}, x::Symbol)
+    getfield(system, x)[i]
+end
 Base.getindex(system::FastSystem, ::Colon, x::Symbol) = getfield(system, x)
