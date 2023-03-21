@@ -57,8 +57,12 @@ velocity(::FastSystem)        = missing
 
 # System property access
 function Base.getindex(system::FastSystem, x::Symbol)
-    x === :bounding_box && return bounding_box(system)
-    x === :boundary_conditions && return boundary_conditions(system)
+    if x === :bounding_box
+        return bounding_box(system)
+    end
+    if x === :boundary_conditions
+        return boundary_conditions(system)
+    end
     throw(KeyError(x))
 end
 Base.haskey(::FastSystem, x::Symbol) = x in (:bounding_box, :boundary_conditions)
