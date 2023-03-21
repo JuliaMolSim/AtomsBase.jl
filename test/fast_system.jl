@@ -20,6 +20,8 @@ using PeriodicTable
     @test !isinfinite(system)
     @test element(system[1]) == element(:C)
     @test keys(system) == (:bounding_box, :boundary_conditions)
+    @test haskey(system, :boundary_conditions)
+    @test system[:boundary_conditions][1] == Periodic()
     @test atomkeys(system) == (:position, :atomic_symbol, :atomic_number, :atomic_mass)
     @test keys(system[1])  == (:position, :atomic_symbol, :atomic_number, :atomic_mass)
     @test hasatomkey(system, :atomic_symbol)
