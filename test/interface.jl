@@ -56,5 +56,9 @@ using PeriodicTable
         @test ismissing(velocity(fast))
         @test all(position(fast)      .== position(flexible))
         @test all(atomic_symbol(fast) .== atomic_symbol(flexible))
+
+        # type stability
+        get_z_periodicity(syst) = syst[:boundary_conditions][3]
+        @test @inferred(BoundaryCondition, get_z_periodicity(flexible)) === DirichletZero()
     end
 end
