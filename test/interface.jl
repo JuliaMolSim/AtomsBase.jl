@@ -59,6 +59,6 @@ using PeriodicTable
 
         # type stability
         get_z_periodicity(syst) = syst[:boundary_conditions][3]
-        @test @inferred(BoundaryCondition, get_z_periodicity(flexible)) === DirichletZero()
+        @test @inferred(BoundaryCondition, get_z_periodicity(flexible)) == DirichletZero()
     end
 end

@@ -44,8 +44,8 @@ using StaticArrays
 
     # check type stability
     get_b_vector(syst) = bounding_box(syst)[2]
-    @test @inferred(get_b_vector(system)) === SVector{3}([0.0, 1.0, 0.0]u"m")
-    @test @inferred(position(system, 1)) === SVector{3}([0.25, 0.25, 0.25]u"m")
+    @test @inferred(get_b_vector(system)) == SVector{3}([0.0, 1.0, 0.0]u"m")
+    @test @inferred(position(system, 1)) == SVector{3}([0.25, 0.25, 0.25]u"m")
     @test ismissing(@inferred(velocity(system, 2)))
 
     # Test AtomView
