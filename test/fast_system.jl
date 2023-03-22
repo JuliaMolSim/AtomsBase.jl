@@ -2,6 +2,7 @@ using AtomsBase
 using Test
 using Unitful
 using PeriodicTable
+using StaticArrays
 
 @testset "Fast system" begin
     box = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
@@ -20,6 +21,8 @@ using PeriodicTable
     @test !isinfinite(system)
     @test element(system[1]) == element(:C)
     @test keys(system) == (:bounding_box, :boundary_conditions)
+    @test haskey(system, :boundary_conditions)
+    @test system[:boundary_conditions][1] == Periodic()
     @test atomkeys(system) == (:position, :atomic_symbol, :atomic_number, :atomic_mass)
     @test keys(system[1])  == (:position, :atomic_symbol, :atomic_number, :atomic_mass)
     @test hasatomkey(system, :atomic_symbol)
@@ -38,6 +41,12 @@ using PeriodicTable
         :atomic_number => 6,
         :atomic_mass => atomic_mass(atoms[1]),
     ]
+
+    # check type stability
+    get_b_vector(syst) = bounding_box(syst)[2]
+    @test @inferred(get_b_vector(system)) == SVector{3}([0.0, 1.0, 0.0]u"m")
+    @test @inferred(position(system, 1)) == SVector{3}([0.25, 0.25, 0.25]u"m")
+    @test ismissing(@inferred(velocity(system, 2)))
 
     # Test AtomView
     for method in (position, atomic_mass, atomic_symbol, atomic_number)
