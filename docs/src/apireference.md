@@ -38,6 +38,7 @@ element
 
 ```@docs
 Atom
+AtomView
 FlexibleSystem
 AbstractSystem
 atomic_system

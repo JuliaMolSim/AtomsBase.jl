@@ -13,8 +13,10 @@ end
 
 # System property access
 function Base.getindex(system::FlexibleSystem, x::Symbol)
-    if x in (:bounding_box, :boundary_conditions)
-        getfield(system, x)
+    if x === :bounding_box
+        bounding_box(system)
+    elseif x === :boundary_conditions
+        boundary_conditions(system)
     else
         getindex(system.data, x)
     end

@@ -55,18 +55,14 @@ atomic_number(s::FastSystem)  = s.atomic_number
 atomic_mass(s::FastSystem)    = s.atomic_mass
 velocity(::FastSystem)        = missing
 
-position(s::FastSystem, i)      = s.position[i]
-atomic_symbol(s::FastSystem, i) = s.atomic_symbol[i]
-atomic_number(s::FastSystem, i) = s.atomic_number[i]
-atomic_mass(s::FastSystem, i)   = s.atomic_mass[i]
-velocity(::FastSystem, i)       = missing
-
 # System property access
 function Base.getindex(system::FastSystem, x::Symbol)
-    if x in (:bounding_box, :boundary_conditions)
-        getfield(system, x)
+    if x === :bounding_box
+        bounding_box(system)
+    elseif x === :boundary_conditions
+        boundary_conditions(system)
     else
-        throw(KeyError("Key $x not found"))
+        throw(KeyError(x))
     end
 end
 Base.haskey(::FastSystem, x::Symbol) = x in (:bounding_box, :boundary_conditions)
