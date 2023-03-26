@@ -1,4 +1,5 @@
-using Test, Pkg
+using Test
+using Pkg
 
 const GROUP = get(ENV, "GROUP", "Core")
 
