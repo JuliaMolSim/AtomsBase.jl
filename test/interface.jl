@@ -14,10 +14,14 @@ using PeriodicTable
     @testset "Atoms" begin
         @test position(atoms[1]) == [0.25, 0.25, 0.25]u"m"
         @test velocity(atoms[1]) == [0.0, 0.0, 0.0]u"bohr/s"
-        @test element(atoms[1]) == PeriodicTable.elements[:C]
         @test atomic_symbol(atoms[1]) == :C
         @test atomic_number(atoms[1]) == 6
         @test atomic_mass(atoms[1])   == 12.011u"u"
+        @test element(atoms[1]) == element(:C)
+        @test atoms[1][:atomic_number] == 6
+        @test keys(atoms[1]) == (:position, :velocity, :atomic_symbol,
+                                 :atomic_number, :atomic_mass)
+        @test get(atoms[1], :blubber, :adidi) == :adidi
     end
 
     @testset "System" begin
@@ -29,6 +33,7 @@ using PeriodicTable
         @test bounding_box(flexible) == [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
         @test boundary_conditions(flexible) == [Periodic(), Periodic(), DirichletZero()]
         @test periodicity(flexible) == [1, 1, 0]
+        @test !isinfinite(flexible)
         @test n_dimensions(flexible) == 3
         @test position(flexible) == [[0.25, 0.25, 0.25], [0.75, 0.75, 0.75]]u"m"
         @test position(flexible, 1) == [0.25, 0.25, 0.25]u"m"
@@ -42,8 +47,18 @@ using PeriodicTable
         @test atomic_number(flexible, 2) == 6
         @test atomic_mass(flexible, 1)   == 12.011u"u"
 
+        @test atomkeys(flexible) == (:position, :velocity, :atomic_symbol,
+                                     :atomic_number, :atomic_mass)
+        @test hasatomkey(flexible, :atomic_number)
+        @test flexible[1, :atomic_symbol] == :C
+        @test flexible[:, :atomic_symbol] == [:C, :C]
+
         @test ismissing(velocity(fast))
         @test all(position(fast)      .== position(flexible))
         @test all(atomic_symbol(fast) .== atomic_symbol(flexible))
+
+        # type stability
+        get_z_periodicity(syst) = syst[:boundary_conditions][3]
+        @test @inferred(BoundaryCondition, get_z_periodicity(flexible)) == DirichletZero()
     end
 end
