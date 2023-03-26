@@ -35,7 +35,10 @@ additional behavior depending on context.
 ## System state and properties
 The only required properties to be specified of the system is the species
 and implementations of standard functions accessing the properties of the species,
-currently [`position`](@ref), [`velocity`](@ref), [`atomic_symbol`](@ref), [`atomic_mass`](@ref), [`atomic_number`](@ref), [`n_dimensions`](@ref), [`element`](@ref). 
+currently
+  - Geometric information: [`position`](@ref), [`velocity`](@ref), [`n_dimensions`](@ref)
+  - Atomic information: [`atomic_symbol`](@ref), [`atomic_mass`](@ref), [`atomic_number`](@ref), [`element`](@ref)
+  - Atomic and system property accessors: `getindex`, `haskey`, `get`, `keys`, `pairs`
 Based on these methods respective equivalent methods acting
 on an `AbstractSystem` will be automatically available, e.g. using the iteration
 interface of the `AbstractSystem` (see above). Most of the property accessors on the
@@ -47,7 +50,7 @@ position(sys, i) # position of `i`th particle in `sys`
 Currently, this syntax only supports linear indexing.
 
 To simplify working with `AtomsBase`, default implementations for systems
-composed of atoms are provided (see [Atomic systems](@ref atomic-systems)).
+composed of atoms are provided (see [Tutorial](@ref)).
 
 ## Struct-of-Arrays vs. Array-of-Structs
 The "struct-of-arrays" (SoA) vs. "array-of-structs" (AoS) is a common design
@@ -66,9 +69,33 @@ positions, then index into it for a single particle). The beauty of an abstract
 interface in Julia is that these details can be, in large part, abstracted away
 through method dispatch such that the end user sees the same expected behavior
 irrespective of how things are implemented "under the hood".
-For concrete implementations see the section on [atomic systems](@ref atomic-systems).
 
 ## Boundary Conditions
 Finally, we include support for defining boundary conditions. Currently
 included are `Periodic` and `DirichletZero`. There should be one boundary
 condition specified for each spatial dimension represented.
+
+## Atomic system
+Since we anticipate atomic systems to be a commonly needed representation,
+`AtomsBase` provides two flexible implementations for this setting.
+One implementation follows the struct-of-arrays approach introducing the `AtomView`
+type to conveniently expose atomic data.
+The more flexible implementation is based on an array-of-structs approach
+and can be easily customised, e.g. by adding custom properties or by swapping
+the underlying `Atom` struct by a custom one.
+In both cases the respective datastructures can be used either fully
+or in parts in downstream packages and we hope these to develop into universally
+useful types within the Julia ecosystem over time.
+
+### Struct of Arrays / FastSystem
+The file [src/fast_system.jl](https://github.com/JuliaMolSim/AtomsBase.jl/blob/master/src/fast_system.jl) contains an implementation of
+AtomsBase based on the struct-of-arrays approach. All species data is stored
+as plain arrays, but for convenience indexing of individual atoms is supported
+by a light-weight `AtomView`. See the implementation files
+as well as the tests for how these can be used.
+
+### Atoms and FlexibleSystem
+A flexible implementation of the interface is provided by the
+`FlexibleSystem` and the `Atom` structs
+for representing atomic systems.
+These are discussed in detail in [Tutorial](@ref).

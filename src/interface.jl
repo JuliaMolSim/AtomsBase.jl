@@ -1,9 +1,11 @@
 import Base.position
+import PeriodicTable
 
 export AbstractSystem
-export BoundaryCondition, DirichletZero, Periodic, infinite_box
+export BoundaryCondition, DirichletZero, Periodic, infinite_box, isinfinite
 export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type
 export position, velocity, element, atomic_mass, atomic_number, atomic_symbol
+export atomkeys, hasatomkey
 
 #
 # Identifier for boundary conditions per dimension
@@ -52,6 +54,10 @@ function species_type end
 """Return vector indicating whether the system is periodic along a dimension."""
 periodicity(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditions(sys)]
 
+"""Returns true if the given system is infinite"""
+isinfinite(sys::AbstractSystem{D}) where {D} = bounding_box(sys) == infinite_box(D)
+
+
 """
     n_dimensions(::AbstractSystem)
     n_dimensions(atom)
@@ -68,14 +74,21 @@ Base.lastindex(s::AbstractSystem) = length(s)
 # default to 1D indexing
 Base.iterate(sys::AbstractSystem, state = firstindex(sys)) =
     (firstindex(sys) <= state <= length(sys)) ? (@inbounds sys[state], state + 1) : nothing
+Base.eltype(sys::AbstractSystem) = species_type(sys)
+Base.getindex(s::AbstractSystem, i::AbstractArray) = getindex.(Ref(s), i)
+Base.getindex(s::AbstractSystem, ::Colon) = collect(s)
+function Base.getindex(s::AbstractSystem, r::AbstractVector{Bool})
+    s[ (firstindex(s):lastindex(s))[r] ]
+end
 
 # TODO Support similar, push, ...
 
 #
 # Species property accessors from systems and species
 #
+
 """The element corresponding to a species/atom (or missing)."""
-function element end
+element(id::Union{Symbol,AbstractString,Integer})  = PeriodicTable.elements[id]
 
 
 """
@@ -126,6 +139,11 @@ atomic_mass(sys::AbstractSystem, index) = atomic_mass(sys[index])
 
 Vector of atomic symbols in the system `sys` or the atomic symbol of a particular `species` /
 the `i`th species in `sys`.
+
+The intention is that [`atomic_number`](@ref) carries the meaning
+of identifying the type of a `species` (e.g. the element for the case of an atom), whereas
+[`atomic_symbol`](@ref) may return a more unique identifier. For example for a deuterium atom
+this may be `:D` while `atomic_number` is still `1`.
 """
 atomic_symbol(sys::AbstractSystem)        = atomic_symbol.(sys)
 atomic_symbol(sys::AbstractSystem, index) = atomic_symbol(sys[index])
@@ -138,6 +156,34 @@ atomic_symbol(sys::AbstractSystem, index) = atomic_symbol(sys[index])
 
 Vector of atomic numbers in the system `sys` or the atomic number of a particular `species` /
 the `i`th species in `sys`.
+
+The intention is that [`atomic_number`](@ref) carries the meaning
+of identifying the type of a `species` (e.g. the element for the case of an atom), whereas
+[`atomic_symbol`](@ref) may return a more unique identifier. For example for a deuterium atom
+this may be `:D` while `atomic_number` is still `1`.
 """
 atomic_number(sys::AbstractSystem)        = atomic_number.(sys)
 atomic_number(sys::AbstractSystem, index) = atomic_number(sys[index])
+
+"""
+    atomkeys(sys::AbstractSystem)
+
+Return the atomic properties, which are available in all atoms of the system.
+"""
+function atomkeys(system::AbstractSystem)
+    atkeys = length(system) == 0 ? () : keys(system[1])
+    filter(k -> hasatomkey(system, k), atkeys)
+end
+
+"""
+    hasatomkey(system::AbstractSystem, x::Symbol)
+
+Returns true whether the passed property available in all atoms of the passed system.
+"""
+hasatomkey(system::AbstractSystem, x::Symbol) = all(at -> haskey(at, x), system)
+
+# Defaults for system
+Base.pairs(system::AbstractSystem) = (k => system[k] for k in keys(system))
+function Base.get(system::AbstractSystem, x::Symbol, default)
+    haskey(system, x) ? getindex(system, x) : default
+end

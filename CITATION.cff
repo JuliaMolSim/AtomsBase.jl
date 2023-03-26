@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Herbst"
+  given-names: "Michael"
+  orcid: "https://orcid.org/0000-0003-0378-7921"
+- family-names: "Kurchin"
+  given-names: "Rachel"
+  orcid: "https://orcid.org/0000-0002-2147-4809"
+title: "AtomsBase.jl"
+version: 0.2.5
+date-released: 2023-01-03
+repository-code: "https://github.com/JuliaMolSim/AtomsBase.jl"
+url: "https://juliamolsim.github.io/AtomsBase.jl/stable/"
+license: MIT

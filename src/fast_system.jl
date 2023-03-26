@@ -4,12 +4,12 @@
 export FastSystem
 
 struct FastSystem{D, L <: Unitful.Length, M <: Unitful.Mass} <: AbstractSystem{D}
-    box::SVector{D, SVector{D, L}}
+    bounding_box::SVector{D, SVector{D, L}}
     boundary_conditions::SVector{D, BoundaryCondition}
-    positions::Vector{SVector{D, L}}
-    atomic_symbols::Vector{Symbol}
-    atomic_numbers::Vector{Int}
-    atomic_masses::Vector{M}
+    position::Vector{SVector{D, L}}
+    atomic_symbol::Vector{Symbol}
+    atomic_number::Vector{Int}
+    atomic_mass::Vector{M}
 end
 
 # Constructor to fetch the types
@@ -41,27 +41,37 @@ function FastSystem(particles, box, boundary_conditions)
                atomic_number.(particles), atomic_mass.(particles))
 end
 
-function Base.show(io::IO, system::FastSystem)
-    print(io, "FastSystem")
-    show_system(io, system)
-end
-
-bounding_box(sys::FastSystem)        = sys.box
+bounding_box(sys::FastSystem)        = sys.bounding_box
 boundary_conditions(sys::FastSystem) = sys.boundary_conditions
-Base.length(sys::FastSystem)         = length(sys.positions)
-Base.size(sys::FastSystem)           = size(sys.positions)
+Base.length(sys::FastSystem)         = length(sys.position)
+Base.size(sys::FastSystem)           = size(sys.position)
 
-species_type(sys::FS) where {FS <: FastSystem} = AtomView{FS}
-Base.getindex(sys::FastSystem, index::Int)     = AtomView(sys, index)
+species_type(::FS) where {FS <: FastSystem} = AtomView{FS}
+Base.getindex(sys::FastSystem, i::Integer)  = AtomView(sys, i)
 
-position(s::FastSystem)       = s.positions
-atomic_symbol(s::FastSystem)  = s.atomic_symbols
-atomic_number(s::FastSystem)  = s.atomic_numbers
-atomic_mass(s::FastSystem)    = s.atomic_masses
-velocity(s::FastSystem)       = missing
+position(s::FastSystem)       = s.position
+atomic_symbol(s::FastSystem)  = s.atomic_symbol
+atomic_number(s::FastSystem)  = s.atomic_number
+atomic_mass(s::FastSystem)    = s.atomic_mass
+velocity(::FastSystem)        = missing
 
-position(s::FastSystem, i)      = s.positions[i]
-atomic_symbol(s::FastSystem, i) = s.atomic_symbols[i]
-atomic_number(s::FastSystem, i) = s.atomic_numbers[i]
-atomic_mass(s::FastSystem, i)   = s.atomic_masses[i]
-velocity(s::FastSystem, i)      = missing
+# System property access
+function Base.getindex(system::FastSystem, x::Symbol)
+    if x === :bounding_box
+        bounding_box(system)
+    elseif x === :boundary_conditions
+        boundary_conditions(system)
+    else
+        throw(KeyError(x))
+    end
+end
+Base.haskey(::FastSystem, x::Symbol) = x in (:bounding_box, :boundary_conditions)
+Base.keys(::FastSystem) = (:bounding_box, :boundary_conditions)
+
+# Atom and atom property access
+atomkeys(::FastSystem) = (:position, :atomic_symbol, :atomic_number, :atomic_mass)
+hasatomkey(system::FastSystem, x::Symbol) = x in atomkeys(system)
+function Base.getindex(system::FastSystem, i::Union{Integer,AbstractVector}, x::Symbol)
+    getfield(system, x)[i]
+end
+Base.getindex(system::FastSystem, ::Colon, x::Symbol) = getfield(system, x)
