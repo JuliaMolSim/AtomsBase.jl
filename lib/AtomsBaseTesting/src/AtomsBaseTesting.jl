@@ -53,6 +53,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         if hasatomkey(s, prop) != hasatomkey(t, prop)
             println("hashatomkey mismatch for $prop")
             @test hasatomkey(s, prop) == hasatomkey(t, prop)
+            continue
         end
         for (at_s, at_t) in zip(s, t)
             @test haskey(at_s, prop) == haskey(at_t, prop)
@@ -77,6 +78,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         if haskey(s, prop) != haskey(t, prop)
             println("haskey mismatch for $prop")
             @test haskey(s, prop) == haskey(t, prop)
+            continue
         end
 
         if s[prop] isa Quantity
@@ -97,7 +99,6 @@ and specific standard keys can be ignored using `drop_atprop` and `drop_sysprop`
 """
 function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
                           extra_atprop=(; ), extra_sysprop=(; ), cellmatrix=:full)
-    # TODO Should be moved to AtomsBase
     @assert D == 3
     n_atoms = 5
 
