@@ -38,6 +38,17 @@ include("testmacros.jl")
     end
 
     @testset "Cell distortion" begin
+        # TODO This can be simplified to
+        #      (; system, atoms, box, bcs, sysprop) = make_test_system()
+        # once we require Julia 1.7
+        case = make_test_system()
+        system = case.system
+        atoms = case.atoms
+        box = case.box
+        bcs = case.bcs
+        sysprop = case.sysprop
+        # end simplify
+
         (; system, atoms, box, bcs, sysprop) = make_test_system()
 
         box_dist = [v .+ 1e-5u"Å" * ones(3) for v in box]
@@ -48,7 +59,16 @@ include("testmacros.jl")
     end
 
     @testset "ignore_sysprop / common_only" begin
-        (; system, atoms, box, bcs, sysprop) = make_test_system()
+        # TODO This can be simplified to
+        #      (; system, atoms, box, bcs, sysprop) = make_test_system()
+        # once we require Julia 1.7
+        case = make_test_system()
+        system = case.system
+        atoms = case.atoms
+        box = case.box
+        bcs = case.bcs
+        sysprop = case.sysprop
+        # end simplify
 
         sysprop_dict = Dict(pairs(sysprop))
         pop!(sysprop_dict, :multiplicity)
