@@ -49,8 +49,6 @@ include("testmacros.jl")
         sysprop = case.sysprop
         # end simplify
 
-        (; system, atoms, box, bcs, sysprop) = make_test_system()
-
         box_dist = [v .+ 1e-5u"Å" * ones(3) for v in box]
         system_dist = atomic_system(atoms, box_dist, bcs; sysprop...)
 
