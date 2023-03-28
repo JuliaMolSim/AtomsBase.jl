@@ -18,6 +18,7 @@ makedocs(;
         "Home" => "index.md",
         "tutorial.md",
         "overview.md",
+        "testing.md",
         "apireference.md"
     ],
     checkdocs=:exports,
