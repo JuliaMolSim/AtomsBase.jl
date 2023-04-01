@@ -56,15 +56,18 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
         @printf io "    %-17s : %s\n" string(k) string(v)
     end
+    if length(system) < 10
+        extra_line && println(io)
+        for atom in system
+            println(io, "    ", atom)
+        end
+        extra_line = true
+    end
 
     ascii_string = ascii_structure(system)
     if !isempty(ascii_string)
         extra_line && println(io)
         println(io, "   ", replace(ascii_string, "\n" => "\n   "))
-        extra_line && println(io)
-        for atom in system
-            println(io, "    ", atom)
-        end
     end
 end
 
