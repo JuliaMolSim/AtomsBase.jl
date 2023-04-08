@@ -56,13 +56,18 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
         @printf io "    %-17s : %s\n" string(k) string(v)
     end
-
-    # TODO Better would be some ascii-graphical representation of the structure
     if length(system) < 10
         extra_line && println(io)
         for atom in system
             println(io, "    ", atom)
         end
+        extra_line = true
+    end
+
+    ascii = visualize_ascii(system)
+    if !isempty(ascii)
+        extra_line && println(io)
+        println(io, "   ", replace(ascii, "\n" => "\n   "))
     end
 end
 
