@@ -6,7 +6,7 @@ using Requires
 
 include("interface.jl")
 include("properties.jl")
-include("ascii_structure.jl")
+include("visualize_ascii.jl")
 include("show.jl")
 include("flexible_system.jl")
 include("atomview.jl")

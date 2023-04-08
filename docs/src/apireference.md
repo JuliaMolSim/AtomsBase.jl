@@ -21,6 +21,7 @@ periodicity
 species_type
 atomkeys
 hasatomkey
+visualize_ascii
 ```
 
 ## Species / atom properties

@@ -28,11 +28,11 @@ end
              :C  => [0.125, 0.0, 0.0]]
     box = [[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"Å"
     system = periodic_system(atoms, box; fractional=true)
-    println(ascii_structure(system))
+    println(visualize_ascii(system))
 
     atoms = [:Si => [0.0, -0.125],
              :C  => [0.125, 0.0]]
     box = [[10, 0.0], [0.0, 5]]u"Å"
     system = periodic_system(atoms, box; fractional=true)
-    println(ascii_structure(system))
+    println(visualize_ascii(system))
 end

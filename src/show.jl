@@ -64,10 +64,10 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
     end
 
-    ascii_string = ascii_structure(system)
-    if !isempty(ascii_string)
+    ascii = visualize_ascii(system)
+    if !isempty(ascii)
         extra_line && println(io)
-        println(io, "   ", replace(ascii_string, "\n" => "\n   "))
+        println(io, "   ", replace(ascii, "\n" => "\n   "))
     end
 end
 

@@ -1,14 +1,14 @@
 using UnitfulAtomic
 using LinearAlgebra
 
-export ascii_structure
+export visualize_ascii
 
 """
 Build an ASCII representation of the passed atomistic structure. The string may
 be empty if the passed structure could not be represented
 (structure not supported or invalid).
 """
-function ascii_structure(system::AbstractSystem{D}) where {D}
+function visualize_ascii(system::AbstractSystem{D}) where {D}
     # Heavily inspired by the ascii art plot algorithm of GPAW
     # See output.py in the GPAW sources
 
@@ -109,4 +109,4 @@ function ascii_structure(system::AbstractSystem{D}) where {D}
 
     join(reverse([join(col) for col in eachcol(canvas)]), "\n")
 end
-ascii_structure(::AbstractSystem{1}) = ""
+visualize_ascii(::AbstractSystem{1}) = ""
