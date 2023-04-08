@@ -14,6 +14,7 @@ UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 
 [compat]
 PeriodicTable = "1"
+Requires = "1"
 StaticArrays = "1"
 Unitful = "1"
 UnitfulAtomic = "1"
