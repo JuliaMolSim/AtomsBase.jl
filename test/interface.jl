@@ -61,4 +61,14 @@ using PeriodicTable
         get_z_periodicity(syst) = syst[:boundary_conditions][3]
         @test @inferred(BoundaryCondition, get_z_periodicity(flexible)) == DirichletZero()
     end
+
+    # https://github.com/JuliaMolSim/AtomsBase.jl/issues/71
+    @testset "Atoms element names" begin
+        @test element("silicon").name == "Silicon"
+        @test element(:Si).name == "Silicon"
+        @test element(14).name == "Silicon"
+
+        @test_throws ArgumentError element("Si")
+        @test_throws KeyError element(0)
+    end
 end

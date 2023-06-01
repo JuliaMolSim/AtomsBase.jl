@@ -88,7 +88,24 @@ end
 #
 
 """The element corresponding to a species/atom (or missing)."""
-element(id::Union{Symbol,AbstractString,Integer})  = PeriodicTable.elements[id]
+element(id::Union{Symbol,Integer}) = PeriodicTable.elements[id]  # Keep for better inlining
+function element(name::AbstractString)
+    try
+        return PeriodicTable.elements[name]
+    catch e
+        if e isa KeyError
+            throw(ArgumentError(
+                "Unknown element name: $name. " *
+                "Note that AtomsBase uses PeriodicTables to resolve element identifiers, " *
+                "where strings are considered element names. To lookup an element by " *
+                "element symbol use `Symbol`s instead, e.g. "*
+                """`Atom(Symbol("Si"), zeros(3)u"Å")` or `Atom("silicon", zeros(3)u"Å")`."""
+            ))
+        else
+            rethrow()
+        end
+    end
+end
 
 
 """
