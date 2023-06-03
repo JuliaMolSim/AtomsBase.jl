@@ -148,10 +148,14 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
         box = [[1.54732, 0.0, 0.0],
                [-0.807289, 0.4654985, 0.0],
                [-0.500870, 0.5615117, 0.7928950]]u"Å"
+    elseif cellmatrix == :diagonal
+        box = [[1.54732, 0.0, 0.0],
+              [0.0, 0.4654985, 0.0],
+              [0.0, 0.0, 0.7928950]]u"Å"
     else
-        box = [[-1.50304, 0.850344, 0.717239],
-               [ 0.36113, 0.008144, 0.814712],
-               [ 0.06828, 0.381122, 0.129081]]u"Å"
+        box = [[1.50304, 0.850344, 0.717239],
+               [ 0.36113, 1.008144, 0.814712],
+               [ 0.06828, 0.381122, 2.129081]]u"Å"
     end
     bcs = [Periodic(), Periodic(), DirichletZero()]
     system = atomic_system(atoms, box, bcs; sysprop...)
