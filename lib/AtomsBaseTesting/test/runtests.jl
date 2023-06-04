@@ -13,16 +13,25 @@ include("testmacros.jl")
             box = reduce(hcat, bounding_box(case.system))
             @test UpperTriangular(box) != box
             @test LowerTriangular(box) != box
+            @test Diagonal(box) != box
         end
         let case = make_test_system(; cellmatrix=:upper_triangular)
             box = reduce(hcat, bounding_box(case.system))
             @test UpperTriangular(box) == box
             @test LowerTriangular(box) != box
+            @test Diagonal(box) != box
         end
         let case = make_test_system(; cellmatrix=:lower_triangular)
             box = reduce(hcat, bounding_box(case.system))
             @test UpperTriangular(box) != box
             @test LowerTriangular(box) == box
+            @test Diagonal(box) != box
+        end
+        let case = make_test_system(; cellmatrix=:diagonal)
+            box = reduce(hcat, bounding_box(case.system))
+            @test UpperTriangular(box) != box
+            @test LowerTriangular(box) != box
+            @test Diagonal(box) == box
         end
 
         @test  hasatomkey(make_test_system().system,                            :vdw_radius)
