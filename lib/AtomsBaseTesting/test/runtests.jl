@@ -29,11 +29,11 @@ include("testmacros.jl")
         end
         let case = make_test_system(; cellmatrix=:diagonal)
             box = reduce(hcat, bounding_box(case.system))
-            @test UpperTriangular(box) != box
-            @test LowerTriangular(box) != box
             @test Diagonal(box) == box
+            @test UpperTriangular(box) == box
+            @test LowerTriangular(box) == box
         end
-
+ 
         @test  hasatomkey(make_test_system().system,                            :vdw_radius)
         @test !hasatomkey(make_test_system(; drop_atprop=[:vdw_radius]).system, :vdw_radius)
 
