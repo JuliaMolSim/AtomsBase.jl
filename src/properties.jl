@@ -1,17 +1,17 @@
-export chemical_formula
+export chemical_formula, element_symbol
 
 """
     element_symbol(system)
-    element_symbol(system, index)
 
-Return the symbol corresponding to the elmeent of an atom. Note that
+Return the symbols corresponding to the elements of the atoms. Note that
 this may be different than `atomic_symbol` for cases where `atomic_symbol`
 is chosen to be more specific (i.e. designate a special atom).
 """
-element_symbol(system::AbstractSystem, i::Integer) = element(atomic_symbol(system, i)).symbol
-element_symbol(system::AbstractSystem) = [element(num).symbol for num in atomic_number(system)]
-# Note that atomic_symbol cannot be used here, since this may map
-# to something more specific than the element
+function element_symbol(system::AbstractSystem)
+    # Note that atomic_symbol cannot be used here, since this may map
+    # to something more specific than the element
+    [Symbol(element(num).symbol) for num in atomic_number(system)]
+end
 
 
 """
@@ -30,5 +30,4 @@ function chemical_formula(symbols::AbstractVector{Symbol})
     end
     join(sort(parts))
 end
-
 chemical_formula(system::AbstractSystem) = chemical_formula(element_symbol(system))
