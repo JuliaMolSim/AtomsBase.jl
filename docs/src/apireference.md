@@ -15,6 +15,7 @@ Pages = ["apireference.md"]
 boundary_conditions
 bounding_box
 chemical_formula
+element_symbol
 isinfinite
 n_dimensions
 periodicity
