@@ -1,4 +1,18 @@
-export chemical_formula
+export chemical_formula, element_symbol
+
+"""
+    element_symbol(system)
+
+Return the symbols corresponding to the elements of the atoms. Note that
+this may be different than `atomic_symbol` for cases where `atomic_symbol`
+is chosen to be more specific (i.e. designate a special atom).
+"""
+function element_symbol(system::AbstractSystem)
+    # Note that atomic_symbol cannot be used here, since this may map
+    # to something more specific than the element
+    [Symbol(element(num).symbol) for num in atomic_number(system)]
+end
+
 
 """
 Returns the chemical formula of an AbstractSystem as a string.
@@ -16,4 +30,4 @@ function chemical_formula(symbols::AbstractVector{Symbol})
     end
     join(sort(parts))
 end
-chemical_formula(system) = chemical_formula(atomic_symbol(system))
+chemical_formula(system::AbstractSystem) = chemical_formula(element_symbol(system))
