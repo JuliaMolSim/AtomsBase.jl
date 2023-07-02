@@ -28,7 +28,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         @test rnorm(method(s, 1), method(t, 1)) < rtol
     end
 
-    for method in (atomic_symbol, atomic_number)
+    for method in (atomic_symbol, atomic_number, element_symbol)
         @test method(s)    == method(t)
         @test method(s, 1) == method(t, 1)
     end

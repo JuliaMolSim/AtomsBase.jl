@@ -21,5 +21,6 @@ end
                   ]
     system      = periodic_system(atoms, lattice)
     @test atomic_symbol(system) == [:C1, :C2, :D, :D, :D]
+    @test element_symbol(system) == [:C, :C, :H, :H, :H]
     @test chemical_formula(system) == "C₂H₃"
 end
