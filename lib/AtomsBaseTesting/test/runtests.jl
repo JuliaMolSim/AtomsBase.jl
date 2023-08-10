@@ -86,5 +86,10 @@ include("testmacros.jl")
         @testpass test_approx_eq(system, system_edit; common_only=true)
     end
 
+    @testset "Identical systems without multiplicity" begin
+        case = make_test_system(; drop_sysprop=[:multiplicity])
+        @testpass test_approx_eq(case.system, case.system)
+    end
+
     # TODO More tests would be useful
 end
