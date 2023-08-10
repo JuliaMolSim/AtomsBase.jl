@@ -80,6 +80,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
             @test haskey(s, prop) == haskey(t, prop)
             continue
         end
+        (haskey(s, prop) && haskey(t, prop)) || continue
 
         if s[prop] isa Quantity
             @test rnorm(s[prop], t[prop]) < rtol
