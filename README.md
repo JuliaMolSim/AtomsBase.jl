@@ -40,6 +40,7 @@ The following (not all yet-registered) packages currently make use of AtomsBase:
 * [ASEconvert](https://github.com/mfherbst/ASEconvert.jl)
 * [AtomIO](https://github.com/mfherbst/AtomIO.jl): I/O for atomic structures, also wraps some ASE functionality
 * [Atomistic](https://github.com/cesmix-mit/Atomistic.jl/tree/263ec97b5f380f1b2ba593bf8feaf36e7f7cff9a): integrated workflow for MD simulations, part of [CESMIX](https://computing.mit.edu/cesmix/)
+* [AutoBZCore.jl](https://github.com/lxvm/AutoBZCore.jl/): Brillouin-zone integration
 * [BFPIS](https://github.com/GDufenshuoo/BFPIS.jl)
 * [ChemistryFeaturization](https://github.com/Chemellia/ChemistryFeaturization.jl): Interface for featurization of atomic structures for input into machine learning models, part of [Chemellia](https://chemellia.org)
 * [DFTK](https://github.com/JuliaMolSim/DFTK.jl): density functional theory simulations
