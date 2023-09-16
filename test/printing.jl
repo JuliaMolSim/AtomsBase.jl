@@ -24,15 +24,27 @@ using Test
 end
 
 @testset "Test ASCII representation of structures" begin
-    atoms = [:Si => [0.0, -0.125, 0.0],
-             :C  => [0.125, 0.0, 0.0]]
-    box = [[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"Å"
-    system = periodic_system(atoms, box; fractional=true)
-    println(visualize_ascii(system))
+    @testset "3D standard system" begin
+        atoms = [:Si => [0.0, -0.125, 0.0],
+                 :C  => [0.125, 0.0, 0.0]]
+        box = [[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"Å"
+        system = periodic_system(atoms, box; fractional=true)
+        println(visualize_ascii(system))
+    end
 
-    atoms = [:Si => [0.0, -0.125],
-             :C  => [0.125, 0.0]]
-    box = [[10, 0.0], [0.0, 5]]u"Å"
-    system = periodic_system(atoms, box; fractional=true)
-    println(visualize_ascii(system))
+    @testset "2D standard system" begin
+        atoms = [:Si => [0.0, -0.125],
+                 :C  => [0.125, 0.0]]
+        box = [[10, 0.0], [0.0, 5]]u"Å"
+        system = periodic_system(atoms, box; fractional=true)
+        println(visualize_ascii(system))
+    end
+
+    @testset "3D with negative unit cell" begin
+        atoms = [:Si => [0.75, 0.75, 0.75],
+                 :Si => [0.0,  0.0,  0.0]]
+        box = [[-2.73, -2.73, 0.0], [-2.73, 0.0, -2.73], [0.0, -2.73, -2.73]]u"Å"
+        system = periodic_system(atoms, box; fractional=true)
+        println(visualize_ascii(system))
+    end
 end
