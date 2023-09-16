@@ -22,7 +22,6 @@ makedocs(;
         "apireference.md"
     ],
     checkdocs=:exports,
-    strict=true,
 )
 
 deploydocs(;
