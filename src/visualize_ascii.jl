@@ -16,11 +16,11 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
     cell  = austrip.(reduce(hcat, bounding_box(system)))
     box   = Vector(diag(cell))
     shift = zero(box)
+    plot_box = D > 1
 
     is_right_handed = det(cell) > 0
     is_right_handed || return ""
 
-    plot_box = D > 1
     is_orthorhombic = isdiag(cell)
     if !is_orthorhombic
         # Build an orthorhombic cell inscribing the actual unit cell
@@ -33,6 +33,9 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
 
         plot_box = false
     end
+
+    # If one of the box coordinates is negative 
+    any(box .≤ 0) && return ""
 
     # Normalise positions
     normpos = [@. box * mod((shift + austrip(p)) / box, 1.0)

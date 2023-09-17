@@ -6,7 +6,6 @@ DocMeta.setdocmeta!(AtomsBase, :DocTestSetup, :(using AtomsBase); recursive=true
 makedocs(;
     modules=[AtomsBase],
     authors="JuliaMolSim community",
-    repo="https://github.com/JuliaMolSim/AtomsBase.jl/blob/{commit}{path}#{line}",
     sitename="AtomsBase.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
@@ -22,7 +21,6 @@ makedocs(;
         "apireference.md"
     ],
     checkdocs=:exports,
-    strict=true,
 )
 
 deploydocs(;
