@@ -136,7 +136,7 @@ should be a vector of vectors each containing `D` elements that are
 `<:Unitful.Length`. If an index is passed or the action is on a `species`,
 return only the position of the referenced `species` / species on that index.
 """
-position(sys::AbstractSystem)        = position.(sys)    # in Cartesian coordinates!
+position(sys::AbstractSystem)        = map(position, sys.particles)    # in Cartesian coordinates!
 position(sys::AbstractSystem, index) = position(sys[index])
 
 
