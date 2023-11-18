@@ -12,6 +12,7 @@ include("flexible_system.jl")
 include("atomview.jl")
 include("atom.jl")
 include("fast_system.jl")
+include("bonded_system.jl")
 
 function __init__()
     @require AtomsView="ee286e10-dd2d-4ff2-afcb-0a3cd50c8041" begin
