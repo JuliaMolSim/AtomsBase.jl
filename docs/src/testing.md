@@ -12,6 +12,7 @@ The basic idea of the functions is to use `make_test_system` to obtain a
 test system, construct an identical system in a downstream library and then use
 `test_approx_eq` to check they are actually equal.
 
-For usage examples see the tests of [ExtXYZ](https://github.com/libAtoms/ExtXYZ.jl),
-[AtomsIO](https://github.com/mfherbst/AtomIO.jl)
-and [ASEconnect](https://github.com/mfherbst/ASEconvert.jl).
+For usage examples see the tests of [ExtXYZ](https://github.com/libAtoms/ExtXYZ.jl/blob/master/test/atomsbase.jl),
+[AtomsIO](https://github.com/mfherbst/AtomsIO.jl/blob/master/test/xsf.jl),
+[Chemfiles](https://github.com/chemfiles/Chemfiles.jl/blob/master/src/atomsbase.jl)
+and [ASEconnect](https://github.com/mfherbst/ASEconvert.jl/blob/master/test/runtests.jl).

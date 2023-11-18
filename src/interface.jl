@@ -3,8 +3,10 @@ import PeriodicTable
 
 export AbstractSystem
 export BoundaryCondition, DirichletZero, Periodic, infinite_box, isinfinite
+
 export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type, bonds
-export position, velocity, element, atomic_mass, atomic_number, atomic_symbol
+export position, velocity, element, element_symbol, atomic_mass, atomic_number, atomic_symbol
+
 export atomkeys, hasatomkey
 
 #
@@ -123,6 +125,24 @@ function element(name::AbstractString)
         end
     end
 end
+
+
+"""
+    element_symbol(system)
+    element_symbol(system, index)
+    element_symbol(species)
+
+Return the symbols corresponding to the elements of the atoms. Note that
+this may be different than `atomic_symbol` for cases where `atomic_symbol`
+is chosen to be more specific (i.e. designate a special atom).
+"""
+function element_symbol(system::AbstractSystem)
+    # Note that atomic_symbol cannot be used here, since this may map
+    # to something more specific than the element
+    [Symbol(element(num).symbol) for num in atomic_number(system)]
+end
+element_symbol(sys::AbstractSystem, index) = element_symbol(sys[index])
+element_symbol(species) = Symbol(element(atomic_number(species)).symbol)
 
 
 """

@@ -1,7 +1,7 @@
 name = "AtomsBaseTesting"
 uuid = "ed7c10db-df7e-4efa-a7be-4f4190f7f227"
 authors = ["JuliaMolSim community"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 AtomsBase = "a963bdd2-2df7-4f54-a1ee-49d51e6be12a"
