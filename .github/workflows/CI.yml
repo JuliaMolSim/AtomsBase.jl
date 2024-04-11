@@ -26,7 +26,7 @@ jobs:
     continue-on-error: ${{ matrix.version == 'nightly' }}
     steps:
       - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
       - uses: julia-actions/cache@v1
@@ -49,7 +49,7 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@v2
         with:
           version: '1'
       - uses: julia-actions/julia-buildpkg@v1
