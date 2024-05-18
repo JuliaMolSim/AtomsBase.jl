@@ -22,53 +22,25 @@ function show_system(io::IO, system::AbstractSystem{D}) where {D}
     end
     print(io, ")")
 end
+
 function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) where {D}
-    bc  = boundary_conditions(system)
-    box = bounding_box(system)
-    print(io, typeof(system).name.name, "($(chemical_formula(system))")
-    if isinfinite(system)
-        print(io, ", infinite")
-    else
-        perstr = [p ? "T" : "F" for p in periodicity(system)]
-        print(io, ", periodic = ", join(perstr, ""))
-    end
-    println(io, "):")
+    println(io, typeof(system).name.name, "($(chemical_formula(system))")
+    print(io, get_cell(system))
 
-    extra_line = false
-    if !isinfinite(system)
-        extra_line = true
-        box = bounding_box(system)
-        bunit = unit(eltype(first(bounding_box(system))))
-        for (i, bvector) in enumerate(box)
-            if i == 1
-                @printf io "    %-17s : [" "bounding_box"
-            else
-                print(io, " "^25)
-            end
-            boxstr = [(@sprintf "%8.6g" ustrip(b)) for b in bvector]
-            print(io, join(boxstr, " "))
-            println(io, i == D ? "]u\"$bunit\"" : ";")
-        end
-    end
-
-    for (k, v) in pairs(system)
-        k in (:bounding_box, :boundary_conditions) && continue
-        extra_line = true
-        @printf io "    %-17s : %s\n" string(k) string(v)
-    end
     if length(system) < 10
-        extra_line && println(io)
         for atom in system
             println(io, "    ", atom)
         end
         extra_line = true
     end
 
-    ascii = visualize_ascii(system)
-    if !isempty(ascii)
-        extra_line && println(io)
-        println(io, "   ", replace(ascii, "\n" => "\n   "))
-    end
+    # TODO: this currently fails, but I don't know how to 
+    #       fix it. Need to return to it. 
+    # ascii = visualize_ascii(system)
+    # if !isempty(ascii)
+    #     extra_line && println(io)
+    #     println(io, "   ", replace(ascii, "\n" => "\n   "))
+    # end
 end
 
 Base.show(io::IO, system::AbstractSystem) = show_system(io, system)

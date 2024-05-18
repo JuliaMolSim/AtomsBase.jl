@@ -14,8 +14,14 @@ struct ChemicalElement
 end
 
 Base.show(io::IO, element::ChemicalElement) = 
-      print(io, atomic_symbol(element))
+      print(io, Symbol(element))
 
+ChemicalElement(sym::Symbol) = ChemicalElement(_sym2z[sym])  
+ChemicalElement(sym::ChemicalElement) = sym
+
+import Base.== 
+
+==(a::ChemicalElement, sym::Symbol) = (Symbol(a) == sym)
 
 # -------- fast access to the periodic table 
 
@@ -28,13 +34,22 @@ const _chem_el_info = [
        for z in 1:length(PeriodicTable.elements)
       ]
 
+const _sym2z = Dict{Symbol, UInt8}() 
+for z in 1:length(_chem_el_info)
+   _sym2z[_chem_el_info[z].symbol] = z
+end
 
 # -------- accessor functions 
 
 atomic_number(element::ChemicalElement) = element.atomic_number
 
-atomic_symbol(element::ChemicalElement) = _chem_el_info[element.atomic_number].symbol
+atomic_symbol(element::ChemicalElement) = element 
+
+Base.convert(::typeof(Symbol), element::ChemicalElement) = Symbol(element) 
+Symbol(element::ChemicalElement) = _chem_el_info[element.atomic_number].symbol
 
 atomic_mass(element::ChemicalElement) = _chem_el_info[element.atomic_number].atomic_mass
 
 rich_info(element::ChemicalElement) = PeriodicTable.elements[element.atomic_number]
+
+element(element::ChemicalElement) = rich_info(element)

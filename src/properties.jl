@@ -19,4 +19,5 @@ function chemical_formula(symbols::AbstractVector{Symbol})
     end
     join(sort(parts))
 end
-chemical_formula(system::AbstractSystem) = chemical_formula(element_symbol(system))
+chemical_formula(system::AbstractSystem) = 
+        chemical_formula(element_symbol(system))

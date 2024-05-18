@@ -17,6 +17,21 @@ periodicity(cell::PCell) = cell.pbc
 
 isinfinite(cell::PCell) = map(!, cell.pbc)
 
+n_dimensions(::PCell{D}) where {D} = D
+
+# ---------------------- pretty printing 
+
+function Base.show(io::IO, cell::PCell{D}) where {D} 
+   u = unit(first(cell.cell_vectors[1][1]))
+   println(io, "    PCell(", prod(p -> p ? "T" : "F", cell.pbc), ",")  
+   for d = 1:D 
+      print(io, "          ", ustrip.(cell.cell_vectors[d]), u)
+      d < D && println(",") 
+   end 
+   println(")")
+end
+
+
 # ---------------------- Constructors 
 
 # different ways to construct cell vectors 
@@ -52,9 +67,9 @@ _auto_pbc(bc::Union{Bool, Nothing, BoundaryCondition}, cell_vectors) =
 
 # kwarg constructor for PCell
 
-PCell(; cell_vectors, bc) = 
+PCell(; cell_vectors, boundary_conditions) = 
       PCell(_auto_cell_vectors(cell_vectors), 
-            _auto_pbc(bc, cell_vectors))
+            _auto_pbc(boundary_conditions, cell_vectors))
 
 
 

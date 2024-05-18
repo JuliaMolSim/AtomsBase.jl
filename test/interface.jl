@@ -6,34 +6,47 @@ using PeriodicTable
 
 @testset "Interface" begin
     box = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
-    bcs = [Periodic(), Periodic(), DirichletZero()]
+    bcs = [Periodic(), Periodic(), OpenBC()]
     positions = [[0.25, 0.25, 0.25], [0.75, 0.75, 0.75]]u"m"
     elements = [:C, :C]
     atoms = [Atom(elements[i], positions[i]) for i in 1:2]
+    fatoms = [ FastAtom(elements[i], positions[i]) for i in 1:2 ] 
 
     @testset "Atoms" begin
         @test position(atoms[1]) == [0.25, 0.25, 0.25]u"m"
+        @test position(fatoms[1]) == [0.25, 0.25, 0.25]u"m"
         @test velocity(atoms[1]) == [0.0, 0.0, 0.0]u"bohr/s"
         @test atomic_symbol(atoms[1]) == :C
+        @test atomic_symbol(fatoms[1]) == :C
         @test atomic_number(atoms[1]) == 6
+        @test atomic_number(fatoms[1]) == 6
         @test atomic_mass(atoms[1])   == 12.011u"u"
+        @test atomic_mass(fatoms[1])   == 12.011u"u"
         @test element(atoms[1]) == element(:C)
-        @test atoms[1][:atomic_number] == 6
-        @test keys(atoms[1]) == (:position, :velocity, :atomic_symbol,
-                                 :atomic_number, :atomic_mass)
+        @test element(fatoms[1]) == element(:C)
+        # CO: I've removed the following tests - they are not part of the public 
+        #     interface but of the implementatio details. We can discuss
+        # @test atoms[1][:atomic_number] == 6
+        # @test keys(atoms[1]) == (:position, :velocity, :atomic_symbol,
+        #                          :atomic_number, :atomic_mass)
         @test get(atoms[1], :blubber, :adidi) == :adidi
+        @test get(fatoms[1], :blubber, :adidi) == :adidi
     end
 
     @testset "System" begin
         flexible = FlexibleSystem(atoms, box, bcs)
-        fast     = FastSystem(flexible)
+        fast    = FastSystem(flexible)
+        fast2   = FastSystem(atoms, box, bcs)
+        @test fast.cell == fast2.cell
+        @test fast.position == fast2.position
         @test length(flexible) == 2
         @test size(flexible)   == (2, )
 
-        @test bounding_box(flexible) == [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
-        @test boundary_conditions(flexible) == [Periodic(), Periodic(), DirichletZero()]
-        @test periodicity(flexible) == [1, 1, 0]
-        @test !isinfinite(flexible)
+        @test all(bounding_box(flexible) .== [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m")
+        @test all(boundary_conditions(flexible) .== [Periodic(), Periodic(), OpenBC()])
+        @test periodicity(flexible) == (true, true, false)
+        @test !all(isinfinite(flexible))
+        @test any(isinfinite(flexible))
         @test n_dimensions(flexible) == 3
         @test position(flexible) == [[0.25, 0.25, 0.25], [0.75, 0.75, 0.75]]u"m"
         @test position(flexible, 1) == [0.25, 0.25, 0.25]u"m"
@@ -45,13 +58,17 @@ using PeriodicTable
         @test ismissing(velocity(fast, 2))
         @test atomic_symbol(flexible, 2) == :C
         @test atomic_number(flexible, 2) == 6
-        @test atomic_mass(flexible, 1)   == 12.011u"u"
+        @test atomic_mass(flexible, 1)   == PeriodicTable.elements[6].atomic_mass
 
-        @test atomkeys(flexible) == (:position, :velocity, :atomic_symbol,
-                                     :atomic_number, :atomic_mass)
-        @test hasatomkey(flexible, :atomic_number)
-        @test flexible[1, :atomic_symbol] == :C
-        @test flexible[:, :atomic_symbol] == [:C, :C]
+        # CO: again this is not public interface so I think should not be tested 
+        #     but we can discuss this 
+        # @test atomkeys(flexible) == (:position, :velocity, :atomic_symbol,
+        #                              :atomic_number, :atomic_mass)
+        # @test hasatomkey(flexible, :atomic_number)
+        # @test flexible[1, :atomic_symbol] == :C
+        # @test flexible[:, :atomic_symbol] == [:C, :C]
+        @test atomic_symbol(flexible[1]) == :C
+        @test atomic_symbol.(flexible[:]) == [:C, :C] 
 
         @test ismissing(velocity(fast))
         @test all(position(fast)      .== position(flexible))
@@ -59,7 +76,7 @@ using PeriodicTable
 
         # type stability
         get_z_periodicity(syst) = syst[:boundary_conditions][3]
-        @test @inferred(BoundaryCondition, get_z_periodicity(flexible)) == DirichletZero()
+        @test @inferred(BoundaryCondition, get_z_periodicity(flexible)) == OpenBC()
     end
 
     # https://github.com/JuliaMolSim/AtomsBase.jl/issues/71

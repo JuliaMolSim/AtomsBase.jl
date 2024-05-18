@@ -11,16 +11,22 @@ struct FastSystem{D, TCELL, L <: Unitful.Length, M <: Unitful.Mass} <: SystemWit
 end
 
 # Constructor to fetch the types
-function FastSystem(box, boundary_conditions, positions, atomic_symbols, atomic_numbers, atomic_masses)
-    FastSystem{length(box),eltype(eltype(positions)),eltype(atomic_masses)}(
-        box, boundary_conditions, positions, atomic_symbols, atomic_numbers, atomic_masses
+function FastSystem(cell::TCELL, positions, atomic_ids, atomic_masses) where {TCELL}
+    D = n_dimensions(cell)  
+    L = eltype(eltype(positions)) 
+    M = eltype(atomic_masses)
+    chemical_elements = ChemicalElement.(atomic_ids)
+    FastSystem{D, TCELL, L, M}(
+        cell, chemical_elements, positions, atomic_masses
     )
 end
 
 # Constructor to take data from another system
-function FastSystem(system::AbstractSystem)
-    FastSystem(bounding_box(system), boundary_conditions(system), position(system),
-               atomic_symbol(system), atomic_number(system), atomic_mass(system))
+function FastSystem(system::SystemWithCell)
+    FastSystem(get_cell(system), 
+               position(system),
+               atomic_number(system), 
+               atomic_mass(system))
 end
 
 # Convenience constructor where we don't have to preconstruct all the static stuff...
@@ -35,12 +41,15 @@ function FastSystem(particles, box, boundary_conditions)
     if !all(n_dimensions.(particles) .== D)
         throw(ArgumentError("Particles must have positions of length D=$D."))
     end
-    FastSystem(box, boundary_conditions, position.(particles), atomic_symbol.(particles),
-               atomic_number.(particles), atomic_mass.(particles))
+    cell = PCell(; cell_vectors = box, 
+                   boundary_conditions = boundary_conditions)
+    FastSystem(cell, position.(particles), 
+                atomic_number.(particles), 
+                atomic_mass.(particles))
 end
 
-bounding_box(sys::FastSystem)        = sys.bounding_box
-boundary_conditions(sys::FastSystem) = sys.boundary_conditions
+get_cell(sys::FastSystem) = sys.cell
+
 Base.length(sys::FastSystem)         = length(sys.position)
 Base.size(sys::FastSystem)           = size(sys.position)
 
@@ -48,8 +57,8 @@ species_type(::FS) where {FS <: FastSystem} = AtomView{FS}
 Base.getindex(sys::FastSystem, i::Integer)  = AtomView(sys, i)
 
 position(s::FastSystem)       = s.position
-atomic_symbol(s::FastSystem)  = s.atomic_symbol
-atomic_number(s::FastSystem)  = s.atomic_number
+atomic_symbol(s::FastSystem)  = s.chemical_element
+atomic_number(s::FastSystem)  = getfield.(s.chemical_element, :atomic_number)  #  reinterpret(UInt8, s.chemical_element)
 atomic_mass(s::FastSystem)    = s.atomic_mass
 velocity(::FastSystem)        = missing
 

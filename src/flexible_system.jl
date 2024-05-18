@@ -12,6 +12,8 @@ end
 
 # System property access
 
+get_cell(sys::FlexibleSystem) = sys.cell
+
 function Base.getindex(system::FlexibleSystem, x::Symbol)
     if x === :bounding_box
         bounding_box(system)
@@ -66,8 +68,11 @@ function FlexibleSystem(
     if !all(length.(box) .== D)
         throw(ArgumentError("Box must have D vectors of length D"))
     end
-    cell = PCell(box, boundary_conditions)
-    FlexibleSystem(particles, box, boundary_conditions, Dict(kwargs...))
+    cell = PCell(; cell_vectors = box, 
+                   boundary_conditions = boundary_conditions)
+    TPART = eltype(particles)
+    TCELL = typeof(cell)                   
+    FlexibleSystem{D, TPART, TCELL}(particles, cell, Dict{Symbol, Any}(kwargs...))
 end
 
 function FlexibleSystem(particles; bounding_box, boundary_conditions, kwargs...)
