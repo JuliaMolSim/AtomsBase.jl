@@ -11,6 +11,7 @@ mutable struct FlexibleSystem{D, TPART, TCELL} <: SystemWithCell{D, TCELL}
 end
 
 # System property access
+
 function Base.getindex(system::FlexibleSystem, x::Symbol)
     if x === :bounding_box
         bounding_box(system)
@@ -20,19 +21,33 @@ function Base.getindex(system::FlexibleSystem, x::Symbol)
         getindex(system.data, x)
     end
 end
+
 function Base.haskey(system::FlexibleSystem, x::Symbol)
     x in (:bounding_box, :boundary_conditions) || haskey(system.data, x)
 end
+
 Base.keys(system::FlexibleSystem) = (:bounding_box, :boundary_conditions, keys(system.data)...)
 
 # Atom and atom property access
-Base.getindex(system::FlexibleSystem, i::Integer) = system.particles[i]
-Base.getindex(system::FlexibleSystem, i::Integer, x::Symbol) = system.particles[i][x]
-function Base.getindex(system::FlexibleSystem, i::AbstractVector, x::Symbol)
-    [at[x] for at in system.particles[i]]
-end
-Base.getindex(system::FlexibleSystem, ::Colon, x::Symbol) = [at[x] for at in system.particles]
 
+Base.size(sys::FlexibleSystem)   = size(sys.particles)
+
+Base.length(sys::FlexibleSystem) = length(sys.particles)
+
+Base.getindex(system::FlexibleSystem, i::Union{Integer, AbstractVector}) = 
+        system.particles[i]
+
+Base.getindex(system::FlexibleSystem, i::Integer, x::Symbol) = 
+        system.particles[i][x]
+
+Base.getindex(system::FlexibleSystem, i::AbstractVector, x::Symbol) = 
+        Base.getindex.(Ref(system), i, x)
+
+Base.getindex(system::FlexibleSystem, ::Colon, x::Symbol) = 
+        [at[x] for at in system.particles]
+
+
+# ------------ Constructors         
 
 """
     FlexibleSystem(particles, bounding_box, boundary_conditions; kwargs...)
@@ -42,17 +57,19 @@ Construct a flexible system, a versatile data structure for atomistic systems,
 which puts an emphasis on flexibility rather than speed.
 """
 function FlexibleSystem(
-    particles::AbstractVector{S},
-    box::AbstractVector{<:AbstractVector{L}},
-    boundary_conditions::AbstractVector{BC};
-    kwargs...
-) where {BC<:BoundaryCondition, L<:Unitful.Length, S}
-    D = length(box)
+        particles::AbstractVector,
+        box::Union{Tuple, AbstractVector},
+        boundary_conditions::Union{Tuple, AbstractVector};
+        kwargs...
+        ) 
+    D = length(box) 
     if !all(length.(box) .== D)
         throw(ArgumentError("Box must have D vectors of length D"))
     end
-    FlexibleSystem{D, S, L}(particles, box, boundary_conditions, Dict(kwargs...))
+    cell = PCell(box, boundary_conditions)
+    FlexibleSystem(particles, box, boundary_conditions, Dict(kwargs...))
 end
+
 function FlexibleSystem(particles; bounding_box, boundary_conditions, kwargs...)
     FlexibleSystem(particles, bounding_box, boundary_conditions; kwargs...)
 end
@@ -66,6 +83,8 @@ function FlexibleSystem(system::AbstractSystem; particles=nothing, atoms=nothing
     particles = something(particles, atoms, collect(system))
     FlexibleSystem(particles; pairs(system)..., kwargs...)
 end
+
+
 
 """
     AbstractSystem(system::AbstractSystem; kwargs...)
@@ -87,6 +106,3 @@ AbstractSystem(system::AbstractSystem; kwargs...) = FlexibleSystem(system; kwarg
 
 species_type(sys::FlexibleSystem{D, S, L}) where {D, S, L} = S
 
-Base.size(sys::FlexibleSystem)   = size(sys.particles)
-
-Base.length(sys::FlexibleSystem) = length(sys.particles)

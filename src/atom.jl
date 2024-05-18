@@ -128,31 +128,32 @@ atomic_number(atom::FastAtom) = atomic_number(atom.element)
 element(atom::FastAtom)       = atom.element 
 n_dimensions(::FastAtom{D}) where {D} = D
 
-Base.getindex(at::FastAtom, x::Symbol) = hasfield(FastAtom, x) ? getfield(at, x) : missing 
+Base.getindex(at::FastAtom, x::Symbol) =   
+        hasfield(FastAtom, x) ? getfield(at, x) : missing 
 
-Base.haskey(at::FastAtom,   x::Symbol) = hasfield(FastAtom, x)
+Base.haskey(at::FastAtom,   x::Symbol) = 
+        hasfield(FastAtom, x)
 
-function Base.get(at::FastAtom, x::Symbol, default)
-    hasfield(FastAtom, x) ? getfield(at, x) : default 
-end
+Base.get(at::FastAtom, x::Symbol, default) = 
+        hasfield(FastAtom, x) ? getfield(at, x) : default 
 
-function Base.keys(at::FastAtom)
-    (:position, :element, :atomic_mass,)
-end
+Base.keys(at::FastAtom) = 
+        (:position, :element, :atomic_mass,)
 
-Base.pairs(at::FastAtom) = (k => at[k] for k in keys(at))
+Base.pairs(at::FastAtom) = 
+        (k => at[k] for k in keys(at))
 
 
-function Atom(identifier::AtomId, position::AbstractVector{L};
+function FastAtom(identifier::AtomId, position::AbstractVector{L};
               chemical_element = ChemicalElement(identifier),
               atomic_mass::M   = atomic_mass(chemical_element),
-            ) where {L <: Unitful.Length, V <: Unitful.Velocity, M <: Unitful.Mass}
+            ) where {L <: Unitful.Length, M <: Unitful.Mass}
     D = length(position)            
-    return Atom(chemical_element, SVector{D}(position), atomic_mass)
+    return FastAtom(chemical_element, SVector{D}(position), atomic_mass)
 end
 
-function Atom(; atomic_symbol, position, kwargs...)
-    return Atom(atomic_symbol, position; kwargs...)
+function FastAtom(; atomic_symbol, position, kwargs...)
+    return FastAtom(atomic_symbol, position; kwargs...)
 end
 
 

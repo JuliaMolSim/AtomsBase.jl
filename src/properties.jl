@@ -1,5 +1,8 @@
 export chemical_formula
 
+chemical_formula(symbols::AbstractVector{ChemicalElement}) = 
+        chemical_formula(atomic_symbol.(symbols))
+
 """
 Returns the chemical formula of an AbstractSystem as a string.
 """

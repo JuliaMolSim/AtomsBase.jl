@@ -5,9 +5,11 @@ using StaticArrays
 using Requires
 
 include("interface.jl")
+include("chem.jl")
 include("properties.jl")
 include("visualize_ascii.jl")
 include("show.jl")
+include("cell.jl")
 include("flexible_system.jl")
 include("atomview.jl")
 include("atom.jl")

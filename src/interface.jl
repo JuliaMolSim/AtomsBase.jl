@@ -31,6 +31,12 @@ A `D`-dimensional system.
 """
 abstract type AbstractSystem{D} end
 
+"""
+    SystemWithCell{D, TCELL}
+
+A `D`-dimensional system with a computational cell of type `TCELL`.
+"""
+
 abstract type SystemWithCell{D, TCELL} <: AbstractSystem{D} end 
 
 """
@@ -55,10 +61,17 @@ Return the type used to represent a species or atom.
 function species_type end
 
 """Return vector indicating whether the system is periodic along a dimension."""
-periodicity(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditions(sys)]
+function periodicity(sys::AbstractSystem{D}) where {D} 
+    bc = boundary_conditions(sys) 
+    return ntuple(i -> isa(bc[i], Periodic), D) 
+end
 
 """Returns true if the given system is infinite"""
-isinfinite(sys::AbstractSystem{D}) where {D} = bounding_box(sys) == infinite_box(D)
+function isinfinite end 
+
+# CO: I think this is a dangerous default implementation and I would like to 
+#     remove it entirely. 
+# isinfinite(sys::AbstractSystem{D}) where {D} = bounding_box(sys) == infinite_box(D)
 
 
 """
