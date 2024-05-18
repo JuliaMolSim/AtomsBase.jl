@@ -3,22 +3,29 @@
 #
 export Atom, atomic_system, periodic_system, isolated_system
 
-# Valid types for atom identifiers
-const AtomId = Union{Symbol,AbstractString,Integer}
+
+# Valid types for user-oriented atom identifiers
+const AtomId = Union{Symbol, AbstractString, Integer, ChemicalElement}
+
+
+
+# --------------------------------------------- 
+#  Implementation of a maximally flexible Atom type 
+
 
 struct Atom{D, L<:Unitful.Length, V<:Unitful.Velocity, M<:Unitful.Mass}
     position::SVector{D, L}
     velocity::SVector{D, V}
-    atomic_symbol::Symbol
-    atomic_number::Int
+    element::ChemicalElement
     atomic_mass::M
     data::Dict{Symbol, Any}  # Store arbitrary data about the atom.
 end
+
 velocity(atom::Atom)      = atom.velocity
 position(atom::Atom)      = atom.position
 atomic_mass(atom::Atom)   = atom.atomic_mass
-atomic_symbol(atom::Atom) = atom.atomic_symbol
-atomic_number(atom::Atom) = atom.atomic_number
+atomic_symbol(atom::Atom) = atomic_symbol(atom.element)
+atomic_number(atom::Atom) = atomic_number(atom.element)
 element(atom::Atom)       = element(atomic_number(atom))
 n_dimensions(::Atom{D}) where {D} = D
 
@@ -46,9 +53,8 @@ Supported `kwargs` include `atomic_symbol`, `atomic_number`, `atomic_mass`, `cha
 function Atom(identifier::AtomId,
               position::AbstractVector{L},
               velocity::AbstractVector{V}=zeros(length(position))u"bohr/s";
-              atomic_symbol=Symbol(element(identifier).symbol),
-              atomic_number=element(identifier).number,
-              atomic_mass::M=element(identifier).atomic_mass,
+              chemical_element = ChemicalElement(identifier),
+              atomic_mass::M = element(chemical_element).atomic_mass,
               kwargs...) where {L <: Unitful.Length, V <: Unitful.Velocity, M <: Unitful.Mass}
     Atom{length(position), L, V, M}(position, velocity, atomic_symbol,
                                     atomic_number, atomic_mass, Dict(kwargs...))
@@ -88,7 +94,70 @@ Base.show(io::IO, at::Atom) = show_atom(io, at)
 Base.show(io::IO, mime::MIME"text/plain", at::Atom) = show_atom(io, mime, at)
 
 
-#
+
+
+# --------------------------------------------- 
+#  Implementation of a FastAtom type which is isbits 
+#  and provides equivalent functionality to `FastSystem`
+
+"""
+`FastAtom` : atom type compatible with `FastSystem`, i.e. providing only 
+    atom id (chemical element), position and mass. It is isbits and hence 
+    can be used with `FlexibleSystem` and achieve similar performance 
+    as `FastSystem`.
+
+### Constructors: 
+```
+Atom(identifier::AtomId, position::AbstractVector; atomic_mass)
+Atom(; identifier, position, atomic_mass)
+```
+If `mass` is not provided then it the default provided by `PeriodicTable.jl` 
+is assigned. 
+"""
+struct FastAtom{D, L<:Unitful.Length, M<:Unitful.Mass}
+    element::ChemicalElement
+    position::SVector{D, L} 
+    atomic_mass::M
+end
+
+velocity(atom::FastAtom)      = missing 
+position(atom::FastAtom)      = atom.position
+atomic_mass(atom::FastAtom)   = atom.atomic_mass
+atomic_symbol(atom::FastAtom) = atomic_symbol(atom.element)
+atomic_number(atom::FastAtom) = atomic_number(atom.element)
+element(atom::FastAtom)       = atom.element 
+n_dimensions(::FastAtom{D}) where {D} = D
+
+Base.getindex(at::FastAtom, x::Symbol) = hasfield(FastAtom, x) ? getfield(at, x) : missing 
+
+Base.haskey(at::FastAtom,   x::Symbol) = hasfield(FastAtom, x)
+
+function Base.get(at::FastAtom, x::Symbol, default)
+    hasfield(FastAtom, x) ? getfield(at, x) : default 
+end
+
+function Base.keys(at::FastAtom)
+    (:position, :element, :atomic_mass,)
+end
+
+Base.pairs(at::FastAtom) = (k => at[k] for k in keys(at))
+
+
+function Atom(identifier::AtomId, position::AbstractVector{L};
+              chemical_element = ChemicalElement(identifier),
+              atomic_mass::M   = atomic_mass(chemical_element),
+            ) where {L <: Unitful.Length, V <: Unitful.Velocity, M <: Unitful.Mass}
+    D = length(position)            
+    return Atom(chemical_element, SVector{D}(position), atomic_mass)
+end
+
+function Atom(; atomic_symbol, position, kwargs...)
+    return Atom(atomic_symbol, position; kwargs...)
+end
+
+
+
+# --------------------------------------------- 
 # Special high-level functions to construct atomic systems
 #
 

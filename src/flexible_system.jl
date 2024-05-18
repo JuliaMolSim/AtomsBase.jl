@@ -4,11 +4,10 @@
 export FlexibleSystem
 
 
-struct FlexibleSystem{D, S, L<:Unitful.Length} <: AbstractSystem{D}
-    particles::AbstractVector{S}
-    bounding_box::SVector{D, SVector{D, L}}
-    boundary_conditions::SVector{D, BoundaryCondition}
-    data::Dict{Symbol, Any}  # Store arbitrary data about the atom.
+mutable struct FlexibleSystem{D, TPART, TCELL} <: SystemWithCell{D, TCELL}
+    particles::AbstractVector{TPART}
+    cell::TCELL 
+    data::Dict{Symbol, Any}  # Store arbitrary data about the system
 end
 
 # System property access
@@ -86,9 +85,8 @@ julia> AbstractSystem(system; bounding_box= ..., atoms = ... )
 """
 AbstractSystem(system::AbstractSystem; kwargs...) = FlexibleSystem(system; kwargs...)
 
-bounding_box(sys::FlexibleSystem)        = sys.bounding_box
-boundary_conditions(sys::FlexibleSystem) = sys.boundary_conditions
 species_type(sys::FlexibleSystem{D, S, L}) where {D, S, L} = S
 
 Base.size(sys::FlexibleSystem)   = size(sys.particles)
+
 Base.length(sys::FlexibleSystem) = length(sys.particles)

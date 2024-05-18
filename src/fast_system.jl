@@ -3,12 +3,10 @@
 #
 export FastSystem
 
-struct FastSystem{D, L <: Unitful.Length, M <: Unitful.Mass} <: AbstractSystem{D}
-    bounding_box::SVector{D, SVector{D, L}}
-    boundary_conditions::SVector{D, BoundaryCondition}
+struct FastSystem{D, TCELL, L <: Unitful.Length, M <: Unitful.Mass} <: SystemWithCell{D, TCELL}
+    cell::TCELL 
+    chemical_element::Vector{ChemicalElement}
     position::Vector{SVector{D, L}}
-    atomic_symbol::Vector{Symbol}
-    atomic_number::Vector{Int}
     atomic_mass::Vector{M}
 end
 

@@ -13,6 +13,7 @@ export atomkeys, hasatomkey
 abstract type BoundaryCondition end
 struct DirichletZero <: BoundaryCondition end  # Dirichlet zero boundary (i.e. molecular context)
 struct Periodic <: BoundaryCondition end  # Periodic BCs
+struct OpenBC <: BoundaryCondition end 
 
 infinite_box(::Val{1}) = [[Inf]]u"bohr"
 infinite_box(::Val{2}) = [[Inf, 0], [0, Inf]]u"bohr"
@@ -29,6 +30,8 @@ infinite_box(dim::Int) = infinite_box(Val(dim))
 A `D`-dimensional system.
 """
 abstract type AbstractSystem{D} end
+
+abstract type SystemWithCell{D, TCELL} <: AbstractSystem{D} end 
 
 """
     bounding_box(sys::AbstractSystem{D})
