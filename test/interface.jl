@@ -24,11 +24,9 @@ using PeriodicTable
         @test atomic_mass(fatoms[1])   == 12.011u"u"
         @test element(atoms[1]) == element(:C)
         @test element(fatoms[1]) == element(:C)
-        # CO: I've removed the following tests - they are not part of the public 
-        #     interface but of the implementatio details. We can discuss
-        # @test atoms[1][:atomic_number] == 6
-        # @test keys(atoms[1]) == (:position, :velocity, :atomic_symbol,
-        #                          :atomic_number, :atomic_mass)
+        @test atoms[1][atomic_number] == 6
+        @test keys(atoms[1]) == (:position, :velocity, :chemical_element, 
+                                 :atomic_mass)
         @test get(atoms[1], :blubber, :adidi) == :adidi
         @test get(fatoms[1], :blubber, :adidi) == :adidi
 
@@ -65,13 +63,11 @@ using PeriodicTable
         @test atomic_number(flexible, 2) == 6
         @test atomic_mass(flexible, 1)   == PeriodicTable.elements[6].atomic_mass
 
-        # CO: again this is not public interface so I think should not be tested 
-        #     but we can discuss this 
-        # @test atomkeys(flexible) == (:position, :velocity, :atomic_symbol,
-        #                              :atomic_number, :atomic_mass)
-        # @test hasatomkey(flexible, :atomic_number)
-        # @test flexible[1, :atomic_symbol] == :C
-        # @test flexible[:, :atomic_symbol] == [:C, :C]
+        @test atomkeys(flexible) == (:position, :velocity, :chemical_element,
+                                     :atomic_mass)
+        @test hasatomkey(flexible, :chemical_element)
+        @test flexible[1, atomic_symbol] == :C
+        @test all(flexible[:, atomic_symbol] .== [:C, :C])
         @test atomic_symbol(flexible[1]) == :C
         @test atomic_symbol.(flexible[:]) == [:C, :C] 
 
