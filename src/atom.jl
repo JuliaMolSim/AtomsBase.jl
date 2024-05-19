@@ -29,14 +29,17 @@ atomic_number(atom::Atom) = atomic_number(atom.chemical_element)
 element(atom::Atom)       = element(atom.chemical_element)
 n_dimensions(::Atom{D}) where {D} = D
 
-Base.getindex(at::Atom, x::Symbol) = hasfield(Atom, x) ? getfield(at, x) : getindex(at.data, x)
-Base.haskey(at::Atom,   x::Symbol) = hasfield(Atom, x) || haskey(at.data, x)
-function Base.get(at::Atom, x::Symbol, default)
-    hasfield(Atom, x) ? getfield(at, x) : get(at.data, x, default)
-end
+Base.getindex(at::Atom, x::Symbol) = 
+        hasfield(Atom, x) ? getfield(at, x) : getindex(at.data, x)
+Base.haskey(at::Atom, x::Symbol) = 
+        hasfield(Atom, x) || haskey(at.data, x)
+Base.get(at::Atom, x::Symbol, default) = 
+        haskey(at, x) ? getindex(at, x) : get(at.data, x, default)
+
 function Base.keys(at::Atom)
     (:position, :velocity, :chemical_element, :atomic_mass, keys(at.data)...)
 end
+
 Base.pairs(at::Atom) = (k => at[k] for k in keys(at))
 
 """
@@ -60,14 +63,12 @@ function Atom(identifier::AtomId,
                                     atomic_mass, Dict(kwargs...))
 end
 
-# CO: I don't see what this method is doing that isn't already 
-#     included above?
-# function Atom(id::AtomId, position::AbstractVector, velocity::Missing; kwargs...)
-#     Atom(id, position, zeros(length(position))u"bohr/s"; kwargs...)
-# end
+function Atom(id::AtomId, position::AbstractVector, velocity::Missing; kwargs...)
+    Atom(id, position, zeros(length(position))u"bohr/s"; kwargs...)
+end
 
-function Atom(; atomic_symbol, position, velocity=zeros(length(position))u"bohr/s", kwargs...)
-    Atom(atomic_symbol, position, velocity; atomic_symbol, kwargs...)
+function Atom(; chemical_element, position, velocity=zeros(length(position))u"bohr/s", kwargs...)
+    Atom(chemical_element, position, velocity; kwargs...)
 end
 
 """
@@ -124,10 +125,14 @@ struct FastAtom{D, L<:Unitful.Length, M<:Unitful.Mass}
     atomic_mass::M
 end
 
+Base.show(io::IO, at::FastAtom) = show_atom(io, at)
+Base.show(io::IO, mime::MIME"text/plain", at::FastAtom) = show_atom(io, mime, at)
+
+
 velocity(atom::FastAtom)      = missing 
 position(atom::FastAtom)      = atom.position
 atomic_mass(atom::FastAtom)   = atom.atomic_mass
-atomic_symbol(atom::FastAtom) = atomic_symbol(atom.chemical_element)
+atomic_symbol(atom::FastAtom) = atom.chemical_element
 atomic_number(atom::FastAtom) = atomic_number(atom.chemical_element)
 element(atom::FastAtom)       = element(atom.chemical_element)
 n_dimensions(::FastAtom{D}) where {D} = D
@@ -160,6 +165,13 @@ function FastAtom(; atomic_symbol, position, kwargs...)
     return FastAtom(atomic_symbol, position; kwargs...)
 end
 
+
+# --------------------------------------------- 
+# a few alternative getters 
+
+for f in (velocity, position, atomic_mass, atomic_symbol, atomic_number, element)
+    @eval Base.getindex(at::Union{Atom, FastAtom}, ::typeof($f)) = $f(at)
+end
 
 
 # --------------------------------------------- 

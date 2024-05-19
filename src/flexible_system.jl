@@ -37,17 +37,30 @@ Base.size(sys::FlexibleSystem)   = size(sys.particles)
 Base.length(sys::FlexibleSystem) = length(sys.particles)
 
 Base.getindex(system::FlexibleSystem, i::Union{Integer, AbstractVector}) = 
-        system.particles[i]
+        getindex(system.particles, i)
+Base.getindex(system::FlexibleSystem, i::AbstractVector{Bool}) = 
+        getindex(system.particles, i)
 
 Base.getindex(system::FlexibleSystem, i::Integer, x::Symbol) = 
         system.particles[i][x]
 
 Base.getindex(system::FlexibleSystem, i::AbstractVector, x::Symbol) = 
-        Base.getindex.(Ref(system), i, x)
+        Base.getindex.(system[i], x)
 
 Base.getindex(system::FlexibleSystem, ::Colon, x::Symbol) = 
-        [at[x] for at in system.particles]
+        Base.getindex.(system.particles, x)
 
+
+for f in (:position, :velocity, :atomic_mass, :atomic_symbol, :atomic_number)
+    @eval (Base.getindex(sys::FlexibleSystem, i::Integer, ::typeof($f)) = 
+                $f(sys.particles[i])) 
+    @eval (Base.getindex(sys::FlexibleSystem, inds::AbstractVector, ::typeof($f)) = 
+                [ $f(sys.particles[i]) for i in inds ] )
+    @eval (Base.getindex(sys::FlexibleSystem, ::Colon, ::typeof($f)) = 
+                [ $f(x) for x in sys.particles ] )
+    @eval (Base.getindex(sys::FlexibleSystem, inds::AbstractVector{Bool}, ::typeof($f)) = 
+                [ $f(x) for x in sys.particles[inds] ] )
+end
 
 # ------------ Constructors         
 

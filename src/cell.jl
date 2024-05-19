@@ -23,6 +23,16 @@ n_dimensions(::PCell{D}) where {D} = D
 
 function Base.show(io::IO, cell::PCell{D}) where {D} 
    u = unit(first(cell.cell_vectors[1][1]))
+   print(io, "PCell(", prod(p -> p ? "T" : "F", cell.pbc), ", ")  
+   for d = 1:D 
+      print(io, ustrip.(cell.cell_vectors[d]), u)
+      if d < D; print(io, ", "); end 
+   end 
+   println(")")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", cell::PCell{D}) where {D} 
+   u = unit(first(cell.cell_vectors[1][1]))
    println(io, "    PCell(", prod(p -> p ? "T" : "F", cell.pbc), ",")  
    for d = 1:D 
       print(io, "          ", ustrip.(cell.cell_vectors[d]), u)
@@ -51,10 +61,11 @@ _auto_cell_vectors(vecs::AbstractVector) =
 
 # different ways to construct PBC 
 
+_auto_pbc1(bc::Bool)   = bc 
 _auto_pbc1(::Periodic) = true 
 _auto_pbc1(::OpenBC)   = false 
 _auto_pbc1(::Nothing)  = false 
-_auto_pbc1(bc::Bool) = bc 
+_auto_pbc1(::DirichletZero)  = false 
 
 _auto_pbc(bc::Tuple, cell_vectors = nothing) = 
       map(_auto_pbc1, bc)

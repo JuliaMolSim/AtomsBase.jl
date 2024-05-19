@@ -45,7 +45,7 @@ atomic_number(element::ChemicalElement) = element.atomic_number
 
 atomic_symbol(element::ChemicalElement) = element 
 
-Base.convert(::typeof(Symbol), element::ChemicalElement) = Symbol(element) 
+Base.convert(::Type{Symbol}, element::ChemicalElement) = Symbol(element) 
 Symbol(element::ChemicalElement) = _chem_el_info[element.atomic_number].symbol
 
 atomic_mass(element::ChemicalElement) = _chem_el_info[element.atomic_number].atomic_mass

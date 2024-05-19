@@ -50,8 +50,8 @@ end
 
 get_cell(sys::FastSystem) = sys.cell
 
-Base.length(sys::FastSystem)         = length(sys.position)
-Base.size(sys::FastSystem)           = size(sys.position)
+Base.length(sys::FastSystem)  = length(sys.position)
+Base.size(sys::FastSystem)    = size(sys.position)
 
 species_type(::FS) where {FS <: FastSystem} = AtomView{FS}
 Base.getindex(sys::FastSystem, i::Integer)  = AtomView(sys, i)
@@ -68,10 +68,19 @@ function Base.getindex(system::FastSystem, x::Symbol)
         bounding_box(system)
     elseif x === :boundary_conditions
         boundary_conditions(system)
-    else
+    elseif x === :atomic_number 
+        atomic_number(system)
+    elseif x === :atomic_symbol
+        atomic_symbol(system)
+    elseif x === :position
+        position(system)
+    elseif x === :atomic_mass
+        atomic_mass(system)
+    else 
         throw(KeyError(x))
     end
 end
+
 Base.haskey(::FastSystem, x::Symbol) = x in (:bounding_box, :boundary_conditions)
 Base.keys(::FastSystem) = (:bounding_box, :boundary_conditions)
 
@@ -79,6 +88,6 @@ Base.keys(::FastSystem) = (:bounding_box, :boundary_conditions)
 atomkeys(::FastSystem) = (:position, :atomic_symbol, :atomic_number, :atomic_mass)
 hasatomkey(system::FastSystem, x::Symbol) = x in atomkeys(system)
 function Base.getindex(system::FastSystem, i::Union{Integer,AbstractVector}, x::Symbol)
-    getfield(system, x)[i]
+    getindex(system, x)[i]
 end
-Base.getindex(system::FastSystem, ::Colon, x::Symbol) = getfield(system, x)
+Base.getindex(system::FastSystem, ::Colon, x::Symbol) = getindex(system, x)

@@ -31,6 +31,11 @@ using PeriodicTable
         #                          :atomic_number, :atomic_mass)
         @test get(atoms[1], :blubber, :adidi) == :adidi
         @test get(fatoms[1], :blubber, :adidi) == :adidi
+
+        for f in (velocity, position, atomic_mass, atomic_symbol, atomic_number, element)
+            @test atoms[1][f] === f(atoms[1])
+            @test fatoms[1][f] === f(fatoms[1])
+        end
     end
 
     @testset "System" begin

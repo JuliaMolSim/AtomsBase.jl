@@ -4,28 +4,14 @@ using Printf
 Suggested function to print AbstractSystem objects to screen
 """
 function show_system(io::IO, system::AbstractSystem{D}) where {D}
-    bc  = boundary_conditions(system)
-
-    print(io, typeof(system).name.name, "($(chemical_formula(system))")
-    if isinfinite(system)
-        print(io, ", infinite")
-    else
-        perstr = [p ? "T" : "F" for p in periodicity(system)]
-        print(io, ", periodic = ", join(perstr, ""))
-    end
-
-    if !isinfinite(system)
-        box_str = ["[" * join(ustrip.(bvector), ", ") * "]"
-                   for bvector in bounding_box(system)]
-        bunit = unit(eltype(first(bounding_box(system))))
-        print(io, ", bounding_box = [", join(box_str, ", "), "]u\"$bunit\"")
-    end
+    print(io, typeof(system).name.name, "($(chemical_formula(system)), ")
+    print(io, repr(get_cell(system)))
     print(io, ")")
 end
 
-function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) where {D}
+function show_system(io::IO, mime::MIME"text/plain", system::AbstractSystem{D}) where {D}
     println(io, typeof(system).name.name, "($(chemical_formula(system))")
-    print(io, get_cell(system))
+    print(io, mime, get_cell(system))
 
     if length(system) < 10
         for atom in system
@@ -34,13 +20,11 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
     end
 
-    # TODO: this currently fails, but I don't know how to 
-    #       fix it. Need to return to it. 
-    # ascii = visualize_ascii(system)
-    # if !isempty(ascii)
-    #     extra_line && println(io)
-    #     println(io, "   ", replace(ascii, "\n" => "\n   "))
-    # end
+    ascii = visualize_ascii(system)
+    if !isempty(ascii)
+        extra_line && println(io)
+        println(io, "   ", replace(ascii, "\n" => "\n   "))
+    end
 end
 
 Base.show(io::IO, system::AbstractSystem) = show_system(io, system)
@@ -65,19 +49,18 @@ end
 
 function show_atom(io::IO, ::MIME"text/plain", at)
     print(io, typeof(at).name.name, "(")
-    println(io, atomic_symbol(at), ", atomic_number = ", atomic_number(at),
-            ", atomic_mass = ", atomic_mass(at), "):")
+    println(io, atomic_symbol(at), ", atomic_mass = ", atomic_mass(at), "): ")
 
     pos = [(@sprintf "%.8g" ustrip(p)) for p in position(at)]
     posunit = unit(eltype(position(at)))
-    @printf io "    %-17s : [%s]u\"%s\"\n" "position" join(pos, ",") string(posunit)
+    @printf io "     %-17s : [%s]u\"%s\"\n" "position" join(pos, ",") string(posunit)
     if !ismissing(velocity(at)) && !iszero(velocity(at))
         vel = [(@sprintf "%.8g" ustrip(p)) for p in velocity(at)]
         velunit = unit(eltype(velocity(at)))
         @printf io "    %-17s : [%s]u\"%s\"\n" "velocity" join(vel, ",") string(velunit)
     end
     for (k, v) in pairs(at)
-        k in (:atomic_number, :atomic_mass, :atomic_symbol, :position, :velocity) && continue
-        @printf io "    %-17s : %s\n" string(k) string(v)
+        k in (:atomic_number, :atomic_mass, :atomic_symbol, :chemical_element, :position, :velocity) && continue
+        @printf io "     %-17s : %s\n" string(k) string(v)
     end
 end

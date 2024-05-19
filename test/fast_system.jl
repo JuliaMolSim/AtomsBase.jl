@@ -6,7 +6,7 @@ using StaticArrays
 
 @testset "Fast system" begin
     box = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
-    bcs = [Periodic(), Periodic(), DirichletZero()]
+    bcs = [Periodic(), Periodic(), OpenBC()]
     atoms = Atom[:C => [0.25, 0.25, 0.25]u"m",
                  :C => [0.75, 0.75, 0.75]u"m"]
     system = FastSystem(atoms, box, bcs)
@@ -14,11 +14,11 @@ using StaticArrays
     @test length(system) == 2
     @test size(system)   == (2, )
     @test atomic_mass(system) == [12.011, 12.011]u"u"
-    @test boundary_conditions(system) == bcs
-    @test bounding_box(system) == box
-    @test system[:boundary_conditions] == bcs
-    @test system[:bounding_box] == box
-    @test !isinfinite(system)
+    @test all(boundary_conditions(system) .== bcs)
+    @test all(bounding_box(system) .== box)
+    @test all(system[:boundary_conditions] .== bcs)
+    @test all(system[:bounding_box] .== box)
+    @test !all(isinfinite(system))
     @test element(system[1]) == element(:C)
     @test keys(system) == (:bounding_box, :boundary_conditions)
     @test haskey(system, :boundary_conditions)
@@ -35,7 +35,7 @@ using StaticArrays
     @test system[1, :atomic_number] == 6
     @test system[1:2, :atomic_symbol] == [:C, :C]
     @test system[[1, 2], :atomic_symbol] == [:C, :C]
-    @test system[:, :atomic_symbol] == [:C, :C]
+    @test all(system[:, :atomic_symbol] .== [:C, :C])
     @test system[[false, true], :atomic_number] == [6]
     @test system[2][:position] == system[2, :position]
     @test system[2][:position] == [0.75, 0.75, 0.75]u"m"
@@ -43,7 +43,8 @@ using StaticArrays
     @test !haskey(system[1], :abc)
     @test get(system[1], :dagger, 3) == 3
 
-    @test collect(pairs(system)) == [(:bounding_box => box), (:boundary_conditions => bcs)]
+    @test collect(pairs(system)) == [(:bounding_box => tuple(box...)), 
+                                      (:boundary_conditions => tuple(bcs...))]
     @test collect(pairs(system[1])) == [
         :position => position(atoms[1]),
         :atomic_symbol => :C,
