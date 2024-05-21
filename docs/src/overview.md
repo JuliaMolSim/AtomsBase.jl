@@ -1,6 +1,9 @@
 # Overview
 The main abstract type introduced in AtomsBase is [`AbstractSystem{D}`](@ref). The `D`
-parameter indicates the number of spatial dimensions in the system.
+parameter indicates the number of spatial dimensions in the system. In most circumstances 
+particles have a position and `D` then indicates the dimension of a position vector. 
+(A particle may have additional properties such as mass, charge, etc but those are 
+normally ignored in the interpretation of `D`.)
 Contained inside the system are species, which may have an arbitrary type,
 accessible via the `species_type(system)` function.
 While AtomsBase provides some default species types (e.g. `Atom` and `AtomView`
