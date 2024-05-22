@@ -136,7 +136,7 @@ should be a vector of vectors each containing `D` elements that are
 `<:Unitful.Length`. If an index is passed or the action is on a `species`,
 return only the position of the referenced `species` / species on that index.
 """
-position(sys::AbstractSystem)        = position.(sys)    # in Cartesian coordinates!
+position(sys::AbstractSystem)        = map(position, sys.particles)    # in Cartesian coordinates!
 position(sys::AbstractSystem, index) = position(sys[index])
 
 
@@ -151,7 +151,7 @@ type should be a vector of vectors each containing `D` elements that are
 return only the velocity of the referenced `species`. Returned value of the function
 may be `missing`.
 """
-velocity(sys::AbstractSystem)        = velocity.(sys)    # in Cartesian coordinates!
+velocity(sys::AbstractSystem)        = map(velocity, sys.particles)    # in Cartesian coordinates!
 velocity(sys::AbstractSystem, index) = velocity(sys[index])
 
 
@@ -163,7 +163,7 @@ velocity(sys::AbstractSystem, index) = velocity(sys[index])
 Vector of atomic masses in the system `sys` or the atomic mass of a particular `species` /
 the `i`th species in `sys`. The elements are `<: Unitful.Mass`.
 """
-atomic_mass(sys::AbstractSystem)        = atomic_mass.(sys)
+atomic_mass(sys::AbstractSystem)        = map(atomic_mass, sys.particles)
 atomic_mass(sys::AbstractSystem, index) = atomic_mass(sys[index])
 
 
@@ -180,7 +180,7 @@ of identifying the type of a `species` (e.g. the element for the case of an atom
 [`atomic_symbol`](@ref) may return a more unique identifier. For example for a deuterium atom
 this may be `:D` while `atomic_number` is still `1`.
 """
-atomic_symbol(sys::AbstractSystem)        = atomic_symbol.(sys)
+atomic_symbol(sys::AbstractSystem)        = map(atomic_symbol, sys.particles)
 atomic_symbol(sys::AbstractSystem, index) = atomic_symbol(sys[index])
 
 
@@ -197,7 +197,7 @@ of identifying the type of a `species` (e.g. the element for the case of an atom
 [`atomic_symbol`](@ref) may return a more unique identifier. For example for a deuterium atom
 this may be `:D` while `atomic_number` is still `1`.
 """
-atomic_number(sys::AbstractSystem)        = atomic_number.(sys)
+atomic_number(sys::AbstractSystem)        = map(atomic_number, sys.particles)
 atomic_number(sys::AbstractSystem, index) = atomic_number(sys[index])
 
 """
