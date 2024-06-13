@@ -3,8 +3,10 @@ import PeriodicTable
 
 export AbstractSystem
 export BoundaryCondition, DirichletZero, Periodic, infinite_box, isinfinite
-export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type
+
+export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type, bonds
 export position, velocity, element, element_symbol, atomic_mass, atomic_number, atomic_symbol
+
 export atomkeys, hasatomkey
 
 #
@@ -50,6 +52,23 @@ function boundary_conditions end
 Return the type used to represent a species or atom.
 """
 function species_type end
+
+"""
+The possible bond orders that can be used in the `bonds` function
+"""
+@enum BondOrder begin
+    single
+    double
+    triple
+end 
+
+"""
+    bonds(::AbstractSystem)
+
+Returns a Vector{Tuple{Integer, Integer, BondOrder}} where each entry stores the unique indices
+ i and j of the atoms participating in the bond and the order of the bond (e.g. [(13,21,5)])
+"""
+function bonds end
 
 """Return vector indicating whether the system is periodic along a dimension."""
 periodicity(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditions(sys)]
