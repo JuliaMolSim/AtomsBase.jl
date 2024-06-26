@@ -91,5 +91,13 @@ include("testmacros.jl")
         @testpass test_approx_eq(case.system, case.system)
     end
 
+    @testset "test_approx_eq for isolated molecules" begin
+        hydrogen = isolated_system([
+            :H => [0, 0, 0.]u"Å",
+            :H => [0, 0, 1.]u"Å",
+        ])
+        test_approx_eq(hydrogen, hydrogen)
+    end
+
     # TODO More tests would be useful
 end

@@ -22,7 +22,11 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         @test method(s) == method(t)
     end
 
-    @test maximum(map(rnorm, bounding_box(s), bounding_box(t))) < rtol
+    if isinfinite(s)
+        @test isinfinite(t)
+    else
+        @test maximum(map(rnorm, bounding_box(s), bounding_box(t))) < rtol
+    end
     for method in (position, atomic_mass)
         @test maximum(map(rnorm, method(s), method(t))) < rtol
         @test rnorm(method(s, 1), method(t, 1)) < rtol
@@ -84,7 +88,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
 
         if s[prop] isa Quantity
             @test rnorm(s[prop], t[prop]) < rtol
-        elseif prop in (:bounding_box, )
+        elseif prop in (:bounding_box, ) && !isinfinite(s)
             @test maximum(map(rnorm, s[prop], t[prop])) < rtol
         else
             @test s[prop] == t[prop]
