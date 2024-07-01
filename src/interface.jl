@@ -2,8 +2,10 @@ import Base.position
 import PeriodicTable
 
 export AbstractSystem
-export BoundaryCondition, DirichletZero, Periodic, infinite_box, isinfinite
-export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type
+export BoundaryCondition, DirichletZero, Periodic, OpenBC, 
+       infinite_box, isinfinite
+export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type, 
+        get_cell 
 export position, velocity, element, element_symbol, atomic_mass, atomic_number, atomic_symbol
 export atomkeys, hasatomkey
 
@@ -13,6 +15,7 @@ export atomkeys, hasatomkey
 abstract type BoundaryCondition end
 struct DirichletZero <: BoundaryCondition end  # Dirichlet zero boundary (i.e. molecular context)
 struct Periodic <: BoundaryCondition end  # Periodic BCs
+struct OpenBC <: BoundaryCondition end 
 
 infinite_box(::Val{1}) = [[Inf]]u"bohr"
 infinite_box(::Val{2}) = [[Inf, 0], [0, Inf]]u"bohr"
@@ -29,6 +32,21 @@ infinite_box(dim::Int) = infinite_box(Val(dim))
 A `D`-dimensional system.
 """
 abstract type AbstractSystem{D} end
+
+"""
+    SystemWithCell{D, TCELL}
+
+A `D`-dimensional system with a computational cell of type `TCELL`.
+"""
+abstract type SystemWithCell{D, TCELL} <: AbstractSystem{D} end 
+
+
+"""
+    get_cell(sys::SystemWithCell)
+
+Returns the cell object defining the computational cell 
+"""
+function get_cell end 
 
 """
     bounding_box(sys::AbstractSystem{D})
@@ -52,10 +70,18 @@ Return the type used to represent a species or atom.
 function species_type end
 
 """Return vector indicating whether the system is periodic along a dimension."""
-periodicity(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditions(sys)]
+function periodicity(sys::AbstractSystem{D}) where {D} 
+    bc = boundary_conditions(sys) 
+    return ntuple(i -> isa(bc[i], Periodic), D) 
+end
 
 """Returns true if the given system is infinite"""
-isinfinite(sys::AbstractSystem{D}) where {D} = bounding_box(sys) == infinite_box(D)
+function isinfinite end 
+
+# CO: I think this is a dangerous default implementation and I would like to 
+#     remove it entirely. The reason I don't like it is that the typical case is 
+#     that a system is infinite in specific directions. 
+# isinfinite(sys::AbstractSystem{D}) where {D} = bounding_box(sys) == infinite_box(D)
 
 
 """
@@ -117,13 +143,13 @@ Return the symbols corresponding to the elements of the atoms. Note that
 this may be different than `atomic_symbol` for cases where `atomic_symbol`
 is chosen to be more specific (i.e. designate a special atom).
 """
-function element_symbol(system::AbstractSystem)
-    # Note that atomic_symbol cannot be used here, since this may map
-    # to something more specific than the element
-    [Symbol(element(num).symbol) for num in atomic_number(system)]
-end
-element_symbol(sys::AbstractSystem, index) = element_symbol(sys[index])
-element_symbol(species) = Symbol(element(atomic_number(species)).symbol)
+element_symbol(system::AbstractSystem) = element_symbol.(atomic_number(system))
+element_symbol(z::Integer) = Symbol(PeriodicTable.elements[z].symbol)
+element_symbol(sys::AbstractSystem, index) = element_symbol(atomic_number(sys[index]))
+# element_symbol(species) = Symbol(element(atomic_number(species)).symbol)
+
+# Note that atomic_symbol cannot be used here, since this may map
+# to something more specific than the element
 
 
 """
@@ -219,6 +245,7 @@ hasatomkey(system::AbstractSystem, x::Symbol) = all(at -> haskey(at, x), system)
 
 # Defaults for system
 Base.pairs(system::AbstractSystem) = (k => system[k] for k in keys(system))
+
 function Base.get(system::AbstractSystem, x::Symbol, default)
     haskey(system, x) ? getindex(system, x) : default
 end
