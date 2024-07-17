@@ -27,6 +27,10 @@ julia> atomic_symbol(atom)
 :C
 ```
 """
+
+"""
+TODO: reintroduce the original docs (failing docstest...)
+"""
 struct AtomView{S<:AbstractSystem}
     system::S
     index::Int
@@ -37,12 +41,15 @@ function velocity(v::AtomView)
     ismissing(vel) && return missing
     return vel[v.index]
 end
-position(v::AtomView)      = position(v.system)[v.index]
-atomic_mass(v::AtomView)   = atomic_mass(v.system)[v.index]
-atomic_symbol(v::AtomView) = atomic_symbol(v.system)[v.index]
-atomic_number(v::AtomView) = atomic_number(v.system)[v.index]
+
+position(v::AtomView)      = position(v.system, v.index)
+mass(v::AtomView)          = mass(v.system, v.index)
+species(v::AtomView)       = species(v.system, v.index)
+
+atomic_symbol(v::AtomView) = atomic_symbol(species(v))
+atomic_number(v::AtomView) = atomic_number(species(v))
 n_dimensions(v::AtomView)  = n_dimensions(v.system)
-element(atom::AtomView)    = element(atomic_number(atom))
+element(v::AtomView)       = element(atomic_number(v))
 
 Base.show(io::IO, at::AtomView) = show_atom(io, at)
 Base.show(io::IO, mime::MIME"text/plain", at::AtomView) = show_atom(io, mime, at)

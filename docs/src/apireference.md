@@ -10,40 +10,53 @@ CurrentModule = AtomsBase
 Pages = ["apireference.md"]
 ```
 
-## System properties
+## Types 
+
 ```@docs
-boundary_conditions
+AbstractSystem
+SystemWithCell
+OpenSystemCell
+PCell 
+AtomView
+ChemicalSpecies 
+```
+
+## System properties
+
+```@docs
 bounding_box
-chemical_formula
-element_symbol
-isinfinite
-n_dimensions
 periodicity
-species_type
+n_dimensions
 atomkeys
 hasatomkey
+chemical_formula
 visualize_ascii
 ```
 
 ## Species / atom properties
 
 ```@docs
-atomic_mass
+position
+mass
+species
+velocity
+get_cell 
 atomic_number
 atomic_symbol
-velocity
-position
 element
+element_symbol
 ```
+
 
 ## Atom and system constructors
 
 ```@docs
+```
+
+<!-- 
 Atom
-AtomView
 FlexibleSystem
-AbstractSystem
 atomic_system
 isolated_system
-periodic_system
-```
+periodic_system 
+-->
