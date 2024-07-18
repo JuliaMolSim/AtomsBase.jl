@@ -25,7 +25,11 @@ ChemicalSpecies
 
 ```@docs
 bounding_box
+set_bounding_box!
 periodicity
+set_periodicity!
+get_cell 
+set_cell! 
 n_dimensions
 atomkeys
 hasatomkey
@@ -37,10 +41,13 @@ visualize_ascii
 
 ```@docs
 position
+set_position!
 mass
+set_mass!
 species
+set_species!
 velocity
-get_cell 
+set_velocity!
 atomic_number
 atomic_symbol
 element

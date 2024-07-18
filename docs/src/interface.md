@@ -72,18 +72,35 @@ For each of `property in [position, mass, species]` there must also be defined
 
 
 
-
 ## Setter Interface
 
+The optional setter / mutation interface consists of the following functions to be overloaded. 
 
+- [`set_bounding_box!(system, bb)`](@ref) 
+- [`set_periodicity!(system, pbc)`](@ref) 
+- [`set_cell!(system, pbc)`](@ref) 
+- [`set_position!(system, i, x)`](@ref) 
+- [`set_mass!(system, i, x)`](@ref)
+- [`set_species!(system, i, x)`](@ref) 
+- `deleteat!(system, i)` : delete atoms `i` (or atoms `i` if a list of `":`)
+- `append!(system1, system2)` : append system 2 to system 1, provided they are "compatible". 
+
+### Notes
+
+- For each of the particle property setters, `i` may be an `Integer`, an `AbstractVector{<: Integer}` or `:`.
+- If `set_cell!` is implemented, then for `system <: SystemWithCell`, methods for `set_bounding_box!` and `set_periodicity!` are provided.
 
 
 ## Optional properties interface
 
+(TODO AND TO DISCUSS)
 
+- Atomic and system property accessors: `getindex`, `haskey`, `get`, `keys`, `pairs`
 
 
 ## Reserved Functions
+
+(TODO and TO DISCUSS)
 
 - `charge` 
 - `charge_dipole` 

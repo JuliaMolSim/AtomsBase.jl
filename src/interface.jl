@@ -48,6 +48,11 @@ Return a tuple of length `D` of vectors of length `D` that describe the
 """
 function bounding_box end
 
+"""
+    set_bounding_box!(sys::AbstractSystem{D}, bb::NTuple{D, SVector{D, L}})
+"""
+function set_bounding_box! end
+
 
 """
     periodicity(sys::AbstractSystem{D})
@@ -59,6 +64,12 @@ function periodicity end
 
 
 """
+    set_periodicity!(sys::AbstractSystem{D}, pbc::NTuple{D, Bool})
+"""
+function set_periodicity! end 
+
+
+"""
     get_cell(sys::AbstractSystem)
 
 Returns the computational cell (if it is defined). If 
@@ -67,6 +78,10 @@ is implemented.
 """
 function get_cell end 
 
+"""
+    set_cell!(sys, cell)
+"""
+function set_cell! end 
 
 
 # ---------------------------------------------------------------
@@ -84,6 +99,14 @@ are `<:Unitful.Length`.
 """
 function position end 
 
+"""
+    set_position!(sys::AbstractSystem{D}, i, x)
+
+- If `i` is an integer then `x` is an `SVector{D, L}` with `L <: Unitful.Length`
+- If `i` is an `AbstractVector{<: Integer}` or `:` then `x` is an `AbstractVector{SVector{D, L}}`
+"""
+function set_position! end 
+
 
 """
     mass(sys::AbstractSystem, i)
@@ -92,6 +115,15 @@ Mass of a particle if `i::Integer`, vector of masses if `i` is a vector of
 integers or `:`. The elements are `<: Unitful.Mass`.
 """
 function mass end 
+
+"""
+    set_mass!(sys::AbstractSystem, i, m)
+
+- If `i` is an integer then `m` is a `Unitful.Mass`
+- If `i` is an `AbstractVector{<: Integer}` or `:` then `x` is an `AbstractVector{<: Unitful.Mass}`
+"""
+function set_mass! end 
+
 
 
 @deprecate atomic_mass(args...)  mass(args...)
@@ -104,6 +136,15 @@ Return the species (type, category, ...) of a particle or particles.
 """
 function species end
 
+"""
+    set_species!(sys::AbstractSystem, i, s)
+
+- If `i` is an integer then `s` is an object describing the particle species, e.g., `ChemicalSpecies`
+- If `i` is an `AbstractVector{<: Integer}` or `:` then `x` is an `AbstractVector` of species objects.
+"""
+function set_species! end 
+
+
 
 """
     velocity(sys::AbstractSystem, i)
@@ -114,6 +155,10 @@ vector of integers or `:`. Return type should be a vector of vectors each contai
 """
 velocity(sys::AbstractSystem, args...) = missing
 
+"""
+    set_velocity!(sys::AbstractSystem, i, v)
+"""
+function set_velocity! end 
 
 
 
