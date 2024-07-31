@@ -7,3 +7,4 @@ Manifest.toml
 *.swp
 *.swo
 *~
+.vscode

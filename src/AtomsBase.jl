@@ -1,18 +1,33 @@
 module AtomsBase
+
 using Unitful
 using UnitfulAtomic
 using StaticArrays
 using Requires
 
+# Main Interface specification and inline docs 
 include("interface.jl")
-include("properties.jl")
-include("visualize_ascii.jl")
-include("show.jl")
-include("flexible_system.jl")
-include("atomview.jl")
-include("atom.jl")
-include("fast_system.jl")
 
+# utilities useful to share across implementations 
+include("utils/cells.jl")
+include("utils/chemspecies.jl")
+include("utils/properties.jl")
+include("utils/visualize_ascii.jl")
+include("utils/show.jl")
+include("utils/atomview.jl")
+
+
+# prototype implementations 
+# module Impl
+# include("implementation/flexible_system.jl")
+# include("implementation/atom.jl")
+# include("implementation/fast_system.jl")
+# end
+
+
+# TODO: 
+#  - this should be converted to an extension 
+#  - should work for AbstractSystem
 function __init__()
     @require AtomsView="ee286e10-dd2d-4ff2-afcb-0a3cd50c8041" begin
         function Base.show(io::IO, mime::MIME"text/html", system::FlexibleSystem)
@@ -20,5 +35,6 @@ function __init__()
         end
     end
 end
+
 
 end

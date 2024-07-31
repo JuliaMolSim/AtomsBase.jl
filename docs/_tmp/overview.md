@@ -1,4 +1,5 @@
 # Overview
+
 The main abstract type introduced in AtomsBase is [`AbstractSystem{D}`](@ref). The `D`
 parameter indicates the number of spatial dimensions in the system. In most circumstances 
 particles have a position and `D` then indicates the dimension of a position vector. 
