@@ -1,35 +1,45 @@
 #
 # A simple and flexible atom implementation
 #
-export Atom, atomic_system, periodic_system, isolated_system
+export Atom, FastAtom, 
+       atomic_system, periodic_system, isolated_system
 
-# Valid types for atom identifiers
-const AtomId = Union{Symbol,AbstractString,Integer}
+
+# Valid types for user-oriented atom identifiers
+const AtomId = Union{Symbol, AbstractString, Integer, ChemicalElement}
+
+
+# --------------------------------------------- 
+#  Implementation of a maximally flexible Atom type 
+
 
 struct Atom{D, L<:Unitful.Length, V<:Unitful.Velocity, M<:Unitful.Mass}
     position::SVector{D, L}
     velocity::SVector{D, V}
-    atomic_symbol::Symbol
-    atomic_number::Int
+    chemical_element::ChemicalElement
     atomic_mass::M
     data::Dict{Symbol, Any}  # Store arbitrary data about the atom.
 end
+
 velocity(atom::Atom)      = atom.velocity
 position(atom::Atom)      = atom.position
 atomic_mass(atom::Atom)   = atom.atomic_mass
-atomic_symbol(atom::Atom) = atom.atomic_symbol
-atomic_number(atom::Atom) = atom.atomic_number
-element(atom::Atom)       = element(atomic_number(atom))
+atomic_symbol(atom::Atom) = atom.chemical_element
+atomic_number(atom::Atom) = atomic_number(atom.chemical_element)
+element(atom::Atom)       = element(atom.chemical_element)
 n_dimensions(::Atom{D}) where {D} = D
 
-Base.getindex(at::Atom, x::Symbol) = hasfield(Atom, x) ? getfield(at, x) : getindex(at.data, x)
-Base.haskey(at::Atom,   x::Symbol) = hasfield(Atom, x) || haskey(at.data, x)
-function Base.get(at::Atom, x::Symbol, default)
-    hasfield(Atom, x) ? getfield(at, x) : get(at.data, x, default)
-end
+Base.getindex(at::Atom, x::Symbol) = 
+        hasfield(Atom, x) ? getfield(at, x) : getindex(at.data, x)
+Base.haskey(at::Atom, x::Symbol) = 
+        hasfield(Atom, x) || haskey(at.data, x)
+Base.get(at::Atom, x::Symbol, default) = 
+        haskey(at, x) ? getindex(at, x) : get(at.data, x, default)
+
 function Base.keys(at::Atom)
-    (:position, :velocity, :atomic_symbol, :atomic_number, :atomic_mass, keys(at.data)...)
+    (:position, :velocity, :chemical_element, :atomic_mass, keys(at.data)...)
 end
+
 Base.pairs(at::Atom) = (k => at[k] for k in keys(at))
 
 """
@@ -46,18 +56,19 @@ Supported `kwargs` include `atomic_symbol`, `atomic_number`, `atomic_mass`, `cha
 function Atom(identifier::AtomId,
               position::AbstractVector{L},
               velocity::AbstractVector{V}=zeros(length(position))u"bohr/s";
-              atomic_symbol=Symbol(element(identifier).symbol),
-              atomic_number=element(identifier).number,
-              atomic_mass::M=element(identifier).atomic_mass,
+              chemical_element = ChemicalElement(identifier),
+              atomic_mass::M = element(chemical_element).atomic_mass,
               kwargs...) where {L <: Unitful.Length, V <: Unitful.Velocity, M <: Unitful.Mass}
-    Atom{length(position), L, V, M}(position, velocity, atomic_symbol,
-                                    atomic_number, atomic_mass, Dict(kwargs...))
+    Atom{length(position), L, V, M}(position, velocity, chemical_element, 
+                                    atomic_mass, Dict(kwargs...))
 end
+
 function Atom(id::AtomId, position::AbstractVector, velocity::Missing; kwargs...)
     Atom(id, position, zeros(length(position))u"bohr/s"; kwargs...)
 end
-function Atom(; atomic_symbol, position, velocity=zeros(length(position))u"bohr/s", kwargs...)
-    Atom(atomic_symbol, position, velocity; atomic_symbol, kwargs...)
+
+function Atom(; chemical_element, position, velocity=zeros(length(position))u"bohr/s", kwargs...)
+    Atom(chemical_element, position, velocity; kwargs...)
 end
 
 """
@@ -88,7 +99,82 @@ Base.show(io::IO, at::Atom) = show_atom(io, at)
 Base.show(io::IO, mime::MIME"text/plain", at::Atom) = show_atom(io, mime, at)
 
 
-#
+
+
+# --------------------------------------------- 
+#  Implementation of a FastAtom type which is isbits 
+#  and provides equivalent functionality to `FastSystem`
+
+"""
+`FastAtom` : atom type compatible with `FastSystem`, i.e. providing only 
+    atom id (chemical element), position and mass. It is isbits and hence 
+    can be used with `FlexibleSystem` and achieve similar performance 
+    as `FastSystem`.
+
+### Constructors: 
+```
+Atom(identifier::AtomId, position::AbstractVector; atomic_mass)
+Atom(; identifier, position, atomic_mass)
+```
+If `mass` is not provided then it the default provided by `PeriodicTable.jl` 
+is assigned. 
+"""
+struct FastAtom{D, L<:Unitful.Length, M<:Unitful.Mass}
+    chemical_element::ChemicalElement
+    position::SVector{D, L} 
+    atomic_mass::M
+end
+
+Base.show(io::IO, at::FastAtom) = show_atom(io, at)
+Base.show(io::IO, mime::MIME"text/plain", at::FastAtom) = show_atom(io, mime, at)
+
+
+velocity(atom::FastAtom)      = missing 
+position(atom::FastAtom)      = atom.position
+atomic_mass(atom::FastAtom)   = atom.atomic_mass
+atomic_symbol(atom::FastAtom) = atom.chemical_element
+atomic_number(atom::FastAtom) = atomic_number(atom.chemical_element)
+element(atom::FastAtom)       = element(atom.chemical_element)
+n_dimensions(::FastAtom{D}) where {D} = D
+
+Base.getindex(at::FastAtom, x::Symbol) =   
+        hasfield(FastAtom, x) ? getfield(at, x) : missing 
+
+Base.haskey(at::FastAtom,   x::Symbol) = 
+        hasfield(FastAtom, x)
+
+Base.get(at::FastAtom, x::Symbol, default) = 
+        hasfield(FastAtom, x) ? getfield(at, x) : default 
+
+Base.keys(at::FastAtom) = 
+        (:position, :element, :atomic_mass,)
+
+Base.pairs(at::FastAtom) = 
+        (k => at[k] for k in keys(at))
+
+
+function FastAtom(identifier::AtomId, position::AbstractVector{L};
+              chemical_element = ChemicalElement(identifier),
+              atomic_mass::M   = atomic_mass(chemical_element),
+            ) where {L <: Unitful.Length, M <: Unitful.Mass}
+    D = length(position)            
+    return FastAtom(chemical_element, SVector{D}(position), atomic_mass)
+end
+
+function FastAtom(; atomic_symbol, position, kwargs...)
+    return FastAtom(atomic_symbol, position; kwargs...)
+end
+
+
+# --------------------------------------------- 
+# a few alternative getters 
+
+for f in (velocity, position, atomic_mass, atomic_symbol, atomic_number, element)
+    @eval Base.getindex(at::Union{Atom, FastAtom}, ::typeof($f)) = $f(at)
+end
+
+
+# --------------------------------------------- 
 # Special high-level functions to construct atomic systems
 #
 
