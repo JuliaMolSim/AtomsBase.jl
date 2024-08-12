@@ -28,6 +28,8 @@ function Base.show(io::IO, element::ChemicalSpecies)
     end
 end
 
+Base.Broadcast.broadcastable(s::ChemicalSpecies) = Ref(s)
+
 ChemicalSpecies(sym::Symbol) = ChemicalSpecies(_sym2z[sym]) 
 ChemicalSpecies(z::Integer) = ChemicalSpecies(z, 0, 0) 
 ChemicalSpecies(sym::ChemicalSpecies) = sym
@@ -100,10 +102,7 @@ Return the symbols corresponding to the elements of the atoms. Note that
 this may be different than `atomic_symbol` for cases where `atomic_symbol`
 is chosen to be more specific (i.e. designate a special atom).
 """
-element_symbol(sys::AbstractSystem, index::Integer) = 
-        element_symbol(sys[index])
-
-element_symbol(sys::AbstractSystem, index::Union{AbstractVector, Colon}) = 
+element_symbol(sys::AbstractSystem, index) = 
         element_symbol.(sys[index])
 
 element_symbol(species) = 
@@ -122,7 +121,7 @@ of identifying the type of a `species` (e.g. the element for the case of an atom
 [`atomic_symbol`](@ref) may return a more unique identifier. For example for a deuterium atom
 this may be `:D` while `atomic_number` is still `1`.
 """
-atomic_symbol(sys::AbstractSystem, index) = atomic_symbol(species(sys, index))
+atomic_symbol(sys::AbstractSystem, index) = atomic_symbol.(species(sys, index))
 
 
 
@@ -138,4 +137,4 @@ of identifying the type of a `species` (e.g. the element for the case of an atom
 [`atomic_symbol`](@ref) may return a more unique identifier. For example for a deuterium atom
 this may be `:D` while `atomic_number` is still `1`.
 """
-atomic_number(sys::AbstractSystem, index) = atomic_number(species(sys, index))
+atomic_number(sys::AbstractSystem, index) = atomic_number.(species(sys, index))

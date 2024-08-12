@@ -106,7 +106,25 @@ Base.size(sys::FlexibleSystem)   = size(sys.particles)
 Base.length(sys::FlexibleSystem) = length(sys.particles)
 
 position(sys::FlexibleSystem, i::Integer) = 
-        sys.particles[i].position
+        position(sys.particles[i])
 
 position(sys::FlexibleSystem, i::Union{AbstractVector, Colon}) = 
-        [ x.position for x in sys.particles[i] ] 
+        [ position(x) for x in sys.particles[i] ] 
+
+velocity(sys::FlexibleSystem, i::Integer) = 
+        velocity(sys.particles[i])
+
+velocity(sys::FlexibleSystem, i::Union{AbstractVector, Colon}) = 
+        [ velocity(x) for x in sys.particles[i] ]         
+
+atomic_mass(sys::FlexibleSystem, i::Integer) = 
+        atomic_mass(sys.particles[i])
+
+atomic_mass(sys::FlexibleSystem, i::Union{AbstractVector, Colon}) = 
+        [ atomic_mass(x) for x in sys.particles[i] ]
+
+species(sys::FlexibleSystem, i::Integer) = 
+        species(sys.particles[i])
+
+species(sys::FlexibleSystem, i::Union{AbstractVector, Colon}) = 
+        [ species(x) for x in sys.particles[i] ]                         
