@@ -11,10 +11,10 @@ import AtomsBase: AbstractSystem, SystemWithCell,
          atomic_mass, element, 
          show_atom
 
-import AtomsBase: ChemicalSpecies
+import AtomsBase: ChemicalSpecies, PCell, OpenSystemCell
 
 include("atom.jl")
-# include("flexible_system.jl")
+include("flexible_system.jl")
 # include("fast_system.jl")
 
 end 

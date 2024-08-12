@@ -6,27 +6,30 @@
 export FlexibleSystem
 
 
-struct FlexibleSystem{D, S, L<:Unitful.Length} <: AbstractSystem{D}
+struct FlexibleSystem{D, S, TCELL} <: SystemWithCell{D}
     particles::AbstractVector{S}
-    bounding_box::SVector{D, SVector{D, L}}
-    boundary_conditions::SVector{D, BoundaryCondition}
+    cell::TCELL
     data::Dict{Symbol, Any}  # Store arbitrary data about the atom.
 end
+
+get_cell(sys::FlexibleSystem) = sys.cell
 
 # System property access
 function Base.getindex(system::FlexibleSystem, x::Symbol)
     if x === :bounding_box
         bounding_box(system)
-    elseif x === :boundary_conditions
-        boundary_conditions(system)
+    elseif x === :periodicity
+        periodicity(system)
     else
         getindex(system.data, x)
     end
 end
+
 function Base.haskey(system::FlexibleSystem, x::Symbol)
-    x in (:bounding_box, :boundary_conditions) || haskey(system.data, x)
+    x in (:bounding_box, :periodicity) || haskey(system.data, x)
 end
-Base.keys(system::FlexibleSystem) = (:bounding_box, :boundary_conditions, keys(system.data)...)
+
+Base.keys(system::FlexibleSystem) = (:bounding_box, :periodicity, keys(system.data)...)
 
 # Atom and atom property access
 Base.getindex(system::FlexibleSystem, i::Integer) = system.particles[i]
@@ -38,27 +41,34 @@ Base.getindex(system::FlexibleSystem, ::Colon, x::Symbol) = [at[x] for at in sys
 
 
 """
-    FlexibleSystem(particles, bounding_box, boundary_conditions; kwargs...)
-    FlexibleSystem(particles; bounding_box, boundary_conditions, kwargs...)
+    FlexibleSystem(particles, bounding_box, periodicity; kwargs...)
+    FlexibleSystem(particles; bounding_box, periodicity, kwargs...)
+    FlexibleSystem(particles, cell; kwargs...)
 
 Construct a flexible system, a versatile data structure for atomistic systems,
 which puts an emphasis on flexibility rather than speed.
 """
 function FlexibleSystem(
     particles::AbstractVector{S},
-    box::AbstractVector{<:AbstractVector{L}},
-    boundary_conditions::AbstractVector{BC};
+    box::NTuple{D, <: AbstractVector{L}},
+    periodicity::Union{Bool, NTuple{D, Bool}};
     kwargs...
-) where {BC<:BoundaryCondition, L<:Unitful.Length, S}
-    D = length(box)
+) where {L<:Unitful.Length, S, D}
+    periodicity = periodicity isa Bool ? ntuple(_ -> periodicity, D) : periodicity
     if !all(length.(box) .== D)
         throw(ArgumentError("Box must have D vectors of length D"))
     end
-    FlexibleSystem{D, S, L}(particles, box, boundary_conditions, Dict(kwargs...))
+    cell = PCell(; cell_vectors = box, periodicity = periodicity)
+    FlexibleSystem{D, S, typeof(cell)}(particles, cell, Dict(kwargs...))
 end
-function FlexibleSystem(particles; bounding_box, boundary_conditions, kwargs...)
-    FlexibleSystem(particles, bounding_box, boundary_conditions; kwargs...)
+
+function FlexibleSystem(particles; bounding_box, periodicity, kwargs...)
+    FlexibleSystem(particles, bounding_box, periodicity; kwargs...)
 end
+
+FlexibleSystem(particles::AbstractVector, cell; kwargs...) = 
+        FlexibleSystem(particles, cell, Dict(kwargs...))
+
 
 """
     FlexibleSystem(system; kwargs...)
@@ -88,9 +98,15 @@ julia> AbstractSystem(system; bounding_box= ..., atoms = ... )
 """
 AbstractSystem(system::AbstractSystem; kwargs...) = FlexibleSystem(system; kwargs...)
 
-bounding_box(sys::FlexibleSystem)        = sys.bounding_box
-boundary_conditions(sys::FlexibleSystem) = sys.boundary_conditions
-species_type(sys::FlexibleSystem{D, S, L}) where {D, S, L} = S
+# TODO - I don't think this is part of the interface.
+#        it is also tied to eltype somewhere else. Sounds dangerous and hacky. 
+# species_type(sys::FlexibleSystem{D, S, L}) where {D, S, L} = S
 
 Base.size(sys::FlexibleSystem)   = size(sys.particles)
 Base.length(sys::FlexibleSystem) = length(sys.particles)
+
+position(sys::FlexibleSystem, i::Integer) = 
+        sys.particles[i].position
+
+position(sys::FlexibleSystem, i::Union{AbstractVector, Colon}) = 
+        [ x.position for x in sys.particles[i] ] 

@@ -4,9 +4,11 @@ using Unitful
 using UnitfulAtomic
 using PeriodicTable
 
+using AtomsBase.Implementation: Atom, FlexibleSystem
+
 @testset "Interface" begin
-    box = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
-    pbcs = [true, true, false]
+    box = ([1, 0, 0]u"m", [0, 1, 0]u"m", [0, 0, 1]u"m")
+    pbcs = (true, true, false)
     positions = [[0.25, 0.25, 0.25], [0.75, 0.75, 0.75]]u"m"
     elements = [:C, :C]
     atoms = [Atom(elements[i], positions[i]) for i in 1:2]
@@ -23,17 +25,16 @@ using PeriodicTable
     end
 
     @testset "System" begin
-        flexible = FlexibleSystem(atoms, box, bcs)
-        fast     = FastSystem(flexible)
+        flexible = FlexibleSystem(atoms, box, pbcs)
+        # TODO 
+        # fast     = FastSystem(flexible)
         @test length(flexible) == 2
         @test size(flexible)   == (2, )
 
-        @test bounding_box(flexible) == [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
-        @test boundary_conditions(flexible) == [Periodic(), Periodic(), DirichletZero()]
-        @test periodicity(flexible) == [1, 1, 0]
-        @test !isinfinite(flexible)
+        @test bounding_box(flexible) == ([1, 0, 0]u"m", [0, 1, 0]u"m", [0, 0, 1]u"m")
+        @test periodicity(flexible) == (true, true, false)
         @test n_dimensions(flexible) == 3
-        @test position(flexible) == [[0.25, 0.25, 0.25], [0.75, 0.75, 0.75]]u"m"
+        @test position(flexible, :) == [[0.25, 0.25, 0.25], [0.75, 0.75, 0.75]]u"m"
         @test position(flexible, 1) == [0.25, 0.25, 0.25]u"m"
         @test velocity(flexible)[1] == [0.0, 0.0, 0.0]u"bohr/s"
         @test velocity(flexible)[2] == [0.0, 0.0, 0.0]u"bohr/s"

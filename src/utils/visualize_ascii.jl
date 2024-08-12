@@ -39,7 +39,7 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
 
     # Normalise positions
     normpos = [@. box * mod((shift + austrip(p)) / box, 1.0)
-               for p in position(system)]
+               for p in position(system, :)]
 
     scaling = 1.3
     sx = nothing
@@ -112,4 +112,5 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
 
     join(reverse([join(col) for col in eachcol(canvas)]), "\n")
 end
+
 visualize_ascii(::AbstractSystem{1}) = ""
