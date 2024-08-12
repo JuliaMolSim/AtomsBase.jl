@@ -6,7 +6,7 @@ using PeriodicTable
 
 @testset "Interface" begin
     box = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
-    bcs = [Periodic(), Periodic(), DirichletZero()]
+    pbcs = [true, true, false]
     positions = [[0.25, 0.25, 0.25], [0.75, 0.75, 0.75]]u"m"
     elements = [:C, :C]
     atoms = [Atom(elements[i], positions[i]) for i in 1:2]
@@ -18,9 +18,7 @@ using PeriodicTable
         @test atomic_number(atoms[1]) == 6
         @test atomic_mass(atoms[1])   == 12.011u"u"
         @test element(atoms[1]) == element(:C)
-        @test atoms[1][:atomic_number] == 6
-        @test keys(atoms[1]) == (:position, :velocity, :atomic_symbol,
-                                 :atomic_number, :atomic_mass)
+        @test keys(atoms[1]) == (:position, :velocity, :species, :atomic_mass)
         @test get(atoms[1], :blubber, :adidi) == :adidi
     end
 

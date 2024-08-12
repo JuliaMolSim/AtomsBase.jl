@@ -4,23 +4,28 @@
 export Atom, atomic_system, periodic_system, isolated_system
 
 # Valid types for atom identifiers
-const AtomId = Union{Symbol,AbstractString,Integer}
+const AtomId = Union{Symbol, AbstractString, Integer, ChemicalSpecies}
+
+
 
 struct Atom{D, L<:Unitful.Length, V<:Unitful.Velocity, M<:Unitful.Mass}
     position::SVector{D, L}
     velocity::SVector{D, V}
-    atomic_symbol::Symbol
-    atomic_number::Int
+    species::ChemicalSpecies
     atomic_mass::M
     data::Dict{Symbol, Any}  # Store arbitrary data about the atom.
 end
+
 velocity(atom::Atom)      = atom.velocity
 position(atom::Atom)      = atom.position
 atomic_mass(atom::Atom)   = atom.atomic_mass
-atomic_symbol(atom::Atom) = atom.atomic_symbol
-atomic_number(atom::Atom) = atom.atomic_number
-element(atom::Atom)       = element(atomic_number(atom))
+species(atom::Atom)       = atom.species
+
 n_dimensions(::Atom{D}) where {D} = D
+
+atomic_symbol(atom::Atom) = atomic_symbol(species(atom))
+atomic_number(atom::Atom) = atomic_number(species(atom))
+element(atom::Atom)       = element(species(atom))
 
 Base.getindex(at::Atom, x::Symbol) = hasfield(Atom, x) ? getfield(at, x) : getindex(at.data, x)
 Base.haskey(at::Atom,   x::Symbol) = hasfield(Atom, x) || haskey(at.data, x)
@@ -28,7 +33,7 @@ function Base.get(at::Atom, x::Symbol, default)
     hasfield(Atom, x) ? getfield(at, x) : get(at.data, x, default)
 end
 function Base.keys(at::Atom)
-    (:position, :velocity, :atomic_symbol, :atomic_number, :atomic_mass, keys(at.data)...)
+    (:position, :velocity, :species, :atomic_mass, keys(at.data)...)
 end
 Base.pairs(at::Atom) = (k => at[k] for k in keys(at))
 
@@ -46,18 +51,28 @@ Supported `kwargs` include `atomic_symbol`, `atomic_number`, `atomic_mass`, `cha
 function Atom(identifier::AtomId,
               position::AbstractVector{L},
               velocity::AbstractVector{V}=zeros(length(position))u"bohr/s";
-              atomic_symbol=Symbol(element(identifier).symbol),
-              atomic_number=element(identifier).number,
-              atomic_mass::M=element(identifier).atomic_mass,
+              species = ChemicalSpecies(identifier),
+              atomic_mass::M=element(species).atomic_mass,
               kwargs...) where {L <: Unitful.Length, V <: Unitful.Velocity, M <: Unitful.Mass}
-    Atom{length(position), L, V, M}(position, velocity, atomic_symbol,
-                                    atomic_number, atomic_mass, Dict(kwargs...))
+    Atom{length(position), L, V, M}(position, velocity, species,
+                                    atomic_mass, Dict(kwargs...))
 end
+
+# TODO: what about the default unit? 
+
 function Atom(id::AtomId, position::AbstractVector, velocity::Missing; kwargs...)
     Atom(id, position, zeros(length(position))u"bohr/s"; kwargs...)
 end
-function Atom(; atomic_symbol, position, velocity=zeros(length(position))u"bohr/s", kwargs...)
-    Atom(atomic_symbol, position, velocity; atomic_symbol, kwargs...)
+
+function Atom(; velocity=zeros(length(position))u"bohr/s", kwargs...)
+    @show kwargs
+    ididx = findlast(x -> x ∈ (:species, :atomic_number, :atomic_symbol), 
+                    keys(kwargs))
+    id = kwargs[ididx] 
+    position = kwargs[:position]
+    kwargs = filter(x -> x[1] ∉ (:species, :position, :velocity, :atomic_number, 
+                                :atomic_symbol), kwargs)
+    Atom(id, position, velocity; kwargs...)
 end
 
 """
@@ -88,6 +103,7 @@ Base.show(io::IO, at::Atom) = show_atom(io, at)
 Base.show(io::IO, mime::MIME"text/plain", at::Atom) = show_atom(io, mime, at)
 
 
+#= 
 #
 # Special high-level functions to construct atomic systems
 #
@@ -171,3 +187,5 @@ function periodic_system(atoms::AbstractVector,
     end
     atomic_system(parse_fractional.(atoms), box, boundary_conditions; kwargs...)
 end
+
+=#

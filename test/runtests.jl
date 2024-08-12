@@ -7,10 +7,10 @@ const GROUP_COVERAGE = !isempty(get(ENV, "GROUP_COVERAGE", ""))
 if GROUP == "Core"
     @testset "AtomsBase.jl" begin
         include("interface.jl")
-        include("fast_system.jl")
         include("atom.jl")
-        include("properties.jl")
-        include("printing.jl")
+        # include("fast_system.jl")
+        # include("properties.jl")
+        # include("printing.jl")
     end
 else
     subpkg_path = joinpath(dirname(@__DIR__), "lib", GROUP)

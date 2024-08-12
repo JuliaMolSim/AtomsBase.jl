@@ -9,6 +9,8 @@ using Unitful
 
 import Base: ==, convert, show, length
 
+export ChemicalSpecies
+
 """
 Encodes a chemical species by wrapping an integer that represents the atomic 
 number, the number of protons, and additional unspecified information as a `UInt32`. 
@@ -26,7 +28,8 @@ function Base.show(io::IO, element::ChemicalSpecies)
     end
 end
 
-ChemicalSpecies(sym::Symbol) = ChemicalSpecies(_sym2z[sym])  
+ChemicalSpecies(sym::Symbol) = ChemicalSpecies(_sym2z[sym]) 
+ChemicalSpecies(z::Integer) = ChemicalSpecies(z, 0, 0) 
 ChemicalSpecies(sym::ChemicalSpecies) = sym
 
 ==(a::ChemicalSpecies, sym::Symbol) = (Symbol(a) == sym)
@@ -48,9 +51,10 @@ for z in 1:length(_chem_el_info)
 end
 
 # -------- accessor functions 
+# TODO: some of these need to be adapted or throw errors when nprot ≠ 0. 
 
 # UInt* is not readable
-atomic_number(element::ChemicalSpecies) = Int16(element.atomic_number)  
+atomic_number(element::ChemicalSpecies) = element.atomic_number
 
 atomic_symbol(element::ChemicalSpecies) = element 
 

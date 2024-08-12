@@ -18,11 +18,7 @@ include("utils/atomview.jl")
 
 
 # prototype implementations 
-# module Impl
-# include("implementation/flexible_system.jl")
-# include("implementation/atom.jl")
-# include("implementation/fast_system.jl")
-# end
+include("implementation/impl.jl")
 
 
 # TODO: 

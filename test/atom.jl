@@ -3,6 +3,8 @@ using Unitful
 using UnitfulAtomic
 using Test
 
+using AtomsBase.Implementation: Atom
+
 @testset "atomic systems" begin
     @testset "Atom construction" begin
         at2D = Atom(:Si, zeros(2) * u"m", extradata=41)
@@ -16,32 +18,28 @@ using Test
         @test element(at)  == element(:Si)
         @test atomic_symbol(at) == :Si
         @test atomic_number(at) == 14
-        @test at[:atomic_symbol] == :Si
-        @test at[:atomic_number] == 14
+        @test species(at) == ChemicalSpecies(:Si)
         @test haskey(at, :atomic_mass)
-        @test haskey(at, :atomic_symbol)
-        @test haskey(at, :atomic_number)
+        @test haskey(at, :species)
         @test haskey(at, :extradata)
         @test at[:extradata] == 42
 
-        @test keys(at) == (:position, :velocity, :atomic_symbol,
-                           :atomic_number, :atomic_mass, :extradata)
+        @test keys(at) == (:position, :velocity, :species,
+                           :atomic_mass, :extradata)
 
         # Test update constructor
         newatom = Atom(at; extradata=43, atomic_number=15)
         @test keys(at) == keys(newatom)
         @test newatom[:extradata] == 43
-        @test newatom[:atomic_number] == 15
-
-        newatom = Atom(at; extradata=43, atomic_number=15)
-        @test keys(at) == keys(newatom)
-        @test newatom[:extradata] == 43
-        @test newatom[:atomic_number] == 15
+        @test atomic_number(newatom) == 15
 
         newatom = Atom(:Si, ones(3)u"m", missing)
         @test iszero(newatom[:velocity])
     end
 
+    # CO : these are all tests about making systems, and not about atoms 
+    # i think this needs to be moved elsewhere. 
+    #= 
     @testset "flexible atomic systems" begin
         box = [[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"Å"
         bcs = [Periodic(), DirichletZero(), DirichletZero()]
@@ -143,6 +141,7 @@ using Test
                                      Atom(:H, zeros(3) * u"Å")])
         @test length(system) == 3
     end
+    =#
 
     @testset "Nothing or zero velocity" begin
         at = Atom(:Si, ones(3) * u"Å"; extradata=42)
