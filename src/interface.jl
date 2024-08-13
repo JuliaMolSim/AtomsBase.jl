@@ -1,9 +1,7 @@
 import Base.position
 import PeriodicTable
 
-export AbstractSystem, 
-       SystemWithCell, 
-       bounding_box, 
+export bounding_box, 
        periodicity, 
        get_cell, 
        n_dimensions, 

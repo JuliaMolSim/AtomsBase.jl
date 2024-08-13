@@ -15,6 +15,8 @@ import AtomsBase: AbstractSystem, SystemWithCell,
 
 import AtomsBase: ChemicalSpecies, PCell, OpenSystemCell
 
+export Atom, FlexibleSystem, FastSystem
+
 include("atom.jl")
 include("flexible_system.jl")
 include("fast_system.jl")
