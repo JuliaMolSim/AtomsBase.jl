@@ -4,7 +4,7 @@ using Unitful
 using UnitfulAtomic
 using PeriodicTable
 
-using AtomsBase.Implementation: Atom, FlexibleSystem
+using AtomsBase.Implementation: Atom, FlexibleSystem, FastSystem 
 
 @testset "Interface" begin
     box = ([1, 0, 0]u"m", [0, 1, 0]u"m", [0, 0, 1]u"m")
@@ -18,15 +18,14 @@ using AtomsBase.Implementation: Atom, FlexibleSystem
         @test velocity(atoms[1]) == [0.0, 0.0, 0.0]u"bohr/s"
         @test atomic_symbol(atoms[1]) == :C
         @test atomic_number(atoms[1]) == 6
-        @test atomic_mass(atoms[1])   == 12.011u"u"
+        @test mass(atoms[1])   == 12.011u"u"
         @test element(atoms[1]) == element(:C)
-        @test keys(atoms[1]) == (:position, :velocity, :species, :atomic_mass)
+        @test keys(atoms[1]) == (:position, :velocity, :species, :mass)
         @test get(atoms[1], :blubber, :adidi) == :adidi
     end
 
     @testset "System" begin
         flexible = FlexibleSystem(atoms, box, pbcs)
-        # TODO 
         # fast     = FastSystem(flexible)
         @test length(flexible) == 2
         @test size(flexible)   == (2, )
@@ -38,8 +37,8 @@ using AtomsBase.Implementation: Atom, FlexibleSystem
         @test position(flexible, 1) == [0.25, 0.25, 0.25]u"m"
         @test velocity(flexible, :)[1] == [0.0, 0.0, 0.0]u"bohr/s"
         @test velocity(flexible, 2) == [0.0, 0.0, 0.0]u"bohr/s"
-        @test atomic_mass(flexible, :)   == [12.011, 12.011]u"u"
-        @test atomic_mass(flexible, 1)   == 12.011u"u"
+        @test mass(flexible, :)   == [12.011, 12.011]u"u"
+        @test mass(flexible, 1)   == 12.011u"u"
         @test atomic_number(flexible, :) == [6, 6]
         # TODO fast         
         # @test atomic_number(fast, 1) == 6
@@ -47,7 +46,7 @@ using AtomsBase.Implementation: Atom, FlexibleSystem
         @test atomic_symbol(flexible, 2) == :C
         @test atomic_number(flexible, 2) == 6
 
-        @test atomkeys(flexible) == (:position, :velocity, :species, :atomic_mass)
+        @test atomkeys(flexible) == (:position, :velocity, :species, :mass)
         @test hasatomkey(flexible, :species)
         @test atomic_symbol(flexible, 1) == :C
         @test atomic_symbol(flexible, :,) == [:C, :C]

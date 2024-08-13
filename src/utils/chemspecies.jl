@@ -64,7 +64,7 @@ Base.convert(::Type{Symbol}, element::ChemicalSpecies) = Symbol(element)
 
 Base.Symbol(element::ChemicalSpecies) = _chem_el_info[element.atomic_number].symbol
 
-atomic_mass(element::ChemicalSpecies) = _chem_el_info[element.atomic_number].atomic_mass
+mass(element::ChemicalSpecies) = _chem_el_info[element.atomic_number].atomic_mass
 
 rich_info(element::ChemicalSpecies) = PeriodicTable.elements[element.atomic_number]
 

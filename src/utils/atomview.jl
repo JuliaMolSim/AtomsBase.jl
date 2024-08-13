@@ -17,7 +17,7 @@ using `AtomView` as its species type.
 julia> system = FastSystem(atoms, box, boundary_conditions);
 
 julia> atom = system[2]
-AtomView(C, atomic_number = 6, atomic_mass = 12.011 u):
+AtomView(C, atomic_number = 6, mass = 12.011 u):
     position          : [0.75,0.75,0.75]u"Å"
 
 julia> atom isa AtomView{typeof(system)}

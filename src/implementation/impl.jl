@@ -8,13 +8,13 @@ import AtomsBase: AbstractSystem, SystemWithCell,
          n_dimensions, species, position, 
          velocity, element, 
          atomic_number, atomic_symbol, 
-         atomic_mass, element, 
+         mass, element, 
          show_atom
 
 import AtomsBase: ChemicalSpecies, PCell, OpenSystemCell
 
 include("atom.jl")
 include("flexible_system.jl")
-# include("fast_system.jl")
+include("fast_system.jl")
 
 end 

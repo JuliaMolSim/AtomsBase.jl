@@ -19,13 +19,13 @@ using AtomsBase.Implementation: Atom
         @test atomic_symbol(at) == :Si
         @test atomic_number(at) == 14
         @test species(at) == ChemicalSpecies(:Si)
-        @test haskey(at, :atomic_mass)
+        @test haskey(at, :mass)
         @test haskey(at, :species)
         @test haskey(at, :extradata)
         @test at[:extradata] == 42
 
         @test keys(at) == (:position, :velocity, :species,
-                           :atomic_mass, :extradata)
+                           :mass, :extradata)
 
         # Test update constructor
         newatom = Atom(at; extradata=43, atomic_number=15)

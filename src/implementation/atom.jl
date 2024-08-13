@@ -12,13 +12,13 @@ struct Atom{D, L<:Unitful.Length, V<:Unitful.Velocity, M<:Unitful.Mass}
     position::SVector{D, L}
     velocity::SVector{D, V}
     species::ChemicalSpecies
-    atomic_mass::M
+    mass::M
     data::Dict{Symbol, Any}  # Store arbitrary data about the atom.
 end
 
 velocity(atom::Atom)      = atom.velocity
 position(atom::Atom)      = atom.position
-atomic_mass(atom::Atom)   = atom.atomic_mass
+mass(atom::Atom)   = atom.mass
 species(atom::Atom)       = atom.species
 
 n_dimensions(::Atom{D}) where {D} = D
@@ -33,7 +33,7 @@ function Base.get(at::Atom, x::Symbol, default)
     hasfield(Atom, x) ? getfield(at, x) : get(at.data, x, default)
 end
 function Base.keys(at::Atom)
-    (:position, :velocity, :species, :atomic_mass, keys(at.data)...)
+    (:position, :velocity, :species, :mass, keys(at.data)...)
 end
 Base.pairs(at::Atom) = (k => at[k] for k in keys(at))
 
@@ -45,17 +45,17 @@ Base.pairs(at::Atom) = (k => at[k] for k in keys(at))
 Construct an atomic located at the cartesian coordinates `position` with (optionally)
 the given cartesian `velocity`. Note that `AtomId = Union{Symbol,AbstractString,Integer}`.
 
-Supported `kwargs` include `atomic_symbol`, `atomic_number`, `atomic_mass`, `charge`,
+Supported `kwargs` include `atomic_symbol`, `atomic_number`, `mass`, `charge`,
 `multiplicity` as well as user-specific custom properties.
 """
 function Atom(identifier::AtomId,
               position::AbstractVector{L},
               velocity::AbstractVector{V}=zeros(length(position))u"bohr/s";
               species = ChemicalSpecies(identifier),
-              atomic_mass::M=element(species).atomic_mass,
+              mass::M=element(species).atomic_mass,
               kwargs...) where {L <: Unitful.Length, V <: Unitful.Velocity, M <: Unitful.Mass}
     Atom{length(position), L, V, M}(position, velocity, species,
-                                    atomic_mass, Dict(kwargs...))
+                                    mass, Dict(kwargs...))
 end
 
 # TODO: what about the default unit? 
@@ -80,7 +80,7 @@ end
 
 Update constructor. Construct a new `Atom`, by amending the data contained
 in the passed `atom` object.
-Supported `kwargs` include `atomic_symbol`, `atomic_number`, `atomic_mass`, `charge`,
+Supported `kwargs` include `atomic_symbol`, `atomic_number`, `mass`, `charge`,
 `multiplicity` as well as user-specific custom properties.
 
 # Examples
@@ -90,7 +90,7 @@ julia> hydrogen = Atom(:H, zeros(3)u"Å")
 ```
 and now amend its charge and atomic mass
 ```julia-repl
-julia> Atom(atom; atomic_mass=1.0u"u", charge=-1.0u"e_au")
+julia> Atom(atom; mass=1.0u"u", charge=-1.0u"e_au")
 ```
 """
 Atom(atom::Atom; kwargs...) = Atom(; pairs(atom)..., kwargs...)

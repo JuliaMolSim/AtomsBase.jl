@@ -89,8 +89,8 @@ end
 
 function show_atom(io::IO, ::MIME"text/plain", at)
     print(io, typeof(at).name.name, "(")
-    println(io, atomic_symbol(at), ", atomic_number = ", atomic_number(at),
-            ", atomic_mass = ", atomic_mass(at), "):")
+    println(io, atomic_symbol(at), ", Z = ", atomic_number(at),
+            ", m = ", mass(at), "):")
 
     pos = [(@sprintf "%.8g" ustrip(p)) for p in position(at)]
     posunit = unit(eltype(position(at)))
@@ -101,7 +101,7 @@ function show_atom(io::IO, ::MIME"text/plain", at)
         @printf io "    %-17s : [%s]u\"%s\"\n" "velocity" join(vel, ",") string(velunit)
     end
     for (k, v) in pairs(at)
-        k in (:atomic_number, :atomic_mass, :atomic_symbol, :position, :velocity) && continue
+        k in (:atomic_number, :mass, :atomic_symbol, :position, :velocity) && continue
         @printf io "    %-17s : %s\n" string(k) string(v)
     end
 end

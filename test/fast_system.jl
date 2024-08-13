@@ -4,16 +4,18 @@ using Unitful
 using PeriodicTable
 using StaticArrays
 
+using AtomsBase.Implementation: Atom, FastSystem
+
 @testset "Fast system" begin
-    box = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"m"
-    bcs = [Periodic(), Periodic(), DirichletZero()]
+    box = ([1, 0, 0]u"m", [0, 1, 0]u"m", [0, 0, 1]u"m")
+    pbcs = (true, true, false)
     atoms = Atom[:C => [0.25, 0.25, 0.25]u"m",
                  :C => [0.75, 0.75, 0.75]u"m"]
     system = FastSystem(atoms, box, bcs)
 
     @test length(system) == 2
     @test size(system)   == (2, )
-    @test atomic_mass(system) == [12.011, 12.011]u"u"
+    @test mass(system) == [12.011, 12.011]u"u"
     @test boundary_conditions(system) == bcs
     @test bounding_box(system) == box
     @test system[:boundary_conditions] == bcs
@@ -23,16 +25,16 @@ using StaticArrays
     @test keys(system) == (:bounding_box, :boundary_conditions)
     @test haskey(system, :boundary_conditions)
     @test system[:boundary_conditions][1] == Periodic()
-    @test atomkeys(system) == (:position, :atomic_symbol, :atomic_number, :atomic_mass)
-    @test keys(system[1])  == (:position, :atomic_symbol, :atomic_number, :atomic_mass)
-    @test hasatomkey(system, :atomic_symbol)
+    @test atomkeys(system) == (:position, :species, :mass)
+    @test keys(system[1])  == (:position, :species, :mass)
+    @test hasatomkey(system, :species)
     @test system[1] == AtomView(system, 1)
     @test system[1:2] == [system[1], system[2]]
     @test system[[2, 1]] == [system[2], system[1]]
     @test system[[1 2; 2 1]] == [system[1] system[2]; system[2] system[1]]
     @test system[:] == [system[1], system[2]]
     @test system[[false, true]] == [AtomView(system, 2)]
-    @test system[1, :atomic_number] == 6
+    @test atomic_number(system, 1) == 6
     @test system[1:2, :atomic_symbol] == [:C, :C]
     @test system[[1, 2], :atomic_symbol] == [:C, :C]
     @test system[:, :atomic_symbol] == [:C, :C]
@@ -46,9 +48,8 @@ using StaticArrays
     @test collect(pairs(system)) == [(:bounding_box => box), (:boundary_conditions => bcs)]
     @test collect(pairs(system[1])) == [
         :position => position(atoms[1]),
-        :atomic_symbol => :C,
-        :atomic_number => 6,
-        :atomic_mass => atomic_mass(atoms[1]),
+        :species => ChemicalSpecies(:C),
+        :mass => mass(atoms[1]),
     ]
 
     # check type stability
@@ -58,7 +59,7 @@ using StaticArrays
     @test ismissing(@inferred(velocity(system, 2)))
 
     # Test AtomView
-    for method in (position, atomic_mass, atomic_symbol, atomic_number)
+    for method in (position, mass, species, atomic_number, atomic_symbol)
         @test method(system[1]) == method(system, 1)
         @test method(system[2]) == method(system, 2)
     end

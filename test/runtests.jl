@@ -8,7 +8,7 @@ if GROUP == "Core"
     @testset "AtomsBase.jl" begin
         include("interface.jl")
         include("atom.jl")
-        # include("fast_system.jl")
+        include("fast_system.jl")
         # include("properties.jl")
         # include("printing.jl")
     end

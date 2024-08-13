@@ -117,11 +117,11 @@ velocity(sys::FlexibleSystem, i::Integer) =
 velocity(sys::FlexibleSystem, i::Union{AbstractVector, Colon}) = 
         [ velocity(x) for x in sys.particles[i] ]         
 
-atomic_mass(sys::FlexibleSystem, i::Integer) = 
-        atomic_mass(sys.particles[i])
+mass(sys::FlexibleSystem, i::Integer) = 
+        mass(sys.particles[i])
 
-atomic_mass(sys::FlexibleSystem, i::Union{AbstractVector, Colon}) = 
-        [ atomic_mass(x) for x in sys.particles[i] ]
+mass(sys::FlexibleSystem, i::Union{AbstractVector, Colon}) = 
+        [ mass(x) for x in sys.particles[i] ]
 
 species(sys::FlexibleSystem, i::Integer) = 
         species(sys.particles[i])
