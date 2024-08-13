@@ -9,7 +9,7 @@ if GROUP == "Core"
         include("interface.jl")
         include("atom.jl")
         include("fast_system.jl")
-        # include("properties.jl")
+        include("properties.jl")
         # include("printing.jl")
     end
 else

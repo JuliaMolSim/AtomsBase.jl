@@ -9,9 +9,9 @@ using Test
 
     atoms = [:Si => [0.0, -0.125, 0.0],
              :C  => [0.125, 0.0, 0.0]]
-    box = [[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"bohr"
+    box = tuple([[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"bohr" ...)
 
-    flexible_system = periodic_system(atoms, box; fractional=true, data=-12)
+    flexible_system = FlexibleSystem(atoms, box, true; fractional=true, data=-12)
     @test repr(flexible_system) == """
     FlexibleSystem(CSi, periodic = TTT, bounding_box = [[10.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 7.0]]u"a₀")"""
     show(stdout, MIME("text/plain"), flexible_system)
@@ -27,24 +27,24 @@ end
     @testset "3D standard system" begin
         atoms = [:Si => [0.0, -0.125, 0.0],
                  :C  => [0.125, 0.0, 0.0]]
-        box = [[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"Å"
-        system = periodic_system(atoms, box; fractional=true)
+        box = tuple([[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"Å" ...)
+        system = FlexibleSystem(atoms, box, true; fractional=true)
         println(visualize_ascii(system))
     end
 
     @testset "2D standard system" begin
         atoms = [:Si => [0.0, -0.125],
                  :C  => [0.125, 0.0]]
-        box = [[10, 0.0], [0.0, 5]]u"Å"
-        system = periodic_system(atoms, box; fractional=true)
+        box = tuple([[10, 0.0], [0.0, 5]]u"Å" ...)
+        system = FlexibleSystem(atoms, box, true; fractional=true)
         println(visualize_ascii(system))
     end
 
     @testset "3D with negative unit cell" begin
         atoms = [:Si => [0.75, 0.75, 0.75],
                  :Si => [0.0,  0.0,  0.0]]
-        box = [[-2.73, -2.73, 0.0], [-2.73, 0.0, -2.73], [0.0, -2.73, -2.73]]u"Å"
-        system = periodic_system(atoms, box; fractional=true)
+        box = tuple([[-2.73, -2.73, 0.0], [-2.73, 0.0, -2.73], [0.0, -2.73, -2.73]]u"Å" ...) 
+        system = FlexibleSystem(atoms, box, true; fractional=true)
         println(visualize_ascii(system))
     end
 end
