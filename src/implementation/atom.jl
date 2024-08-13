@@ -65,7 +65,6 @@ function Atom(id::AtomId, position::AbstractVector, velocity::Missing; kwargs...
 end
 
 function Atom(; velocity=zeros(length(position))u"bohr/s", kwargs...)
-    @show kwargs
     ididx = findlast(x -> x ∈ (:species, :atomic_number, :atomic_symbol), 
                     keys(kwargs))
     id = kwargs[ididx] 

@@ -9,7 +9,9 @@ import AtomsBase: AbstractSystem, SystemWithCell,
          velocity, element, 
          atomic_number, atomic_symbol, 
          mass, element, 
-         show_atom
+         show_atom, 
+         AtomView, 
+         atomkeys, hasatomkey
 
 import AtomsBase: ChemicalSpecies, PCell, OpenSystemCell
 

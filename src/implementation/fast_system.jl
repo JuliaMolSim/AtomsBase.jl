@@ -13,7 +13,7 @@ end
 # Constructor to fetch the types
 function FastSystem(box::NTuple{D, <: AbstractVector}, pbc::NTuple{D, Bool}, 
                     positions, species, masses) where {D}
-    cell = PCell(box, pbc)
+    cell = PCell(; cell_vectors = box, periodicity = pbc)
     FastSystem(cell, positions, species, masses)
 end 
 

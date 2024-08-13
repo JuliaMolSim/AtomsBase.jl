@@ -26,7 +26,7 @@ using AtomsBase.Implementation: Atom, FlexibleSystem, FastSystem
 
     @testset "System" begin
         flexible = FlexibleSystem(atoms, box, pbcs)
-        # fast     = FastSystem(flexible)
+        fast     = FastSystem(flexible)
         @test length(flexible) == 2
         @test size(flexible)   == (2, )
 
@@ -40,9 +40,8 @@ using AtomsBase.Implementation: Atom, FlexibleSystem, FastSystem
         @test mass(flexible, :)   == [12.011, 12.011]u"u"
         @test mass(flexible, 1)   == 12.011u"u"
         @test atomic_number(flexible, :) == [6, 6]
-        # TODO fast         
-        # @test atomic_number(fast, 1) == 6
-        # @test ismissing(velocity(fast, 2))
+        @test atomic_number(fast, 1) == 6
+        @test ismissing(velocity(fast, 2))
         @test atomic_symbol(flexible, 2) == :C
         @test atomic_number(flexible, 2) == 6
 
@@ -52,9 +51,10 @@ using AtomsBase.Implementation: Atom, FlexibleSystem, FastSystem
         @test atomic_symbol(flexible, :,) == [:C, :C]
 
         # TODO fast 
-        # @test ismissing(velocity(fast))
-        # @test all(position(fast)      .== position(flexible))
-        # @test all(atomic_symbol(fast) .== atomic_symbol(flexible))
+        @test ismissing(velocity(fast, :))
+        @test all(position(fast, :)      .== position(flexible, :))
+        @test all(atomic_symbol(fast, :) .== atomic_symbol(flexible, :))
+        @test all(species(fast, :) .== species(flexible, :))
 
         # type stability
         @info("This is a failing test? ")
