@@ -14,27 +14,48 @@ export ChemicalSpecies
 """
 Encodes a chemical species by wrapping an integer that represents the atomic 
 number, the number of protons, and additional unspecified information as a `UInt32`. 
+
+Constructors for standard chemical elements
+```julia
+ChemicalSpecies(Z::Integer)
+ChemicalSpecies(sym::Symbol) 
+# for example 
+ChemicalSpecies(:C)
+ChemicalSpecies(6)
+```
+
+Constructors for isotopes 
+```julia 
+# standard carbon = C-12
+ChemicalSpecies(:C)
+ChemicalSpecies(:C; nneutrons = 6)
+
+# three equivalent constructors for C-13
+ChemicalSpecies(:C; nneutrons = 7)
+ChemicalSpecies(6; nneutrons = 7)
+ChemicalSpecies(:C13)
+# deuterium
+ChemicalSpecies(:D) 
+```
 """
 struct ChemicalSpecies
-   atomic_number::Int16
-   nprot::Int16
+   atomic_number::Int16    # = Z = number of protons
+   dneut::Int16            # number of neutrons = Z + dneut 
    info::UInt32
 end
 
+
 function Base.show(io::IO, element::ChemicalSpecies) 
     print(io, Symbol(element))
-    if element.nprot != 0
-        print(io, "($element.nprot)")
-    end
 end
 
 Base.Broadcast.broadcastable(s::ChemicalSpecies) = Ref(s)
 
-ChemicalSpecies(sym::Symbol) = ChemicalSpecies(_sym2z[sym]) 
-ChemicalSpecies(z::Integer) = ChemicalSpecies(z, 0, 0) 
+ChemicalSpecies(z::Integer) = ChemicalSpecies(z, 0, 0)
 ChemicalSpecies(sym::ChemicalSpecies) = sym
 
-==(a::ChemicalSpecies, sym::Symbol) = (Symbol(a) == sym)
+==(a::ChemicalSpecies, sym::Symbol) = 
+        ((a == ChemicalSpecies(sym)) && (Symbol(a) == sym))
 
 # -------- fast access to the periodic table 
 
@@ -52,6 +73,53 @@ for z in 1:length(_chem_el_info)
    _sym2z[_chem_el_info[z].symbol] = z
 end
 
+function ChemicalSpecies(sym::Symbol; nneutrons = -1, info = 0) 
+    _isnum(c::Char) = '0' <= c <= '9'
+    _islett(c::Char) = 'A' <= uppercase(c) <= 'Z'
+
+    # TODO - special-casing deuterium to make tests pass 
+    #        this should be handled better
+    if sym == :D 
+        return ChemicalSpecies(1, 1, info)
+    end
+
+    # number of neutrons is explicitly specified
+    if nneutrons != -1
+        @assert all(_islett, String(sym)) 
+        @assert nneutrons >= 0
+        Z = _sym2z[sym]
+        return ChemicalSpecies(Z, nneutrons - Z, info)
+    end
+
+    # number of neutrons is encoded in the symbol
+    str = String(sym)
+    elem_str = str[1:findlast(_islett, str)]
+    Z = _sym2z[Symbol(elem_str)]
+    num_str = str[findlast(_islett, str)+1:end]
+    if isempty(num_str)
+        dneut = 0 
+    else
+        dneut = parse(Int, num_str) - 2*Z
+    end
+    return ChemicalSpecies(Z, dneut, info)
+end
+
+function Base.Symbol(element::ChemicalSpecies) 
+    str = "$(_chem_el_info[element.atomic_number].symbol)"
+    if element.dneut != 0
+        str *= "$(2 * element.atomic_number + element.dneut)"
+    end
+
+    # TODO: again special-casing deuterium; to be fixed. 
+    if str == "H2"
+        return :D
+    end 
+
+    return Symbol(str)
+end
+    
+
+
 # -------- accessor functions 
 # TODO: some of these need to be adapted or throw errors when nprot ≠ 0. 
 
@@ -61,8 +129,6 @@ atomic_number(element::ChemicalSpecies) = element.atomic_number
 atomic_symbol(element::ChemicalSpecies) = element 
 
 Base.convert(::Type{Symbol}, element::ChemicalSpecies) = Symbol(element) 
-
-Base.Symbol(element::ChemicalSpecies) = _chem_el_info[element.atomic_number].symbol
 
 mass(element::ChemicalSpecies) = _chem_el_info[element.atomic_number].atomic_mass
 

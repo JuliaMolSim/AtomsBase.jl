@@ -91,7 +91,7 @@ Update constructor. Construct a new system where one or more properties are chan
 which are given as `kwargs`. A subtype of `AbstractSystem` is returned, by default
 a `FlexibleSystem`, but depending on the type of the passed system this might differ.
 
-Supported `kwargs` include `particles`, `atoms`, `bounding_box` and `boundary_conditions`
+Supported `kwargs` include `particles`, `atoms`, `bounding_box` and `periodicity`
 as well as user-specific custom properties.
 
 # Examples

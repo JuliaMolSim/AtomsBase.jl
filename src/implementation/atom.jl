@@ -43,10 +43,9 @@ Base.pairs(at::Atom) = (k => at[k] for k in keys(at))
     Atom(; atomic_number, position, velocity=zeros(D)u"bohr/s", kwargs...)
 
 Construct an atomic located at the cartesian coordinates `position` with (optionally)
-the given cartesian `velocity`. Note that `AtomId = Union{Symbol,AbstractString,Integer}`.
+the given cartesian `velocity`. Note that `AtomId = Union{Symbol,AbstractString,Integer,ChemicalSymbol}`.
 
-Supported `kwargs` include `atomic_symbol`, `atomic_number`, `mass`, `charge`,
-`multiplicity` as well as user-specific custom properties.
+Supported `kwargs` include `species`, `mass`, as well as user-specific custom properties.
 """
 function Atom(identifier::AtomId,
               position::AbstractVector{L},
@@ -68,6 +67,7 @@ function Atom(; velocity=zeros(length(position))u"bohr/s", kwargs...)
     ididx = findlast(x -> x ∈ (:species, :atomic_number, :atomic_symbol), 
                     keys(kwargs))
     id = kwargs[ididx] 
+    @show id 
     position = kwargs[:position]
     kwargs = filter(x -> x[1] ∉ (:species, :position, :velocity, :atomic_number, 
                                 :atomic_symbol), kwargs)
@@ -79,8 +79,7 @@ end
 
 Update constructor. Construct a new `Atom`, by amending the data contained
 in the passed `atom` object.
-Supported `kwargs` include `atomic_symbol`, `atomic_number`, `mass`, `charge`,
-`multiplicity` as well as user-specific custom properties.
+Supported `kwargs` include `species`, `mass`, as well as user-specific custom properties.
 
 # Examples
 Construct a standard hydrogen atom located at the origin

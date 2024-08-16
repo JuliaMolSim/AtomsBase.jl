@@ -7,7 +7,7 @@
 export atomic_system, isolated_system, periodic_system
 
 """
-    atomic_system(atoms::AbstractVector, bounding_box, boundary_conditions; kwargs...)
+    atomic_system(atoms::AbstractVector, bounding_box, periodicity; kwargs...)
 
 Construct a [`FlexibleSystem`](@ref) using the passed `atoms` and boundary box and conditions.
 Extra `kwargs` are stored as custom system properties.
@@ -16,10 +16,10 @@ Extra `kwargs` are stored as custom system properties.
 Construct a hydrogen molecule in a box, which is periodic only in the first two dimensions
 ```julia-repl
 julia> bounding_box = [[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]u"Å"
-julia> boundary_conditions = [Periodic(), Periodic(), DirichletZero()]
+julia> pbcs = (true, true, false)
 julia> hydrogen = atomic_system([:H => [0, 0, 1.]u"bohr",
                                  :H => [0, 0, 3.]u"bohr"],
-                                  bounding_box, boundary_conditions)
+                                  bounding_box, pubcs)
 ```
 """
 atomic_system(atoms::AbstractVector{<:Atom}, box, bcs; kwargs...) = 
@@ -59,7 +59,7 @@ Extra `kwargs` are stored as custom system properties.
 # Examples
 Setup a hydrogen molecule inside periodic BCs:
 ```julia-repl
-julia> bounding_box = [[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]u"Å"
+julia> bounding_box = ([10.0, 0.0, 0.0]u"Å", [0.0, 10.0, 0.0]u"Å", [0.0, 0.0, 10.0]u"Å")
 julia> hydrogen = periodic_system([:H => [0, 0, 1.]u"bohr",
                                    :H => [0, 0, 3.]u"bohr"],
                                   bounding_box)
