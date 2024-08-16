@@ -40,7 +40,7 @@ ChemicalSpecies(:D)
 """
 struct ChemicalSpecies
    atomic_number::Int16    # = Z = number of protons
-   dneut::Int16            # number of neutrons = Z + dneut 
+   nneut::Int16            # number of neutrons
    info::UInt32
 end
 
@@ -73,6 +73,11 @@ for z in 1:length(_chem_el_info)
    _sym2z[_chem_el_info[z].symbol] = z
 end
 
+function _nneut_default(z::Integer) 
+    nplusp = floor(Int, ustrip(u"u", _chem_el_info[z].atomic_mass))
+    return nplusp - z
+end
+
 function ChemicalSpecies(sym::Symbol; nneutrons = -1, info = 0) 
     _isnum(c::Char) = '0' <= c <= '9'
     _islett(c::Char) = 'A' <= uppercase(c) <= 'Z'
@@ -88,7 +93,7 @@ function ChemicalSpecies(sym::Symbol; nneutrons = -1, info = 0)
         @assert all(_islett, String(sym)) 
         @assert nneutrons >= 0
         Z = _sym2z[sym]
-        return ChemicalSpecies(Z, nneutrons - Z, info)
+        return ChemicalSpecies(Z, nneutrons, info)
     end
 
     # number of neutrons is encoded in the symbol
@@ -97,17 +102,17 @@ function ChemicalSpecies(sym::Symbol; nneutrons = -1, info = 0)
     Z = _sym2z[Symbol(elem_str)]
     num_str = str[findlast(_islett, str)+1:end]
     if isempty(num_str)
-        dneut = 0 
+        nneutrons = _nneut_default(Z)
     else
-        dneut = parse(Int, num_str) - 2*Z
+        nneutrons = parse(Int, num_str) - Z
     end
-    return ChemicalSpecies(Z, dneut, info)
+    return ChemicalSpecies(Z, nneutrons, info)
 end
 
 function Base.Symbol(element::ChemicalSpecies) 
     str = "$(_chem_el_info[element.atomic_number].symbol)"
-    if element.dneut != 0
-        str *= "$(2 * element.atomic_number + element.dneut)"
+    if element.nneut != _nneut_default(element.atomic_number)
+        str *= "$(element.atomic_number + element.nneut)"
     end
 
     # TODO: again special-casing deuterium; to be fixed. 
