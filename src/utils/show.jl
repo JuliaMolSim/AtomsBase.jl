@@ -4,17 +4,12 @@ using Printf
 Suggested function to print AbstractSystem objects to screen
 """
 function show_system(io::IO, system::AbstractSystem{D}) where {D}
-    bc  = boundary_conditions(system)
-
+    pbc = periodicity(system)
     print(io, typeof(system).name.name, "($(chemical_formula(system))")
-    if isinfinite(system)
-        print(io, ", infinite")
-    else
-        perstr = [p ? "T" : "F" for p in periodicity(system)]
-        print(io, ", periodic = ", join(perstr, ""))
-    end
+    perstr = [p ? "T" : "F" for p in pbc]
+    print(io, ", pbc = ", join(perstr, ""))
 
-    if !isinfinite(system)
+    if !any(pbc)
         box_str = ["[" * join(ustrip.(bvector), ", ") * "]"
                    for bvector in bounding_box(system)]
         bunit = unit(eltype(first(bounding_box(system))))
@@ -22,6 +17,7 @@ function show_system(io::IO, system::AbstractSystem{D}) where {D}
     end
     print(io, ")")
 end
+
 function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) where {D}
     pbc  = periodicity(system)
     print(io, typeof(system).name.name, "($(chemical_formula(system))")

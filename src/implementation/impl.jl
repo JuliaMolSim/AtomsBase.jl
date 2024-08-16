@@ -20,5 +20,6 @@ export Atom, FlexibleSystem, FastSystem
 include("atom.jl")
 include("flexible_system.jl")
 include("fast_system.jl")
+include("utils.jl")
 
 end 

@@ -10,7 +10,7 @@ if GROUP == "Core"
         include("atom.jl")
         include("fast_system.jl")
         include("properties.jl")
-        # include("printing.jl")
+        include("printing.jl")
     end
 else
     subpkg_path = joinpath(dirname(@__DIR__), "lib", GROUP)

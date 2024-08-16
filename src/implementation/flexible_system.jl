@@ -51,10 +51,14 @@ which puts an emphasis on flexibility rather than speed.
 function FlexibleSystem(
     particles::AbstractVector{S},
     box::NTuple{D, <: AbstractVector{L}},
-    periodicity::Union{Bool, NTuple{D, Bool}};
+    periodicity::Union{Bool, NTuple{D, Bool}, AbstractVector{<: Bool}};
     kwargs...
 ) where {L<:Unitful.Length, S, D}
-    periodicity = periodicity isa Bool ? ntuple(_ -> periodicity, D) : periodicity
+    if periodicity isa Bool 
+        periodicity = ntuple(_ -> periodicity, D)
+    else 
+        periodicity = tuple(periodicity...)
+    end
     if !all(length.(box) .== D)
         throw(ArgumentError("Box must have D vectors of length D"))
     end
