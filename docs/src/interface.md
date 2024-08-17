@@ -107,14 +107,28 @@ The optional setter / mutation interface consists of the following functions to 
 
 ## Optional properties interface
 
-(TODO AND TO DISCUSS)
+For some use-cases (e.g. managing datasets) it can be useful to allow a system to store more general properties about a particle system or even the individual particles themselves. The *optional properties interface* specifies the recommended interface for such as scenario. The [Tutorial](@ref) provides a more detailed discussion and exmaples how these can be used. The prototype implementations also provide further details.
 
-- Atomic and system property accessors: `getindex`, `haskey`, `get`, `keys`, `pairs`
+An implementation that wants to support the AtomsBase optional properties interface should implement the following methods: 
+
+System properties:
+- `getindex`
+- `haskey`
+- `get`
+- `keys`
+- `pairs`
+
+Particle properties
+- `atomkeys` 
+- `hasatomkey` 
 
 
-## Reserved Functions
 
-(TODO and TO DISCUSS)
+## Future Interface Extensions
+
+The AtomsBase developers are considering extending the AtomsBase interface with additional functions. Developers may keep this in mind during development. Issues or discussions related to this are welcome. 
+
+Here we maintain a list of possibly future interface functions:
 
 - `charge` 
 - `charge_dipole` 
