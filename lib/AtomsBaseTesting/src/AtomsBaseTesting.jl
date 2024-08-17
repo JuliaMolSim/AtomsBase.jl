@@ -1,9 +1,13 @@
 module AtomsBaseTesting
+
 using AtomsBase
 using Test
 using LinearAlgebra
 using Unitful
 using UnitfulAtomic
+
+using AtomsBase: AbstractSystem 
+using AtomsBase.Implementation
 
 export test_approx_eq
 export make_test_system
@@ -18,29 +22,27 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
     rnorm(a, b) = (ustrip(norm(a)) < rtol ? norm(a - b) / 1unit(norm(a))
                                           : norm(a - b) / norm(a))
 
-    for method in (length, size, boundary_conditions)
+    _isinfinite(s) = any(isinf, reduce(vcat, bounding_box(s)))
+
+    for method in (length, size, periodicity, )
         @test method(s) == method(t)
     end
 
-    if isinfinite(s)
-        @test isinfinite(t)
-    else
-        @test maximum(map(rnorm, bounding_box(s), bounding_box(t))) < rtol
-    end
-    for method in (position, atomic_mass)
-        @test maximum(map(rnorm, method(s), method(t))) < rtol
+    for method in (position, mass)
+        @test maximum(map(rnorm, method(s, :), method(t, :))) < rtol
         @test rnorm(method(s, 1), method(t, 1)) < rtol
     end
 
-    for method in (atomic_symbol, atomic_number, element_symbol)
-        @test method(s)    == method(t)
+    # TODO: add element_symbol back in 
+    for method in (species, atomic_symbol, atomic_number, )
+        @test method(s, :) == method(t, :)
         @test method(s, 1) == method(t, 1)
     end
 
     if !(:velocity in ignore_atprop)
-        @test ismissing(velocity(s)) == ismissing(velocity(t))
-        if !ismissing(velocity(s)) && !ismissing(velocity(t))
-            @test maximum(map(rnorm, velocity(s), velocity(t))) < rtol
+        @test ismissing(velocity(s, :)) == ismissing(velocity(t, :))
+        if !ismissing(velocity(s, :)) && !ismissing(velocity(t, :))
+            @test maximum(map(rnorm, velocity(s, :), velocity(t, :))) < rtol
             @test rnorm(velocity(s, 1), velocity(t, 1)) < rtol
         end
     end
@@ -88,7 +90,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
 
         if s[prop] isa Quantity
             @test rnorm(s[prop], t[prop]) < rtol
-        elseif prop in (:bounding_box, ) && !isinfinite(s)
+        elseif prop in (:bounding_box, ) && !(_isinfinite(s))
             @test maximum(map(rnorm, s[prop], t[prop])) < rtol
         else
             @test s[prop] == t[prop]
@@ -103,9 +105,9 @@ Extra atomic or system properties can be specified using `extra_atprop` and `ext
 and specific standard keys can be ignored using `drop_atprop` and `drop_sysprop`.
 """
 function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
-                          extra_atprop=(; ), extra_sysprop=(; ), cellmatrix=:full)
+                          extra_atprop=(; ), extra_sysprop=(; ), cellmatrix=:full, 
+                          n_atoms = 5, )
     @assert D == 3
-    n_atoms = 5
 
     # Generate some random data to store in Atoms
     atprop = Dict{Symbol,Any}(
@@ -113,7 +115,6 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
         :velocity        => [randn(3) for _ = 1:n_atoms] * 10^6*u"m/s",
         #                   Note: reasonable velocity range in au
         :atomic_symbol   => [:H, :H, :C, :N, :He],
-        :atomic_number   => [1, 1, 6, 7, 2],
         :charge          => [2, 1, 3.0, -1.0, 0.0]u"e_au",
         :atomic_mass     => 10rand(n_atoms)u"u",
         :vdw_radius      => randn(n_atoms)u"Å",
@@ -146,26 +147,26 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
         end
     end
     if cellmatrix == :lower_triangular
-        box = [[1.54732, -0.807289, -0.500870],
-               [    0.0, 0.4654985, 0.5615117],
-               [    0.0,       0.0, 0.7928950]]u"Å"
+        box = ([1.54732, -0.807289, -0.500870]u"Å",
+               [    0.0, 0.4654985, 0.5615117]u"Å",
+               [    0.0,       0.0, 0.7928950]u"Å")
     elseif cellmatrix == :upper_triangular
-        box = [[1.54732, 0.0, 0.0],
-               [-0.807289, 0.4654985, 0.0],
-               [-0.500870, 0.5615117, 0.7928950]]u"Å"
+        box = ([1.54732, 0.0, 0.0]u"Å",
+               [-0.807289, 0.4654985, 0.0]u"Å",
+               [-0.500870, 0.5615117, 0.7928950]u"Å")
     elseif cellmatrix == :diagonal
-        box = [[1.54732, 0.0, 0.0],
-              [0.0, 0.4654985, 0.0],
-              [0.0, 0.0, 0.7928950]]u"Å"
+        box = ([1.54732, 0.0, 0.0]u"Å",
+              [0.0, 0.4654985, 0.0]u"Å",
+              [0.0, 0.0, 0.7928950]u"Å")
     else
-        box = [[1.50304, 0.850344, 0.717239],
-               [ 0.36113, 1.008144, 0.814712],
-               [ 0.06828, 0.381122, 2.129081]]u"Å"
+        box = ([1.50304, 0.850344, 0.717239]u"Å",
+               [ 0.36113, 1.008144, 0.814712]u"Å",
+               [ 0.06828, 0.381122, 2.129081]u"Å")
     end
-    bcs = [Periodic(), Periodic(), DirichletZero()]
-    system = atomic_system(atoms, box, bcs; sysprop...)
+    pbcs = (true, true, false)
+    system = atomic_system(atoms, box, pbcs; sysprop...)
 
-    (; system, atoms, atprop=NamedTuple(atprop), sysprop=NamedTuple(sysprop), box, bcs)
+    (; system, atoms, atprop=NamedTuple(atprop), sysprop=NamedTuple(sysprop), box, pbcs)
 end
 
 end

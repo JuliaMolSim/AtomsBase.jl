@@ -41,8 +41,12 @@ Construct a hydrogen molecule
 julia> hydrogen = isolated_system([:H => [0, 0, 1.]u"bohr", :H => [0, 0, 3.]u"bohr"])
 ```
 """
-isolated_system(atoms::AbstractVector{<:Atom}; kwargs...) = 
-      FlexibleSystem(atoms, OpenSystemCell(); kwargs...)
+function isolated_system(atoms::AbstractVector{<:Atom}; kwargs...) 
+    𝐫 = position(atoms[1])
+    D = length(𝐫)
+    T = eltype(𝐫[1])
+    return FlexibleSystem(atoms, OpenSystemCell(D, T); kwargs...)
+end
 
 isolated_system(atoms::AbstractVector; kwargs...) = 
       isolated_system(convert.(Atom, atoms); kwargs...)

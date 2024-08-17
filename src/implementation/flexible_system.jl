@@ -70,8 +70,12 @@ function FlexibleSystem(particles; bounding_box, periodicity, kwargs...)
     FlexibleSystem(particles, bounding_box, periodicity; kwargs...)
 end
 
-FlexibleSystem(particles::AbstractVector, cell; kwargs...) = 
-        FlexibleSystem(particles, cell, Dict(kwargs...))
+function FlexibleSystem(particles::AbstractVector, cell; kwargs...) 
+    D = n_dimensions(cell)
+    S = eltype(particles)
+    TCELL = typeof(cell)
+    return FlexibleSystem{D, S, TCELL}(particles, cell, Dict{Symbol, Any}(kwargs...))
+end
 
 
 """
