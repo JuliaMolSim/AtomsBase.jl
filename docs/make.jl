@@ -17,10 +17,11 @@ makedocs(;
         "Home" => "index.md",
         "Interface" => "interface.md", 
         "Utilities" => "utilities.md", 
+        "Implementations" => "implementations.md",
         # "tutorial.md",
         # "overview.md",
-        "testing.md",
-        "apireference.md"
+        # "testing.md",
+        "Reference" => "apireference.md"
     ],
     checkdocs=:exports,
 )

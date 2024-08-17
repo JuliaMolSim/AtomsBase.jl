@@ -3,6 +3,11 @@
 #
 export FastSystem
 
+"""
+    FastSystem
+
+A struct of arrays style prototype implementation of the AtomsBase interface. 
+"""
 struct FastSystem{D, TCELL, L <: Unitful.Length, M <: Unitful.Mass, S} <: SystemWithCell{D}
     cell::TCELL
     position::Vector{SVector{D, L}}

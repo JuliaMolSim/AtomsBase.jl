@@ -50,20 +50,18 @@ velocity
 set_velocity!
 atomic_number
 atomic_symbol
-element
 element_symbol
+element 
 ```
 
 
-## Atom and system constructors
+## Prototype Implementation
 
 ```@docs
+AtomsBase.Implementation.Atom
+AtomsBase.Implementation.FlexibleSystem
+AtomsBase.Implementation.FastSystem
+AtomsBase.Implementation.atomic_system
+AtomsBase.Implementation.isolated_system
+AtomsBase.Implementation.periodic_system 
 ```
-
-<!-- 
-Atom
-FlexibleSystem
-atomic_system
-isolated_system
-periodic_system 
--->
