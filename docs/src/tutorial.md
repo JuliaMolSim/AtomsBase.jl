@@ -1,18 +1,22 @@
+```@meta
+CurrentModule = AtomsBase.Implementation
+```
+
 # Tutorial
 
 This page gives an overview of using `AtomsBase` in practice and introduces
 the conventions followed across the `AtomsBase` ecosystem.
 It serves as a reference for both users interested in doing something
 with an [`AbstractSystem`](@ref) object as well as developers wishing to integrate
-their code with `AtomsBase`.
+their code with `AtomsBase`. See [Interface](@ref) for a precise specification of the `AtomsBase` interface.
 
 For the examples we will mostly draw on the case of atomistic systems using the
-[`FlexibleSystem`](@ref) data structure. See [Overview](@ref) for a more general
-perspective of the `AtomsBase` interface. In practice we expect that the
+[`FlexibleSystem`](@ref) data structure. The
 [`Atom`](@ref) and [`FlexibleSystem`](@ref) data structure we focus on here
-should provide good defaults for most purposes.
+should provide good defaults for many purposes.
 
 ## High-level introduction
+
 The main purpose of AtomsBase is to conveniently pass atomistic data between Julia packages.
 For example the following snippet loads an extxyz file
 using [AtomsIO](https://github.com/mfherbst/AtomsIO.jl)
@@ -43,12 +47,15 @@ For more high-level examples see also:
 - The [DFTK documentation page on AtomsBase](https://docs.dftk.org/stable/examples/atomsbase/).
 - The [AtomsIO documentation](https://mfherbst.github.io/AtomsIO.jl/stable)
 
+
+
 ## Atom interface and conventions
+
 An `Atom` object can be constructed
 just by passing an identifier (e.g. symbol like `:C`, atomic number like `6`) and a vector
 of positions as
 ````@example atom
-using Unitful, UnitfulAtomic, AtomsBase  # hide
+using Unitful, UnitfulAtomic, AtomsBase, AtomsBase.Implementation  # hide
 atom = Atom(:C, [0, 1, 2.]u"bohr")
 ````
 This automatically fills the atom with standard data such as the atomic mass.
@@ -70,14 +77,14 @@ position(atom)
 ````@example atom
 velocity(atom)
 ````
-See [src/atom.jl](https://github.com/JuliaMolSim/AtomsBase.jl/blob/master/src/atom.jl)
+See [`atom.jl`](https://github.com/JuliaMolSim/AtomsBase.jl/blob/master/src/implementation/atom.jl)
 and the respective API documentation for details.
-Notice in particular that [`atomic_number`](@ref) will the element, i.e. the type
-of an atom, whereas [`atomic_symbol`](@ref) may be more specific and may e.g. uniquely specify
-a precise atom in the structure. An example could be a deuterium atom
+Notice in particular that [`atomic_number`](@ref) specifies the element whereas [`species`](@ref) and also [`atomic_symbol`](@ref) may be more specific and may e.g. specify isotopes such as deuterium
 ````@example
-using Unitful, UnitfulAtomic, AtomsBase  # hide
-deuterium = Atom(1, atomic_symbol=:D, [0, 1, 2.]u"bohr")
+using Unitful, UnitfulAtomic, AtomsBase, AtomsBase.Implementation  # hide
+deuterium = Atom(:D, [0, 1, 2.]u"bohr")
+atomic_number(deuterium) == 1
+atomic_symbol(deuterium) == :D
 ````
 
 An equivalent dict-like interface based on `keys`, `haskey`, `get` and `pairs`
@@ -86,7 +93,7 @@ is also available. For example
 keys(atom)
 ````
 ````@example atom
-atom[:atomic_symbol]
+atom[:species]
 ````
 ````@example atom
 pairs(atom)
@@ -94,12 +101,14 @@ pairs(atom)
 This interface seamlessly generalises to working with user-specific atomic properties
 as will be discussed next.
 
+
 ### Optional atomic properties
-Custom properties can be easily attached to an `Atom` by supplying arbitrary
+
+Custom properties can be attached to an `Atom` by supplying arbitrary
 keyword arguments upon construction. For example to attach a pseudopotential
 for using the structure with [DFTK](https://dftk.org), construct the atom as
 ````@example atomprop
-using Unitful, UnitfulAtomic, AtomsBase  # hide
+using Unitful, UnitfulAtomic, AtomsBase, AtomsBase.Implementation  # hide
 atom = Atom(:C, [0, 1, 2.]u"bohr", pseudopotential="hgh/lda/c-q4")
 ````
 which will make the pseudopotential identifier available as
@@ -114,7 +123,7 @@ pairs(atom)
 ````
 Updating an atomic property proceeds similarly. E.g.
 ````@example atomprop
-using Unitful, UnitfulAtomic, AtomsBase  # hide
+using Unitful, UnitfulAtomic, AtomsBase, AtomsBase.Implementation  # hide
 newatom = Atom(atom; atomic_mass=13u"u")
 ````
 makes a new carbon atom with all properties identical to `atom` (including custom ones),
@@ -143,20 +152,24 @@ end
 ````
 
 ## System interface and conventions
+
 Once the atoms are constructed these can be assembled into a system.
 For example to place a hydrogen molecule into a cubic box of `10Å` and periodic
 boundary conditions, use:
 ````@example system
-using Unitful, UnitfulAtomic, AtomsBase  # hide
-box = [[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]u"Å"
-boundary_conditions = [Periodic(), Periodic(), Periodic()]
-hydrogen = FlexibleSystem([Atom(:H, [0, 0, 1.]u"bohr"),
-                           Atom(:H, [0, 0, 3.]u"bohr")],
-                           box, boundary_conditions)
+using Unitful, UnitfulAtomic, AtomsBase, AtomsBase.Implementation  # hide
+box = ([10.0, 0.0, 0.0]u"Å", [0.0, 10.0, 0.0]u"Å", [0.0, 0.0, 10.0]u"Å")
+hydrogen = periodic_system([Atom(:H, [0, 0, 1.]u"Å"),
+                            Atom(:H, [0, 0, 3.]u"Å")],
+                            box)
 ````
 An update constructor for systems is supported as well (see [`AbstractSystem`](@ref)). For example
 ````@example system
-AbstractSystem(hydrogen; bounding_box=[[5.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 5.0]]u"Å")
+using AtomsBase: AbstractSystem
+AbstractSystem(hydrogen; 
+               bounding_box=([5.0, 0.0, 0.0]u"Å", 
+                             [0.0, 5.0, 0.0]u"Å", 
+                             [0.0, 0.0, 5.0]u"Å"))
 ````
 To update the atomic composition of the system, this function supports an `atoms` (or `particles`)
 keyword argument to supply the new set of atoms to be contained in the system.
@@ -172,11 +185,12 @@ as well as a dict-style access:
 bounding_box(hydrogen)
 ````
 ````@example system
-hydrogen[:boundary_conditions]
+hydrogen[:periodicity]
 ````
 ````@example system
 pairs(hydrogen)
 ````
+
 Moreover atomic properties of a specific atom or all atoms can be directly queried using
 the indexing notation:
 ````@example system
@@ -199,44 +213,38 @@ are oftentimes more convenient as they provide specialisations
 for some standard atomic system setups.
 For example to setup a hydrogen system with periodic BCs, we can issue
 ````@example
-using Unitful, UnitfulAtomic, AtomsBase  # hide
-bounding_box = [[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]u"Å"
-hydrogen = periodic_system([:H => [0, 0, 1.]u"bohr",
-                            :H => [0, 0, 3.]u"bohr"],
+using Unitful, UnitfulAtomic, AtomsBase, AtomsBase.Implementation  # hide
+bounding_box = ([10.0, 0.0, 0.0]u"Å", [0.0, 10.0, 0.0]u"Å", [0.0, 0.0, 10.0]u"Å")
+hydrogen = periodic_system([:H => [0, 0, 1.]u"Å",
+                            :H => [0, 0, 3.]u"Å"],
                            bounding_box)
 ````
 To setup a silicon unit cell we can use fractional coordinates
 (which is common for solid-state simulations):
 ````@example
-using Unitful, UnitfulAtomic, AtomsBase  # hide
-bounding_box = 10.26 / 2 * [[0, 0, 1], [1, 0, 1], [1, 1, 0]]u"bohr"
+using Unitful, UnitfulAtomic, AtomsBase, AtomsBase.Implementation  # hide
+bounding_box = 10.26 / 2 .*  ([0, 0, 1]u"bohr", [1, 0, 1]u"bohr", [1, 1, 0]u"bohr")
 silicon = periodic_system([:Si =>  ones(3)/8,
                            :Si => -ones(3)/8],
                            bounding_box, fractional=true)
 ````
-Alternatively we can also place an isolated H2 molecule in vacuum
-(Infinite box and zero dirichlet BCs), which is the standard setup for
-molecular simulations:
+Alternatively we can also place an isolated H2 molecule in vacuum, which is the standard setup for molecular simulations:
 ````@example
-using Unitful, UnitfulAtomic, AtomsBase  # hide
+using Unitful, UnitfulAtomic, AtomsBase, AtomsBase.Implementation  # hide
 hydrogen = isolated_system([:H => [0, 0, 1.]u"bohr",
                             :H => [0, 0, 3.]u"bohr"])
 ````
 
+
 ### Optional system properties
-Similar to atoms, systems also support storing arbitrary data, for example
+
+Similar to atoms, `FlexibleSystem` and `FastSystem` also support storing arbitrary data, for example
 ````@example sysprop
-using Unitful, UnitfulAtomic, AtomsBase  # hide
+using Unitful, UnitfulAtomic, AtomsBase, AtomsBase.Implementation  # hide
 system = isolated_system([:H => [0, 0, 1.]u"bohr", :H => [0, 0, 3.]u"bohr"]; extra_data=42)
 ````
 Again these custom properties are fully integrated with `keys`, `haskey`, `pairs` and `get`.
 ````@example sysprop
 @show keys(system)
 ````
-Some property names are reserved and should be considered by all libraries
-supporting `AtomsBase` if possible:
 
-Property name   | Unit / Type        | Description
-:-------------- | :----------------- | :---------------------
-`:charge`       | `Charge`           | Total net system charge
-`:multiplicity` | `Int` (unitless)   | Multiplicity of the ground state targeted in the calculation

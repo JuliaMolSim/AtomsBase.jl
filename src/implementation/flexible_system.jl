@@ -74,7 +74,8 @@ function FlexibleSystem(particles::AbstractVector, cell; kwargs...)
     D = n_dimensions(cell)
     S = eltype(particles)
     TCELL = typeof(cell)
-    return FlexibleSystem{D, S, TCELL}(particles, cell, Dict{Symbol, Any}(kwargs...))
+    data = Dict{Symbol, Any}(kwargs...)
+    return FlexibleSystem{D, S, TCELL}(particles, cell, data) 
 end
 
 
