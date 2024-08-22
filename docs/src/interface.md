@@ -31,8 +31,6 @@ A minimal implementation of the `AtomsBase` interface is read-only and must over
 
 - `Base.length(system)`
 - `Base.getindex(system, i)` 
-- [`AtomsBase.bounding_box(system)`](@ref)
-- [`AtomsBase.periodicity(system)`](@ref)
 - [`AtomsBase.position(system, i)`](@ref)
 - [`AtomsBase.mass(system, i)`](@ref)
 - [`AtomsBase.species(system, i)`](@ref)

@@ -3,8 +3,6 @@ using Unitful
 using UnitfulAtomic
 using Test
 
-using AtomsBase.Implementation: Atom
-
 @testset "atomic systems" begin
     @testset "Atom construction" begin
         at2D = Atom(:Si, zeros(2) * u"m", extradata=41)

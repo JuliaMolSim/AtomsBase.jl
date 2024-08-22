@@ -4,8 +4,6 @@ using Unitful
 using UnitfulAtomic
 using PeriodicTable
 
-using AtomsBase.Implementation: Atom, FlexibleSystem, FastSystem 
-
 @testset "Interface" begin
     box = ([1, 0, 0]u"m", [0, 1, 0]u"m", [0, 0, 1]u"m")
     pbcs = (true, true, false)

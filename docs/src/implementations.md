@@ -1,15 +1,10 @@
 ```@meta
-CurrentModule = AtomsBase.Implementation
+CurrentModule = AtomsBase
 ```
 
 # Prototype Implementations 
 
-`AtomsBase` provides two prototype implementations of `AbstractSystem{D}`. They are not automatically exported. To use those implementations one can first call 
-```julia
-using AtomsBase.Implementation
-```
-
-The two implementations are 
+`AtomsBase` provides two prototype implementations of `AbstractSystem{D}` that are exported: 
 - [`FlexibleSystem`](@ref)
 - [`FastSystem`](@ref)
 and are briefly discussed in more detail in the remainder of this page. 

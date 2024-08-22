@@ -4,7 +4,6 @@ using LinearAlgebra
 using AtomsBase
 using Unitful
 using UnitfulAtomic
-using AtomsBase.Implementation
 
 include("testmacros.jl")
 

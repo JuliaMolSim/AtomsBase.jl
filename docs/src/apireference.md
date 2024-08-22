@@ -58,10 +58,10 @@ element
 ## Prototype Implementation
 
 ```@docs
-AtomsBase.Implementation.Atom
-AtomsBase.Implementation.FlexibleSystem
-AtomsBase.Implementation.FastSystem
-AtomsBase.Implementation.atomic_system
-AtomsBase.Implementation.isolated_system
-AtomsBase.Implementation.periodic_system 
+Atom
+FlexibleSystem
+FastSystem
+atomic_system
+isolated_system
+periodic_system 
 ```

@@ -2,7 +2,6 @@ using AtomsBase
 using Test
 using Unitful
 using UnitfulAtomic
-using AtomsBase.Implementation
 
 @testset "Chemical formula with symbols" begin
     @test chemical_formula([:H])                  == "H"

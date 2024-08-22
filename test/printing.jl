@@ -1,7 +1,6 @@
 using AtomsBase
 using Unitful, UnitfulAtomic
 using Test
-using AtomsBase.Implementation
 
 @testset "Printing atomic systems" begin
     at = Atom(:Si, zeros(3) * u"m", extradata=42)

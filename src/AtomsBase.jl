@@ -5,6 +5,8 @@ using UnitfulAtomic
 using StaticArrays
 using Requires
 
+export Atom, FlexibleSystem, FastSystem
+
 # Main Interface specification and inline docs 
 include("interface.jl")
 
@@ -18,7 +20,10 @@ include("utils/atomview.jl")
 
 
 # prototype implementations 
-include("implementation/impl.jl")
+include("implementation/atom.jl")
+include("implementation/flexible_system.jl")
+include("implementation/fast_system.jl")
+include("implementation/utils.jl")
 
 
 # TODO: 

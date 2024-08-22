@@ -7,7 +7,6 @@ using Unitful
 using UnitfulAtomic
 
 using AtomsBase: AbstractSystem 
-using AtomsBase.Implementation
 
 export test_approx_eq
 export make_test_system

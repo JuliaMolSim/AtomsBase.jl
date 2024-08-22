@@ -4,8 +4,6 @@ using Unitful
 using PeriodicTable
 using StaticArrays
 
-using AtomsBase.Implementation: Atom, FastSystem
-
 @testset "Fast system" begin
     box = ([1, 0, 0]u"m", [0, 1, 0]u"m", [0, 0, 1]u"m")
     pbcs = (true, true, false)
