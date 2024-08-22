@@ -31,32 +31,34 @@ A minimal implementation of the `AtomsBase` interface is read-only and must over
 
 - `Base.length(system)`
 - `Base.getindex(system, i)` 
+- [`AtomsBase.cell(system)](@ref)
 - [`AtomsBase.position(system, i)`](@ref)
 - [`AtomsBase.mass(system, i)`](@ref)
 - [`AtomsBase.species(system, i)`](@ref)
 
-Methods for `bounding_box` and `periodicity` are provided automatically if the system supports the cell interface. A system implementation that implements the cell interface should subtype `SystemWithCell{D}` instead of `AbstractSystem{D}`. In this case, one needs to instead overload
-- [`AtomsBase.get_cell(system)`](@ref)
 
-The linked documentation and following paragraphs give additional information about each of those functions.
+### System Properties and Cell Interface
 
-
-### System properties
-
-A system is specified by a computational domain and particles within that domain. 
-System properties are properties of the entire particle system, as opposed to 
-properties of individual particles. 
+A system is specified by a computational cell and particles within that cell (or, domain).  System properties are properties of the entire particle system, as opposed to properties of individual particles. 
 
 - `Base.length(system)`  : return an `Integer`, the number of particles in the system; if the system describes a periodic cell, then the number of particles in one period of the cell is returned.
-- [`AtomsBase.bounding_box(system)`](@ref) : returns `NTuple{D, SVector{D, T}}` the cell vectors that specify the computational domain if it is finite. For open systems, the return values of [`AtomsBase.bounding_box`](@ref) are unspecified.
-- [`AtomsBase.periodicity(system)`](@ref) : returns `NTuple{D, Bool}`, booleans that specify whether the system is periodic in the direction of the `D` cell vectors provided by `bounding_box`. For open systems `periodicity` must return `(false, ..., false)`.
+- [`AtomsBase.cell(system)](@ref) : returns an object `cell` that specifies the computational cell. Two reference implementations, [`PeriodicCell`](@ref) and [`IsolatedCell`](@ref) that should serve most purposes are provided. 
 
-It is recommended that the implementation of [`bounding_box`](@ref) and [`periodicity`](@ref) is replaced with an implementation of 
-- [`AtomsBase.get_cell(system)`](@ref) : returns an object `cell` that specifies the computational cell. If that object implements `AtomsBase.bounding_box(cell)` and `AtomsBase.periodicity(cell)`, then `AtomsBase.bounding_box(system)` and `AtomsBase.periodicity(systems)` are provided automatically, provided that `system <: AbstractSystemWithCell{D}`.
+A cell object must implement methods for the following functions: 
+- [`AtomsBase.bounding_box(cell)`](@ref) : returns `NTuple{D, SVector{D, T}}` the cell vectors that specify the computational domain if it is finite. For isolated systems, the return values are unspecified.
+- [`AtomsBase.periodicity(cell)`](@ref) : returns `NTuple{D, Bool}`, booleans that specify whether the system is periodic in the direction of the `D` cell vectors provided by `bounding_box`. For isolated systems `periodicity` must return `(false, ..., false)`.
+- [`AtomsBase.n_dimensions(cell)`](@ref) : returns the dimensionality of the computational cell, it must match the dimensionality of the system. 
+
+
+AtomsBase provides `bounding_box` and `periodicity` methods so that they can be called with a system as argument, i.e., 
+```julia
+bounding_box(system) = bounding_box(cell(system))
+periodicity(system)  =  periodicity(cell(system))
+```
 
 Two recommended general purpose implementations of computational cells are provided as part of `AtomsBase`: 
-- [`PCell`](@ref) : implementation of a periodic parallelepiped shaped cell
-- [`OpenSystemCell`](@ref) : implementation of a cell describing an open system (infinite in all directions)
+- [`PeriodicCell`](@ref) : implementation of a periodic parallelepiped shaped cell
+- [`IsolatedCell`](@ref) : implementation of a cell describing an isolated system within an infinite domain. 
 
 
 ### Particle properties 
@@ -68,6 +70,7 @@ Two recommended general purpose implementations of computational cells are provi
 For each of `property in [position, mass, species]` there must also be defined 
 - `property(system, inds::AbstractVector{<: Integer})` : return a list (e.g. `AbstractVector`) of the requested property of the particles indexed by `inds`;  
 - `property(system, :)` : return a list of the requested property for all particles in the system.
+AtomsBase provides default fallbacks for these methods but they will normally be inefficient. The caller cannot assume whether a view or a copy are returned. 
 
 ### Iteration and Indexing over systems
 
@@ -88,19 +91,16 @@ additional behavior depending on context.
 
 The optional setter / mutation interface consists of the following functions to be overloaded. 
 
-- [`set_bounding_box!(system, bb)`](@ref) 
-- [`set_periodicity!(system, pbc)`](@ref) 
 - [`set_cell!(system, cell)`](@ref) 
 - [`set_position!(system, i, x)`](@ref) 
 - [`set_mass!(system, i, x)`](@ref)
 - [`set_species!(system, i, x)`](@ref) 
+- [`set_bounding_box!(cell, bb)`](@ref) 
+- [`set_periodicity!(cell, pbc)`](@ref) 
 - `deleteat!(system, i)` : delete atoms `i` (or atoms `i` if a list of `":`)
 - `append!(system1, system2)` : append system 2 to system 1, provided they are "compatible". 
 
-### Notes
-
-- For each of the particle property setters, `i` may be an `Integer`, an `AbstractVector{<: Integer}` or `:`.
-- If `set_cell!` is implemented, then for `system <: SystemWithCell`, methods for `set_bounding_box!` and `set_periodicity!` are provided.
+For each of the particle property setters, `i` may be an `Integer`, an `AbstractVector{<: Integer}` or `:`.
 
 
 ## Optional properties interface
@@ -134,3 +134,4 @@ Here we maintain a list of possibly future interface functions:
 - `momentum` 
 - `spin`
 - `magnetic_moment`
+- `multiplicity` 

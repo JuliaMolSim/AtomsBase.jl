@@ -11,8 +11,8 @@ This page documents some utilities that AtomsBase provides in addition to the in
 
 As of AtomsBase 0.4 we recommend that implementations of the interface specify a computational cell type. To simplify this, AtomsBase provides two prototype implementations: 
 
-- [`PCell`](@ref) : implements the standard parallepiped shaped cell defined through three cell vectors and periodicity (true or false) along each cell vector.
-- [`OpenSystemCell`](@ref) : implements a computational cell that is open (infinite) in all directions, i.e. the entire space.
+- [`PeriodicCell`](@ref) : implements the standard parallepiped shaped cell defined through three cell vectors and periodicity (true or false) along each cell vector.
+- [`IsolatedCell`](@ref) : implements a computational cell that is open (infinite) in all directions, i.e. the entire space.
 
 
 ## Chemical Species 

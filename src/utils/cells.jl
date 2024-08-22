@@ -1,69 +1,69 @@
 
-export OpenSystemCell, 
-       PCell
+export IsolatedCell, 
+       PeriodicCell
 
 
 # ------------------------------------------------------------------ 
-#     OpenSystemCell 
+#     IsolatedCell 
 # ------------------------------------------------------------------ 
 
 """
-      OpenSystemCell{D, T} 
+      IsolatedCell{D, T} 
 
 Defines a computational domain / cell describing an open system. 
 """
-struct OpenSystemCell{D, T} end 
+struct IsolatedCell{D, T} end 
 
-OpenSystemCell(D, T = typeof(1.0 * u"bohr")) = 
-      OpenSystemCell{D, T}()
+IsolatedCell(D, T = typeof(1.0 * u"bohr")) = 
+      IsolatedCell{D, T}()
 
-bounding_box(cell::OpenSystemCell{D, T}) where {D, T} = 
+bounding_box(cell::IsolatedCell{D, T}) where {D, T} = 
       ntuple(i -> SVector(ntuple(j -> i == j ? T(Inf) : zero(T), D)...), D)
 
-periodicity(cell::OpenSystemCell{D}) where {D} = 
+periodicity(cell::IsolatedCell{D}) where {D} = 
       ntuple(_ -> false, D)
 
-n_dimensions(::OpenSystemCell{D}) where {D} = D
+n_dimensions(::IsolatedCell{D}) where {D} = D
 
 
 
 # ------------------------------------------------------------------ 
-#     PCell (periodic parallepiped) 
+#     PeriodicCell (periodic parallepiped) 
 # ------------------------------------------------------------------ 
 
 """
 Implementation of a computational cell for particle systems 
-   within AtomsBase.jl. `PCell` specifies a parallepiped shaped cell 
+   within AtomsBase.jl. `PeriodicCell` specifies a parallepiped shaped cell 
    with choice of open or periodic boundary condition in each cell 
    vector direction. 
 """
-struct PCell{D, T}
+struct PeriodicCell{D, T}
    cell_vectors::NTuple{D, SVector{D, T}} 
    pbc::NTuple{D, Bool}
 end
 
-bounding_box(cell::PCell) = cell.cell_vectors 
+bounding_box(cell::PeriodicCell) = cell.cell_vectors 
 
-periodicity(cell::PCell) = cell.pbc
+periodicity(cell::PeriodicCell) = cell.pbc
 
-n_dimensions(::PCell{D}) where {D} = D
+n_dimensions(::PeriodicCell{D}) where {D} = D
 
-# kwarg constructor for PCell
+# kwarg constructor for PeriodicCell
 
-PCell(; cell_vectors, periodicity) = 
-      PCell(_auto_cell_vectors(cell_vectors), 
+PeriodicCell(; cell_vectors, periodicity) = 
+      PeriodicCell(_auto_cell_vectors(cell_vectors), 
             _auto_pbc(periodicity, cell_vectors))
 
-PCell(sys::AbstractSystem) = 
-         PCell(; cell_vectors = bounding_box(sys), 
+PeriodicCell(sys::AbstractSystem) = 
+         PeriodicCell(; cell_vectors = bounding_box(sys), 
                  periodicity = periodicity(sys) )
 
 
 # ---------------------- pretty printing 
 
-function Base.show(io::IO, cell::PCell{D}) where {D} 
+function Base.show(io::IO, cell::PeriodicCell{D}) where {D} 
    u = unit(first(cell.cell_vectors[1][1]))
-   print(io, "PCell(", prod(p -> p ? "T" : "F", cell.pbc), ", ")  
+   print(io, "PeriodicCell(", prod(p -> p ? "T" : "F", cell.pbc), ", ")  
    for d = 1:D 
       print(io, ustrip.(cell.cell_vectors[d]), u)
       if d < D; print(io, ", "); end 
@@ -71,7 +71,7 @@ function Base.show(io::IO, cell::PCell{D}) where {D}
    println(")")
 end
 
-function Base.show(io::IO, ::MIME"text/plain", cell::PCell{D}) where {D} 
+function Base.show(io::IO, ::MIME"text/plain", cell::PeriodicCell{D}) where {D} 
    Base.show(io, cell) 
 end
 

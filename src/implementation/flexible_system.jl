@@ -62,7 +62,7 @@ function FlexibleSystem(
     if !all(length.(box) .== D)
         throw(ArgumentError("Box must have D vectors of length D"))
     end
-    cell = PCell(; cell_vectors = box, periodicity = periodicity)
+    cell = PeriodicCell(; cell_vectors = box, periodicity = periodicity)
     FlexibleSystem{D, S, typeof(cell)}(particles, cell, Dict(kwargs...))
 end
 

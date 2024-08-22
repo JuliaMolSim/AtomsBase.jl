@@ -15,8 +15,8 @@ Pages = ["apireference.md"]
 ```@docs
 AbstractSystem
 SystemWithCell
-OpenSystemCell
-PCell 
+IsolatedCell
+PeriodicCell 
 AtomView
 ChemicalSpecies 
 ```

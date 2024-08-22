@@ -45,7 +45,7 @@ function isolated_system(atoms::AbstractVector{<:Atom}; kwargs...)
     𝐫 = position(atoms[1])
     D = length(𝐫)
     T = eltype(𝐫[1])
-    return FlexibleSystem(atoms, OpenSystemCell(D, T); kwargs...)
+    return FlexibleSystem(atoms, IsolatedCell(D, T); kwargs...)
 end
 
 isolated_system(atoms::AbstractVector; kwargs...) = 
