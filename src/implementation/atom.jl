@@ -49,7 +49,7 @@ Supported `kwargs` include `species`, `mass`, as well as user-specific custom pr
 """
 function Atom(identifier::AtomId,
               position::AbstractVector{L},
-              velocity::AbstractVector{V}=zeros(length(position))u"bohr/s";
+              velocity::AbstractVector{V} = _default_velocity(position); 
               species = ChemicalSpecies(identifier),
               mass::M=element(species).atomic_mass,
               kwargs...) where {L <: Unitful.Length, V <: Unitful.Velocity, M <: Unitful.Mass}
@@ -57,7 +57,23 @@ function Atom(identifier::AtomId,
                                     mass, Dict(kwargs...))
 end
 
-# TODO: what about the default unit? 
+
+function _default_velocity(position::AbstractVector{L}) where {L <: Unitful.Length} 
+    TFL = eltype(ustrip(position[1]))
+    uL = unit(position[1])
+    if uL == u"Å"
+        return zeros(TFL, length(position))u"Å/fs"
+    elseif uL == u"nm"
+        return zeros(TFL, length(position))u"nm/ps"
+    elseif uL == u"bohr" 
+        return zeros(TFL, length(position))u"nm/s"
+    elseif uL == u"m" 
+        return zeros(TFL, length(position))u"m/s"    
+    end 
+    @warn("Cannot infer default velocity for position with unit $(unit(position[1]))")
+    return zeros(TFL, length(position)) * (uL / u"s")
+end 
+
 
 function Atom(id::AtomId, position::AbstractVector, velocity::Missing; kwargs...)
     Atom(id, position, zeros(length(position))u"bohr/s"; kwargs...)
@@ -67,7 +83,6 @@ function Atom(; velocity=zeros(length(position))u"bohr/s", kwargs...)
     ididx = findlast(x -> x ∈ (:species, :atomic_number, :atomic_symbol), 
                     keys(kwargs))
     id = kwargs[ididx] 
-    @show id 
     position = kwargs[:position]
     kwargs = filter(x -> x[1] ∉ (:species, :position, :velocity, :atomic_number, 
                                 :atomic_symbol), kwargs)

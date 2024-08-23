@@ -28,11 +28,11 @@ Constructors for isotopes
 ```julia 
 # standard carbon = C-12
 ChemicalSpecies(:C)
-ChemicalSpecies(:C; nneutrons = 6)
+ChemicalSpecies(:C; n_neutrons = 6)
 
 # three equivalent constructors for C-13
-ChemicalSpecies(:C; nneutrons = 7)
-ChemicalSpecies(6; nneutrons = 7)
+ChemicalSpecies(:C; n_neutrons = 7)
+ChemicalSpecies(6; n_neutrons = 7)
 ChemicalSpecies(:C13)
 # deuterium
 ChemicalSpecies(:D) 
@@ -59,8 +59,13 @@ ChemicalSpecies(sym::ChemicalSpecies) = sym
 
 # -------- fast access to the periodic table 
 
-@assert length(PeriodicTable.elements) == maximum(el.number for el in PeriodicTable.elements)
-@assert all(el.number == i for (i, el) in enumerate(PeriodicTable.elements))
+if length(PeriodicTable.elements) != maximum(el.number for el in PeriodicTable.elements)
+    error("PeriodicTable.elements is not sorted by atomic number")
+end
+
+if !all(el.number == i for (i, el) in enumerate(PeriodicTable.elements))
+    error("PeriodicTable.elements is not sorted by atomic number")
+end
 
 const _chem_el_info = [ 
       (symbol = Symbol(PeriodicTable.elements[z].symbol), 
@@ -78,8 +83,7 @@ function _nneut_default(z::Integer)
     return nplusp - z
 end
 
-function ChemicalSpecies(sym::Symbol; nneutrons = -1, info = 0) 
-    _isnum(c::Char) = '0' <= c <= '9'
+function ChemicalSpecies(sym::Symbol; n_neutrons = -1, info = 0) 
     _islett(c::Char) = 'A' <= uppercase(c) <= 'Z'
 
     # TODO - special-casing deuterium to make tests pass 
@@ -89,11 +93,12 @@ function ChemicalSpecies(sym::Symbol; nneutrons = -1, info = 0)
     end
 
     # number of neutrons is explicitly specified
-    if nneutrons != -1
-        @assert all(_islett, String(sym)) 
-        @assert nneutrons >= 0
+    if n_neutrons != -1
+        if !( all(_islett, String(sym)) && n_neutrons >= 0)
+            throw(ArgumentError("Invalid arguments for ChemicalSpecies"))
+        end
         Z = _sym2z[sym]
-        return ChemicalSpecies(Z, nneutrons, info)
+        return ChemicalSpecies(Z, n_neutrons, info)
     end
 
     # number of neutrons is encoded in the symbol
@@ -102,11 +107,11 @@ function ChemicalSpecies(sym::Symbol; nneutrons = -1, info = 0)
     Z = _sym2z[Symbol(elem_str)]
     num_str = str[findlast(_islett, str)+1:end]
     if isempty(num_str)
-        nneutrons = _nneut_default(Z)
+        n_neutrons = _nneut_default(Z)
     else
-        nneutrons = parse(Int, num_str) - Z
+        n_neutrons = parse(Int, num_str) - Z
     end
-    return ChemicalSpecies(Z, nneutrons, info)
+    return ChemicalSpecies(Z, n_neutrons, info)
 end
 
 function Base.Symbol(element::ChemicalSpecies) 
@@ -126,7 +131,6 @@ end
 
 
 # -------- accessor functions 
-# TODO: some of these need to be adapted or throw errors when nprot ≠ 0. 
 
 # UInt* is not readable
 atomic_number(element::ChemicalSpecies) = element.atomic_number

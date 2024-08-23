@@ -6,13 +6,13 @@
 export FlexibleSystem
 
 
-struct FlexibleSystem{D, S, TCELL} <: SystemWithCell{D}
+struct FlexibleSystem{D, S, TCELL} <: AbstractSystem{D}
     particles::AbstractVector{S}
     cell::TCELL
     data::Dict{Symbol, Any}  # Store arbitrary data about the atom.
 end
 
-get_cell(sys::FlexibleSystem) = sys.cell
+cell(sys::FlexibleSystem) = sys.cell
 
 # System property access
 function Base.getindex(system::FlexibleSystem, x::Symbol)
@@ -62,8 +62,8 @@ function FlexibleSystem(
     if !all(length.(box) .== D)
         throw(ArgumentError("Box must have D vectors of length D"))
     end
-    cell = PeriodicCell(; cell_vectors = box, periodicity = periodicity)
-    FlexibleSystem{D, S, typeof(cell)}(particles, cell, Dict(kwargs...))
+    cϵll = PeriodicCell(; cell_vectors = box, periodicity = periodicity)
+    FlexibleSystem{D, S, typeof(cϵll)}(particles, cϵll, Dict(kwargs...))
 end
 
 function FlexibleSystem(particles; bounding_box, periodicity, kwargs...)

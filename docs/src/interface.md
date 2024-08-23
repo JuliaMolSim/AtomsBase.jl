@@ -27,7 +27,7 @@ The interface aims to achieve predictable behavior of several core functions to 
 
 ## Core Interface
 
-A minimal implementation of the `AtomsBase` interface is read-only and must overload the functions listed as follows. 
+A minimal implementation of the `AtomsBase` interface is read-only and must implement methods for the functions listed as follows. 
 
 - `Base.length(system)`
 - `Base.getindex(system, i)` 

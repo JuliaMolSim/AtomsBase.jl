@@ -8,7 +8,7 @@ export FastSystem
 
 A struct of arrays style prototype implementation of the AtomsBase interface. 
 """
-struct FastSystem{D, TCELL, L <: Unitful.Length, M <: Unitful.Mass, S} <: SystemWithCell{D}
+struct FastSystem{D, TCELL, L <: Unitful.Length, M <: Unitful.Mass, S} <: AbstractSystem{D}
     cell::TCELL
     position::Vector{SVector{D, L}}
     species::Vector{S}
@@ -18,22 +18,24 @@ end
 # Constructor to fetch the types
 function FastSystem(box::NTuple{D, <: AbstractVector}, pbc::NTuple{D, Bool}, 
                     positions, species, masses) where {D}
-    cell = PeriodicCell(; cell_vectors = box, periodicity = pbc)
-    FastSystem(cell, positions, species, masses)
+    cϵll = PeriodicCell(; cell_vectors = box, periodicity = pbc)
+    FastSystem(cϵll, positions, species, masses)
 end 
 
-function FastSystem(cell::TCELL, positions::AbstractVector{<: SVector{D, L}}, 
+function FastSystem(cϵll::TCELL, positions::AbstractVector{<: SVector{D, L}}, 
                     species::AbstractVector{S}, masses) where {TCELL, D, L, S} 
-    @assert D == n_dimensions(cell)
+    if D != n_dimensions(cϵll)
+        throw(ArgumentError("Cell dimension D=$(n_dimensions(cϵll)) does not match particle dimension D=$D."))
+    end                    
     FastSystem{D, TCELL, L, typeof(masses), S}(
-        cell, positions, species, masses)
+        cϵll, positions, species, masses)
 end
 
-get_cell(sys::FastSystem) = sys.cell
+cell(sys::FastSystem) = sys.cell
 
 # Constructor to take data from another system
 function FastSystem(system::AbstractSystem)
-    FastSystem(get_cell(system), position(system, :), species(system, :), mass(system, :))
+    FastSystem(cell(system), position(system, :), species(system, :), mass(system, :))
 end
 
 # Convenience constructor where we don't have to preconstruct all the static stuff...

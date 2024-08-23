@@ -14,7 +14,6 @@ Pages = ["apireference.md"]
 
 ```@docs
 AbstractSystem
-SystemWithCell
 IsolatedCell
 PeriodicCell 
 AtomView
@@ -28,7 +27,7 @@ bounding_box
 set_bounding_box!
 periodicity
 set_periodicity!
-get_cell 
+cell 
 set_cell! 
 n_dimensions
 atomkeys

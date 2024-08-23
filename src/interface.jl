@@ -3,7 +3,7 @@ import PeriodicTable
 
 export bounding_box, 
        periodicity, 
-       get_cell, 
+       cell, 
        n_dimensions, 
        species, 
        position, 
@@ -28,12 +28,6 @@ A `D`-dimensional particle system.
 """
 abstract type AbstractSystem{D} end
 
-"""
-    SystemWithCell{D} <: AbstractSystem{D} 
-
-A `D`-dimensional particle system that implements that `get_cell` interface. 
-"""
-abstract type SystemWithCell{D} <: AbstractSystem{D} end
 
 # ---------------------------------------------------------------
 #   System Properties
@@ -69,13 +63,12 @@ function set_periodicity! end
 
 
 """
-    get_cell(sys::AbstractSystem)
+    cell(sys::AbstractSystem)
 
-Returns the computational cell (if it is defined). If 
-`sys <: SystemWithCell` then the interface expects that `get_cell` 
-is implemented. 
+Returns the computational cell (domain). 
+See e.g. `PeriodicCell` and `IsolatedCell`.
 """
-function get_cell end 
+function cell end 
 
 """
     set_cell!(sys, cell)
@@ -176,9 +169,9 @@ n_dimensions(::AbstractSystem{D}) where {D} = D
 
 #  interface functions to connect Systems and cells 
 
-bounding_box(system::SystemWithCell) = bounding_box(get_cell(system))
+bounding_box(system::AbstractSystem) = bounding_box(cell(system))
 
-periodicity(system::SystemWithCell) = periodicity(get_cell(system))
+periodicity(system::AbstractSystem) = periodicity(cell(system))
 
 
 # ---------------------------------------------------------------

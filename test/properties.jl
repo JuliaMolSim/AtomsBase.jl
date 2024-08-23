@@ -15,7 +15,7 @@ end
     s = ChemicalSpecies(:C)
     @test atomic_number(s) == 6
     @test atomic_symbol(s) == :C
-    s1 = ChemicalSpecies(:C; nneutrons=7)
+    s1 = ChemicalSpecies(:C; n_neutrons=7)
     s2 = ChemicalSpecies(:C13) 
     @test s1 == s2
     @test atomic_number(s1) == 6

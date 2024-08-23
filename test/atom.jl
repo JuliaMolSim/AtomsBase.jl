@@ -35,6 +35,7 @@ using Test
         @test iszero(newatom[:velocity])
     end
 
+    # TODO 
     # CO : these are all tests about making systems, and not about atoms 
     # i think this needs to be moved elsewhere. 
     #= 

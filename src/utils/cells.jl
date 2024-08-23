@@ -54,26 +54,22 @@ PeriodicCell(; cell_vectors, periodicity) =
       PeriodicCell(_auto_cell_vectors(cell_vectors), 
             _auto_pbc(periodicity, cell_vectors))
 
-PeriodicCell(sys::AbstractSystem) = 
-         PeriodicCell(; cell_vectors = bounding_box(sys), 
-                 periodicity = periodicity(sys) )
-
+PeriodicCell(cl::Union{AbstractSystem, PeriodicCell}) = 
+         PeriodicCell(; cell_vectors = bounding_box(cl), 
+                        periodicity = periodicity(cl) )
 
 # ---------------------- pretty printing 
 
-function Base.show(io::IO, cell::PeriodicCell{D}) where {D} 
-   u = unit(first(cell.cell_vectors[1][1]))
-   print(io, "PeriodicCell(", prod(p -> p ? "T" : "F", cell.pbc), ", ")  
+function Base.show(io::IO, cϵll::PeriodicCell{D}) where {D} 
+   u = unit(first(cϵll.cell_vectors[1][1]))
+   print(io, "PeriodicCell(", prod(p -> p ? "T" : "F", cϵll.pbc), ", ")  
    for d = 1:D 
-      print(io, ustrip.(cell.cell_vectors[d]), u)
+      print(io, ustrip.(cϵll.cell_vectors[d]), u)
       if d < D; print(io, ", "); end 
    end 
-   println(")")
+   print(")")
 end
 
-function Base.show(io::IO, ::MIME"text/plain", cell::PeriodicCell{D}) where {D} 
-   Base.show(io, cell) 
-end
 
 
 # ---------------------------------------------
@@ -84,7 +80,9 @@ end
 
 function _auto_cell_vectors(vecs::Tuple) 
    D = length(vecs)
-   @assert all(length.(vecs) .== D) "All cell vectors must have the same length"
+   if !all(length.(vecs) .== D)
+      throw(ArgumentError("All cell vectors must have the same length"))
+   end
    return ntuple(i -> SVector{D}(vecs[i]), D)
 end
 
