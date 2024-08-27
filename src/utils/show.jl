@@ -4,17 +4,12 @@ using Printf
 Suggested function to print AbstractSystem objects to screen
 """
 function show_system(io::IO, system::AbstractSystem{D}) where {D}
-    bc  = boundary_conditions(system)
-
+    pbc = periodicity(system)
     print(io, typeof(system).name.name, "($(chemical_formula(system))")
-    if isinfinite(system)
-        print(io, ", infinite")
-    else
-        perstr = [p ? "T" : "F" for p in periodicity(system)]
-        print(io, ", periodic = ", join(perstr, ""))
-    end
+    perstr = [p ? "T" : "F" for p in pbc]
+    print(io, ", pbc = ", join(perstr, ""))
 
-    if !isinfinite(system)
+    if !any(pbc)
         box_str = ["[" * join(ustrip.(bvector), ", ") * "]"
                    for bvector in bounding_box(system)]
         bunit = unit(eltype(first(bounding_box(system))))
@@ -22,20 +17,16 @@ function show_system(io::IO, system::AbstractSystem{D}) where {D}
     end
     print(io, ")")
 end
+
 function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) where {D}
-    bc  = boundary_conditions(system)
-    box = bounding_box(system)
+    pbc  = periodicity(system)
     print(io, typeof(system).name.name, "($(chemical_formula(system))")
-    if isinfinite(system)
-        print(io, ", infinite")
-    else
-        perstr = [p ? "T" : "F" for p in periodicity(system)]
-        print(io, ", periodic = ", join(perstr, ""))
-    end
+    perstr = [p ? "T" : "F" for p in periodicity(system)]
+    print(io, ", pbc = ", join(perstr, ""))
     println(io, "):")
 
     extra_line = false
-    if !isinfinite(system)
+    if any(pbc) 
         extra_line = true
         box = bounding_box(system)
         bunit = unit(eltype(first(bounding_box(system))))
@@ -52,7 +43,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
     end
 
     for (k, v) in pairs(system)
-        k in (:bounding_box, :boundary_conditions) && continue
+        k in (:bounding_box, :periodicity) && continue
         extra_line = true
         @printf io "    %-17s : %s\n" string(k) string(v)
     end
@@ -64,11 +55,12 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
     end
 
-    ascii = visualize_ascii(system)
-    if !isempty(ascii)
-        extra_line && println(io)
-        println(io, "   ", replace(ascii, "\n" => "\n   "))
-    end
+    # TODO - Not working at the moment
+    # ascii = visualize_ascii(system)
+    # if !isempty(ascii)
+    #     extra_line && println(io)
+    #     println(io, "   ", replace(ascii, "\n" => "\n   "))
+    # end
 end
 
 Base.show(io::IO, system::AbstractSystem) = show_system(io, system)
@@ -93,8 +85,8 @@ end
 
 function show_atom(io::IO, ::MIME"text/plain", at)
     print(io, typeof(at).name.name, "(")
-    println(io, atomic_symbol(at), ", atomic_number = ", atomic_number(at),
-            ", atomic_mass = ", atomic_mass(at), "):")
+    println(io, atomic_symbol(at), ", Z = ", atomic_number(at),
+            ", m = ", mass(at), "):")
 
     pos = [(@sprintf "%.8g" ustrip(p)) for p in position(at)]
     posunit = unit(eltype(position(at)))
@@ -105,7 +97,7 @@ function show_atom(io::IO, ::MIME"text/plain", at)
         @printf io "    %-17s : [%s]u\"%s\"\n" "velocity" join(vel, ",") string(velunit)
     end
     for (k, v) in pairs(at)
-        k in (:atomic_number, :atomic_mass, :atomic_symbol, :position, :velocity) && continue
+        k in (:atomic_number, :mass, :atomic_symbol, :position, :velocity) && continue
         @printf io "    %-17s : %s\n" string(k) string(v)
     end
 end

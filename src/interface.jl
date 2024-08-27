@@ -1,23 +1,21 @@
 import Base.position
 import PeriodicTable
 
-export AbstractSystem
-export BoundaryCondition, DirichletZero, Periodic, infinite_box, isinfinite
-export bounding_box, boundary_conditions, periodicity, n_dimensions, species_type
-export position, velocity, element, element_symbol, atomic_mass, atomic_number, atomic_symbol
-export atomkeys, hasatomkey
-
-#
-# Identifier for boundary conditions per dimension
-#
-abstract type BoundaryCondition end
-struct DirichletZero <: BoundaryCondition end  # Dirichlet zero boundary (i.e. molecular context)
-struct Periodic <: BoundaryCondition end  # Periodic BCs
-
-infinite_box(::Val{1}) = [[Inf]]u"bohr"
-infinite_box(::Val{2}) = [[Inf, 0], [0, Inf]]u"bohr"
-infinite_box(::Val{3}) = [[Inf, 0, 0], [0, Inf, 0], [0, 0, Inf]]u"bohr"
-infinite_box(dim::Int) = infinite_box(Val(dim))
+export bounding_box, 
+       periodicity, 
+       cell, 
+       n_dimensions, 
+       species, 
+       position, 
+       velocity, 
+       element, 
+       element_symbol, 
+       atomic_mass, 
+       mass, 
+       atomic_number, 
+       atomic_symbol, 
+       atomkeys, 
+       hasatomkey
 
 
 #
@@ -26,55 +24,169 @@ infinite_box(dim::Int) = infinite_box(Val(dim))
 """
     AbstractSystem{D}
 
-A `D`-dimensional system.
+A `D`-dimensional particle system.
 """
 abstract type AbstractSystem{D} end
+
+
+# ---------------------------------------------------------------
+#   System Properties
+
 
 """
     bounding_box(sys::AbstractSystem{D})
 
-Return a vector of length `D` of vectors of length `D` that describe the "box" in which the system `sys` is defined.
+Return a tuple of length `D` of vectors of length `D` that describe the 
+"box" in which the system `sys` is defined.
 """
 function bounding_box end
 
 """
-    boundary_conditions(sys::AbstractSystem{D})
-
-Return a vector of length `D` of `BoundaryCondition` objects, one for each direction described by `bounding_box(sys)`.
+    set_bounding_box!(sys::AbstractSystem{D}, bb::NTuple{D, SVector{D, L}})
 """
-function boundary_conditions end
+function set_bounding_box! end
+
 
 """
-    species_type(::AbstractSystem)
+    periodicity(sys::AbstractSystem{D})
 
-Return the type used to represent a species or atom.
+Return a `NTuple{D, Bool}` indicating whether the system is periodic along a
+cell vector as specified by `bounding_box`.
 """
-function species_type end
+function periodicity end 
 
-"""Return vector indicating whether the system is periodic along a dimension."""
-periodicity(sys::AbstractSystem) = [isa(bc, Periodic) for bc in boundary_conditions(sys)]
 
-"""Returns true if the given system is infinite"""
-isinfinite(sys::AbstractSystem{D}) where {D} = bounding_box(sys) == infinite_box(D)
+"""
+    set_periodicity!(sys::AbstractSystem{D}, pbc::NTuple{D, Bool})
+"""
+function set_periodicity! end 
+
+
+"""
+    cell(sys::AbstractSystem)
+
+Returns the computational cell (domain). 
+See e.g. `PeriodicCell` and `IsolatedCell`.
+"""
+function cell end 
+
+"""
+    set_cell!(sys, cell)
+"""
+function set_cell! end 
+
+
+# ---------------------------------------------------------------
+#   Particle Properties 
+
+"""
+    position(sys::AbstractSystem, i)
+
+Return the position of the ith particle if `i` is an `Integer`, a vector of 
+positions if `i` is a vector of integers, or a vector of all positions if 
+`i == :`.
+
+The return type should be a vector of vectors each containing `D` elements that 
+are `<:Unitful.Length`.
+"""
+function position end 
+
+"""
+    set_position!(sys::AbstractSystem{D}, i, x)
+
+- If `i` is an integer then `x` is an `SVector{D, L}` with `L <: Unitful.Length`
+- If `i` is an `AbstractVector{<: Integer}` or `:` then `x` is an `AbstractVector{SVector{D, L}}`
+"""
+function set_position! end 
+
+
+"""
+    mass(sys::AbstractSystem, i)
+
+Mass of a particle if `i::Integer`, vector of masses if `i` is a vector of 
+integers or `:`. The elements are `<: Unitful.Mass`.
+"""
+function mass end 
+
+"""
+    set_mass!(sys::AbstractSystem, i, m)
+
+- If `i` is an integer then `m` is a `Unitful.Mass`
+- If `i` is an `AbstractVector{<: Integer}` or `:` then `x` is an `AbstractVector{<: Unitful.Mass}`
+"""
+function set_mass! end 
+
+
+
+@deprecate atomic_mass(args...)  mass(args...)
+
+
+"""
+    species(::AbstractSystem, i)
+
+Return the species (type, category, ...) of a particle or particles.
+"""
+function species end
+
+"""
+    set_species!(sys::AbstractSystem, i, s)
+
+- If `i` is an integer then `s` is an object describing the particle species, e.g., `ChemicalSpecies`
+- If `i` is an `AbstractVector{<: Integer}` or `:` then `x` is an `AbstractVector` of species objects.
+"""
+function set_species! end 
+
+
+
+"""
+    velocity(sys::AbstractSystem, i)
+
+Return a velocity vector if `i::Integer`, a vector of velocities if `i` is a 
+vector of integers or `:`. Return type should be a vector of vectors each containing `D` elements that are
+`<:Unitful.Velocity`. Returned value of the function may be `missing`.
+"""
+velocity(sys::AbstractSystem, args...) = missing
+
+"""
+    set_velocity!(sys::AbstractSystem, i, v)
+"""
+function set_velocity! end 
+
+
+
+# ---------------------------------------------------------------
+#   Derived functionality and prototype implementations 
 
 
 """
     n_dimensions(::AbstractSystem)
-    n_dimensions(atom)
 
 Return number of dimensions.
 """
 n_dimensions(::AbstractSystem{D}) where {D} = D
 # Note: Can't use ndims, because that is ndims(sys) == 1 (because of indexing interface)
 
+
+#  interface functions to connect Systems and cells 
+
+bounding_box(system::AbstractSystem) = bounding_box(cell(system))
+
+periodicity(system::AbstractSystem) = periodicity(cell(system))
+
+
+# ---------------------------------------------------------------
+#   Indexing and Iteration interface 
+
+
 # indexing and iteration interface...need to implement getindex and length, here are default dispatches for others
+# default to 1D indexing
 Base.size(s::AbstractSystem) = (length(s),)
 Base.firstindex(::AbstractSystem) = 1
 Base.lastindex(s::AbstractSystem) = length(s)
-# default to 1D indexing
 Base.iterate(sys::AbstractSystem, state = firstindex(sys)) =
     (firstindex(sys) <= state <= length(sys)) ? (@inbounds sys[state], state + 1) : nothing
-Base.eltype(sys::AbstractSystem) = species_type(sys)
+# Base.eltype(sys::AbstractSystem) = species_type(sys)
+Base.collect(s::AbstractSystem) = [ s[i] for i = 1:length(s) ]
 Base.getindex(s::AbstractSystem, i::AbstractArray) = getindex.(Ref(s), i)
 Base.getindex(s::AbstractSystem, ::Colon) = collect(s)
 function Base.getindex(s::AbstractSystem, r::AbstractVector{Bool})
@@ -83,122 +195,12 @@ end
 
 # TODO Support similar, push, ...
 
-#
-# Species property accessors from systems and species
-#
-
-"""The element corresponding to a species/atom (or missing)."""
-element(id::Union{Symbol,Integer}) = PeriodicTable.elements[id]  # Keep for better inlining
-function element(name::AbstractString)
-    try
-        return PeriodicTable.elements[name]
-    catch e
-        if e isa KeyError
-            throw(ArgumentError(
-                "Unknown element name: $name. " *
-                "Note that AtomsBase uses PeriodicTables to resolve element identifiers, " *
-                "where strings are considered element names. To lookup an element by " *
-                "element symbol use `Symbol`s instead, e.g. "*
-                """`Atom(Symbol("Si"), zeros(3)u"Å")` or `Atom("silicon", zeros(3)u"Å")`."""
-            ))
-        else
-            rethrow()
-        end
-    end
-end
 
 
-"""
-    element_symbol(system)
-    element_symbol(system, index)
-    element_symbol(species)
 
-Return the symbols corresponding to the elements of the atoms. Note that
-this may be different than `atomic_symbol` for cases where `atomic_symbol`
-is chosen to be more specific (i.e. designate a special atom).
-"""
-function element_symbol(system::AbstractSystem)
-    # Note that atomic_symbol cannot be used here, since this may map
-    # to something more specific than the element
-    [Symbol(element(num).symbol) for num in atomic_number(system)]
-end
-element_symbol(sys::AbstractSystem, index) = element_symbol(sys[index])
-element_symbol(species) = Symbol(element(atomic_number(species)).symbol)
+# ---------------------------------------------------------------
+#   Flexible  dynamic accessors  
 
-
-"""
-    position(sys::AbstractSystem{D})
-    position(sys::AbstractSystem, index)
-    position(species)
-
-Return a vector of positions of every particle in the system `sys`. Return type
-should be a vector of vectors each containing `D` elements that are
-`<:Unitful.Length`. If an index is passed or the action is on a `species`,
-return only the position of the referenced `species` / species on that index.
-"""
-position(sys::AbstractSystem)        = position.(sys)    # in Cartesian coordinates!
-position(sys::AbstractSystem, index) = position(sys[index])
-
-
-"""
-    velocity(sys::AbstractSystem{D})
-    velocity(sys::AbstractSystem, index)
-    velocity(species)
-
-Return a vector of velocities of every particle in the system `sys`. Return
-type should be a vector of vectors each containing `D` elements that are
-`<:Unitful.Velocity`. If an index is passed or the action is on a `species`,
-return only the velocity of the referenced `species`. Returned value of the function
-may be `missing`.
-"""
-velocity(sys::AbstractSystem)        = velocity.(sys)    # in Cartesian coordinates!
-velocity(sys::AbstractSystem, index) = velocity(sys[index])
-
-
-"""
-    atomic_mass(sys::AbstractSystem)
-    atomic_mass(sys::AbstractSystem, i)
-    atomic_mass(species)
-
-Vector of atomic masses in the system `sys` or the atomic mass of a particular `species` /
-the `i`th species in `sys`. The elements are `<: Unitful.Mass`.
-"""
-atomic_mass(sys::AbstractSystem)        = atomic_mass.(sys)
-atomic_mass(sys::AbstractSystem, index) = atomic_mass(sys[index])
-
-
-"""
-    atomic_symbol(sys::AbstractSystem)
-    atomic_symbol(sys::AbstractSystem, i)
-    atomic_symbol(species)
-
-Vector of atomic symbols in the system `sys` or the atomic symbol of a particular `species` /
-the `i`th species in `sys`.
-
-The intention is that [`atomic_number`](@ref) carries the meaning
-of identifying the type of a `species` (e.g. the element for the case of an atom), whereas
-[`atomic_symbol`](@ref) may return a more unique identifier. For example for a deuterium atom
-this may be `:D` while `atomic_number` is still `1`.
-"""
-atomic_symbol(sys::AbstractSystem)        = atomic_symbol.(sys)
-atomic_symbol(sys::AbstractSystem, index) = atomic_symbol(sys[index])
-
-
-"""
-    atomic_number(sys::AbstractSystem)
-    atomic_number(sys::AbstractSystem, i)
-    atomic_number(species)
-
-Vector of atomic numbers in the system `sys` or the atomic number of a particular `species` /
-the `i`th species in `sys`.
-
-The intention is that [`atomic_number`](@ref) carries the meaning
-of identifying the type of a `species` (e.g. the element for the case of an atom), whereas
-[`atomic_symbol`](@ref) may return a more unique identifier. For example for a deuterium atom
-this may be `:D` while `atomic_number` is still `1`.
-"""
-atomic_number(sys::AbstractSystem)        = atomic_number.(sys)
-atomic_number(sys::AbstractSystem, index) = atomic_number(sys[index])
 
 """
     atomkeys(sys::AbstractSystem)

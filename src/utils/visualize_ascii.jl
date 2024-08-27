@@ -28,7 +28,7 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
         box = sum.(eachrow(cell))
 
         # Shift centre of the original unit cell to the centre of the orthorhomic cell
-        centre_atoms = austrip.(sum(position(system)) / length(system))
+        centre_atoms = austrip.(sum(position(system, :)) / length(system))
         shift = box / 2 - centre_atoms
 
         plot_box = false
@@ -39,7 +39,7 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
 
     # Normalise positions
     normpos = [@. box * mod((shift + austrip(p)) / box, 1.0)
-               for p in position(system)]
+               for p in position(system, :)]
 
     scaling = 1.3
     sx = nothing
@@ -100,7 +100,7 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
     end
 
     depth2d = Inf * ones(size(canvas))  # Keep track of things covering each other
-    for (iatom, symbol) in enumerate(atomic_symbol(system))
+    for (iatom, symbol) in enumerate(atomic_symbol(system, :))
         x, y = pos2d[iatom]
         for (i, c) in enumerate(string(symbol))
             if normpos[iatom][2] < depth2d[x + i, y]
@@ -112,4 +112,5 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
 
     join(reverse([join(col) for col in eachcol(canvas)]), "\n")
 end
+
 visualize_ascii(::AbstractSystem{1}) = ""

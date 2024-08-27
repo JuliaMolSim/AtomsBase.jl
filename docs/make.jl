@@ -15,10 +15,11 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
-        "tutorial.md",
-        "overview.md",
-        "testing.md",
-        "apireference.md"
+        "Interface" => "interface.md", 
+        "Utilities" => "utilities.md", 
+        "Implementations" => "implementations.md",
+        "Tutorial" => "tutorial.md",
+        "Reference" => "apireference.md"
     ],
     checkdocs=:exports,
 )

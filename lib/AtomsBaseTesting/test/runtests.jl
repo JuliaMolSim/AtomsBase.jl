@@ -54,11 +54,11 @@ include("testmacros.jl")
         system = case.system
         atoms = case.atoms
         box = case.box
-        bcs = case.bcs
+        bcs = case.pbcs
         sysprop = case.sysprop
         # end simplify
 
-        box_dist = [v .+ 1e-5u"Å" * ones(3) for v in box]
+        box_dist = tuple([v .+ 1e-5u"Å" * ones(3) for v in box]...)
         system_dist = atomic_system(atoms, box_dist, bcs; sysprop...)
 
         @testfail test_approx_eq(system, system_dist; rtol=1e-12)
@@ -73,7 +73,7 @@ include("testmacros.jl")
         system = case.system
         atoms = case.atoms
         box = case.box
-        bcs = case.bcs
+        bcs = case.pbcs
         sysprop = case.sysprop
         # end simplify
 
