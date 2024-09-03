@@ -82,7 +82,7 @@ for z in 1:length(_chem_el_info)
 end
 
 function _nneut_default(z::Integer) 
-    nplusp = floor(Int, ustrip(u"u", _chem_el_info[z].atomic_mass))
+    nplusp = round(Int, ustrip(u"u", _chem_el_info[z].atomic_mass))
     return nplusp - z
 end
 
