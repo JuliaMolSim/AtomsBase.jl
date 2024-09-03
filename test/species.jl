@@ -20,4 +20,8 @@ end
 @test atomic_number( UInt(8) ) == 8
 @test atomic_number( Int16(12) ) == 12
 
+@test "$(ChemicalSpecies(:O))" == "$(ChemicalSpecies(8))" == "O"
+@test "$(ChemicalSpecies(8, 8, 0))" == "O16"
+@test "$(ChemicalSpecies(:C; n_neutrons=7))" == "C13"
+
 end
