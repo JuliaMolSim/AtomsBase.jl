@@ -140,6 +140,8 @@ atomic_number(element::ChemicalSpecies) = element.atomic_number
 
 atomic_number(z::Integer) = z 
 
+atomic_number(s::Symbol) = _sym2z[s]
+
 atomic_symbol(element::ChemicalSpecies) = element 
 
 Base.convert(::Type{Symbol}, element::ChemicalSpecies) = Symbol(element) 
