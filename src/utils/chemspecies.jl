@@ -51,7 +51,10 @@ end
 
 Base.Broadcast.broadcastable(s::ChemicalSpecies) = Ref(s)
 
-ChemicalSpecies(z::Integer) = ChemicalSpecies(z, 0, 0)
+# better to convert z -> symbol to catch special cases such as D; e.g. 
+# Should ChemicalSpecies(z) == ChemicalSpecies(z,z,0)? For H this is false.
+ChemicalSpecies(z::Integer) = ChemicalSpecies(_chem_el_info[z].symbol)
+
 ChemicalSpecies(sym::ChemicalSpecies) = sym
 
 ==(a::ChemicalSpecies, sym::Symbol) = 
@@ -79,7 +82,7 @@ for z in 1:length(_chem_el_info)
 end
 
 function _nneut_default(z::Integer) 
-    nplusp = floor(Int, ustrip(u"u", _chem_el_info[z].atomic_mass))
+    nplusp = round(Int, ustrip(u"u", _chem_el_info[z].atomic_mass))
     return nplusp - z
 end
 
@@ -134,6 +137,10 @@ end
 
 # UInt* is not readable
 atomic_number(element::ChemicalSpecies) = element.atomic_number
+
+atomic_number(z::Integer) = z 
+
+atomic_number(s::Symbol) = _sym2z[s]
 
 atomic_symbol(element::ChemicalSpecies) = element 
 

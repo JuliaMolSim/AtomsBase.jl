@@ -5,7 +5,7 @@ using UnitfulAtomic
 using StaticArrays
 using Requires
 
-export Atom, FlexibleSystem, FastSystem
+export Atom, FlexibleSystem, FastSystem, AbstractSystem 
 
 # Main Interface specification and inline docs 
 include("interface.jl")
