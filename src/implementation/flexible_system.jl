@@ -54,14 +54,6 @@ function FlexibleSystem(
         pbc::AUTOPBC{D};
         kwargs...
     ) where {S, D}
-    # if periodicity isa Bool 
-    #     periodicity = ntuple(_ -> periodicity, D)
-    # else 
-    #     periodicity = tuple(periodicity...)
-    # end
-    # if !all(length.(box) .== D)
-    #     throw(ArgumentError("Box must have D vectors of length D"))
-    # end
     cϵll = PeriodicCell(; cell_vectors = box, periodicity = pbc)
     FlexibleSystem{D, S, typeof(cϵll)}(particles, cϵll, Dict(kwargs...))
 end
