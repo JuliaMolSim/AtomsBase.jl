@@ -16,8 +16,9 @@ struct FastSystem{D, TCELL, L <: Unitful.Length, M <: Unitful.Mass, S} <: Abstra
 end
 
 # Constructor to fetch the types
-function FastSystem(box::NTuple{D, <: AbstractVector}, pbc::NTuple{D, Bool}, 
-                    positions, species, masses) where {D}
+function FastSystem(box::AUTOBOX, 
+                    pbc::AUTOPBC, 
+                    positions, species, masses)
     cϵll = PeriodicCell(; cell_vectors = box, periodicity = pbc)
     FastSystem(cϵll, positions, species, masses)
 end 
@@ -39,18 +40,20 @@ function FastSystem(system::AbstractSystem)
 end
 
 # Convenience constructor where we don't have to preconstruct all the static stuff...
-function FastSystem(particles, box, pbc)
-    D = length(box)
-    if !all(length.(box) .== D)
+function FastSystem(particles, box::AUTOBOX, pbc::AUTOPBC)
+    box1 = _auto_cell_vectors(box)
+    pbc1 = _auto_pbc(pbc, box1)
+    D = length(box1)
+    if !all(length.(box1) .== D)
         throw(ArgumentError("Box must have D vectors of length D=$D."))
     end
-    if length(pbc) != D
+    if length(pbc1) != D
         throw(ArgumentError("Boundary conditions should be of length D=$D."))
     end
     if !all(n_dimensions.(particles) .== D)
         throw(ArgumentError("Particles must have positions of length D=$D."))
     end
-    FastSystem(box, pbc, position.(particles), species.(particles), mass.(particles))
+    FastSystem(box1, pbc1, position.(particles), species.(particles), mass.(particles))
 end
 
 Base.length(sys::FastSystem)         = length(sys.position)

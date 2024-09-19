@@ -75,6 +75,16 @@ end
 # ---------------------------------------------
 #     Utilities 
 
+# allowed input types that convert automatically to the 
+# intended format for cell vectors,  NTuple{D, SVector{D, T}}
+const AUTOBOX = Union{NTuple{D, <: AbstractVector}, 
+                  AbstractVector{<: AbstractVector}} where {D}
+
+# allowed input types that convert automatically to the 
+# intended format for pbc,  NTuple{D, Bool}
+const AUTOPBC = Union{Bool, 
+                      NTuple{D, Bool}, 
+                      AbstractVector{<: Bool}} where {D} 
 
 # different ways to construct cell vectors 
 
@@ -86,7 +96,7 @@ function _auto_cell_vectors(vecs::Tuple)
    return ntuple(i -> SVector{D}(vecs[i]), D)
 end
 
-_auto_cell_vectors(vecs::AbstractVector) = 
+_auto_cell_vectors(vecs::AbstractVector{<: AbstractVector}) = 
       _auto_cell_vectors(tuple(vecs...))
 
 # .... could consider allowing construction from a matrix but 
