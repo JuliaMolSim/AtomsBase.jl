@@ -19,7 +19,7 @@ julia> bounding_box = [[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]u"Å
 julia> pbcs = (true, true, false)
 julia> hydrogen = atomic_system([:H => [0, 0, 1.]u"bohr",
                                  :H => [0, 0, 3.]u"bohr"],
-                                  bounding_box, pubcs)
+                                  bounding_box, pbcs)
 ```
 """
 atomic_system(atoms::AbstractVector{<:Atom}, box, bcs; kwargs...) = 
@@ -53,9 +53,9 @@ isolated_system(atoms::AbstractVector; kwargs...) =
 
 
 """
-    periodic_system(atoms::AbstractVector, bounding_box; fractional=false, kwargs...)
+    periodic_system(atoms::AbstractVector, box; fractional=false, kwargs...)
 
-Construct a [`FlexibleSystem`](@ref) with all boundaries of the `bounding_box` periodic
+Construct a [`FlexibleSystem`](@ref) with all boundaries of the `box` periodic
 (standard setup for modelling solid-state systems). If `fractional` is true, atom coordinates
 are given in fractional (and not in Cartesian) coordinates.
 Extra `kwargs` are stored as custom system properties.
@@ -71,24 +71,24 @@ julia> hydrogen = periodic_system([:H => [0, 0, 1.]u"bohr",
 
 Setup a silicon unit cell using fractional positions
 ```julia-repl
-julia> bounding_box = 10.26 / 2 * [[0, 0, 1], [1, 0, 1], [1, 1, 0]]u"bohr"
+julia> box = 10.26 / 2 * [[0, 0, 1], [1, 0, 1], [1, 1, 0]]u"bohr"
 julia> silicon = periodic_system([:Si =>  ones(3)/8,
                                   :Si => -ones(3)/8],
-                                 bounding_box, fractional=true)
+                                 box, fractional=true)
 ```
 """
 function periodic_system(atoms::AbstractVector,
-                         box::Union{Tuple, AbstractVector};
+                         box::AUTOBOX;
                          fractional=false, kwargs...)
-    pbcs = fill(true, length(box))
-    lattice = tuple(box...)
-    !fractional && return atomic_system(atoms, box, pbcs; kwargs...)
+    lattice = _auto_cell_vectors(box)
+    pbcs = fill(true, length(lattice))
+    !fractional && return atomic_system(atoms, lattice, pbcs; kwargs...)
 
     parse_fractional(atom::Atom) = atom
     function parse_fractional(atom::Pair)::Atom
         id, pos_fractional = atom
         Atom(id, sum(lattice .* pos_fractional))
     end
-    atomic_system(parse_fractional.(atoms), box, pbcs; kwargs...)
+    atomic_system(parse_fractional.(atoms), lattice, pbcs; kwargs...)
 end
 

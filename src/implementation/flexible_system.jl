@@ -49,20 +49,12 @@ Construct a flexible system, a versatile data structure for atomistic systems,
 which puts an emphasis on flexibility rather than speed.
 """
 function FlexibleSystem(
-    particles::AbstractVector{S},
-    box::NTuple{D, <: AbstractVector{L}},
-    periodicity::Union{Bool, NTuple{D, Bool}, AbstractVector{<: Bool}};
-    kwargs...
-) where {L<:Unitful.Length, S, D}
-    if periodicity isa Bool 
-        periodicity = ntuple(_ -> periodicity, D)
-    else 
-        periodicity = tuple(periodicity...)
-    end
-    if !all(length.(box) .== D)
-        throw(ArgumentError("Box must have D vectors of length D"))
-    end
-    cϵll = PeriodicCell(; cell_vectors = box, periodicity = periodicity)
+        particles::AbstractVector{S},
+        box::AUTOBOX{D},
+        pbc::AUTOPBC{D};
+        kwargs...
+    ) where {S, D}
+    cϵll = PeriodicCell(; cell_vectors = box, periodicity = pbc)
     FlexibleSystem{D, S, typeof(cϵll)}(particles, cϵll, Dict(kwargs...))
 end
 
