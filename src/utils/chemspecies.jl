@@ -88,7 +88,7 @@ function _nneut_default(z::Integer)
     return nplusp - z
 end
 
-function ChemicalSpecies(sym::Symbol; n_neutrons = -1, info = 0) 
+function ChemicalSpecies(sym::Symbol; n_neutrons = -1, info = 0)
     _islett(c::Char) = 'A' <= uppercase(c) <= 'Z'
 
     # TODO - special-casing deuterium to make tests pass 
@@ -132,7 +132,6 @@ function Base.Symbol(element::ChemicalSpecies)
 
     return Symbol(str)
 end
-    
 
 
 # -------- accessor functions 

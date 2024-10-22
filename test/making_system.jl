@@ -10,11 +10,11 @@ using Test
                                   :C  => [0.0, 0.8, 1.7]u"Å",
                                   Atom(:H, zeros(3) * u"Å")], extradata=46; dic)
         @test length(system) == 3
-        @test atomic_symbol(system) == [:Si, :C, :H]
-        @test boundary_conditions(system) == [DirichletZero(), DirichletZero(), DirichletZero()]
-        @test position(system) == [[0.0, 1.0, 1.5], [0.0, 0.8, 1.7], [0.0, 0.0, 0.0]]u"Å"
-        @test velocity(system) == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]u"bohr/s"
-        @test bounding_box(system) == infinite_box(3)
+        @test species(system, :) == ChemicalSpecies.([:Si, :C, :H])
+        @test periodicity(system) == (false, false, false)
+        @test cell(system) isa IsolatedCell
+        @test position(system, :) == [[0.0, 1.0, 1.5], [0.0, 0.8, 1.7], [0.0, 0.0, 0.0]]u"Å"
+        @test velocity(system, :) == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]u"bohr/s"
         @test system[:extradata] == 46
         @test system[:dic]["extradata_dic"] == "47"
     end
@@ -28,9 +28,13 @@ using Test
         system = periodic_system(atoms, box, extradata=48; fractional=true, dic)
 
         @test length(system) == 3
-        @test atomic_symbol(system) == [:Si, :C, :H]
-        @test boundary_conditions(system) == [Periodic(), Periodic(), Periodic()]
-        @test position(system) == [[0.0, -0.625, 0.0], [1.25, 0.0, 0.0], [0.0, 0.0, 0.0]]u"Å"
+        @test species(system, :) == ChemicalSpecies.([:Si, :C, :H])
+        @test periodicity(system) == (true, true, true)
+        @test cell(system) isa PeriodicCell
+        @test position(system, :) == [[0.0, -0.625, 0.0], [1.25, 0.0, 0.0], [0.0, 0.0, 0.0]]u"Å"
+        @test bounding_box(system)[1] == box[1]
+        @test bounding_box(system)[2] == box[2]
+        @test bounding_box(system)[3] == box[3]
         @test system[:extradata] == 48
         @test system[:dic]["extradata_dic"] == "49"
     end
