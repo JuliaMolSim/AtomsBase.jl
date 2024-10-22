@@ -53,7 +53,9 @@ Base.Broadcast.broadcastable(s::ChemicalSpecies) = Ref(s)
 
 # better to convert z -> symbol to catch special cases such as D; e.g. 
 # Should ChemicalSpecies(z) == ChemicalSpecies(z,z,0)? For H this is false.
-ChemicalSpecies(z::Integer) = ChemicalSpecies(_chem_el_info[z].symbol)
+function ChemicalSpecies(z::Integer; kwargs...)
+    ChemicalSpecies(_chem_el_info[z].symbol; kwargs...)
+end
 
 ChemicalSpecies(sym::ChemicalSpecies) = sym
 

@@ -6,7 +6,7 @@ using LinearAlgebra
 using Unitful
 using UnitfulAtomic
 
-using AtomsBase: AbstractSystem 
+using AtomsBase: AbstractSystem
 
 export test_approx_eq
 export make_test_system
@@ -21,8 +21,6 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
     rnorm(a, b) = (ustrip(norm(a)) < rtol ? norm(a - b) / 1unit(norm(a))
                                           : norm(a - b) / norm(a))
 
-    _isinfinite(s) = any(isinf, reduce(vcat, bounding_box(s)))
-
     for method in (length, size, periodicity, )
         @test method(s) == method(t)
     end
@@ -32,7 +30,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         @test rnorm(method(s, 1), method(t, 1)) < rtol
     end
 
-    # TODO: add element_symbol back in 
+    # TODO: add element_symbol back in
     for method in (species, atomic_symbol, atomic_number, )
         @test method(s, :) == method(t, :)
         @test method(s, 1) == method(t, 1)
@@ -46,6 +44,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         end
     end
 
+    # test properties of atoms
     if common_only
         test_atprop = [k for k in atomkeys(s) if hasatomkey(t, k)]
     else
@@ -72,6 +71,12 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         end
     end
 
+    # Test some things on cell objects
+    @test typeof(cell(s))       == typeof(cell(t))
+    @test periodicity(cell(s))  == periodicity(cell(t))
+    @test n_dimensions(cell(s)) == n_dimensions(cell(t))
+
+    # test properties of systems
     if common_only
         test_sysprop = [k for k in keys(s) if haskey(t, k)]
     else
@@ -89,7 +94,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
 
         if s[prop] isa Quantity
             @test rnorm(s[prop], t[prop]) < rtol
-        elseif prop in (:bounding_box, ) && !(_isinfinite(s))
+        elseif prop in (:bounding_box, ) && (cell(s) isa PeriodicCell)
             @test maximum(map(rnorm, s[prop], t[prop])) < rtol
         else
             @test s[prop] == t[prop]
@@ -112,8 +117,8 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
     atprop = Dict{Symbol,Any}(
         :position        => [randn(3) for _ = 1:n_atoms]u"Å",
         :velocity        => [randn(3) for _ = 1:n_atoms] * 10^6*u"m/s",
-        #                   Note: reasonable velocity range in au
-        :atomic_symbol   => [:H, :H, :C, :N, :He],
+        #                   Note to above: Reasonable velocity range in au
+        :species         => ChemicalSpecies.([:H, :H, :C, :N, :He]),
         :charge          => [2, 1, 3.0, -1.0, 0.0]u"e_au",
         :atomic_mass     => 10rand(n_atoms)u"u",
         :vdw_radius      => randn(n_atoms)u"Å",
@@ -136,13 +141,11 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
     atprop  = merge(atprop,  pairs(extra_atprop))
 
     atoms = map(1:n_atoms) do i
-        atargs = Dict(k => v[i] for (k, v) in pairs(atprop)
-                      if !(k in (:position, :velocity)))
+        atargs = Dict(k => v[i] for (k, v) in pairs(atprop) if !(k in (:position, :velocity)))
         if haskey(atprop, :velocity)
-            Atom(atprop[:atomic_symbol][i], atprop[:position][i], atprop[:velocity][i];
-                 atargs...)
+            Atom(atprop[:species][i], atprop[:position][i], atprop[:velocity][i]; atargs...)
         else
-            Atom(atprop[:atomic_symbol][i], atprop[:position][i]; atargs...)
+            Atom(atprop[:species][i], atprop[:position][i]; atargs...)
         end
     end
     if cellmatrix == :lower_triangular
