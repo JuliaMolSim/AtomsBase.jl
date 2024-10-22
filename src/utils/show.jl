@@ -56,11 +56,11 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
     end
 
     # TODO - Not working at the moment
-    # ascii = visualize_ascii(system)
-    # if !isempty(ascii)
-    #     extra_line && println(io)
-    #     println(io, "   ", replace(ascii, "\n" => "\n   "))
-    # end
+    ascii = visualize_ascii(system)
+    if !isempty(ascii)
+        extra_line && println(io)
+        println(io, "   ", replace(ascii, "\n" => "\n   "))
+    end
 end
 
 Base.show(io::IO, system::AbstractSystem) = show_system(io, system)
