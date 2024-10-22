@@ -18,8 +18,6 @@ using StaticArrays
     @test bounding_box(system) == box
     @test system[:periodicity] == pbcs
     @test system[:bounding_box] == box
-    # TODO: check this is indeed retired? 
-    # @test !isinfinite(system)
     @test element(system[1]) == element(:C)
     @test keys(system) == (:bounding_box, :periodicity)
     @test haskey(system, :periodicity)
@@ -65,5 +63,6 @@ using StaticArrays
         @test method(system[2]) == method(system, 2)
     end
     @test ismissing(velocity(system[1]))
+    @test ismissing(velocity(system, :))
     @test n_dimensions(system[1]) == n_dimensions(system)
 end

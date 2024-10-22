@@ -22,11 +22,11 @@ julia> hydrogen = atomic_system([:H => [0, 0, 1.]u"bohr",
                                   bounding_box, pbcs)
 ```
 """
-atomic_system(atoms::AbstractVector{<:Atom}, box, bcs; kwargs...) = 
-      FlexibleSystem(atoms, box, bcs; kwargs...)
+atomic_system(atoms::AbstractVector{<:Atom}, box, pbcs; kwargs...) = 
+      FlexibleSystem(atoms, box, pbcs; kwargs...)
 
-atomic_system(atoms::AbstractVector, box, bcs; kwargs...) = 
-      FlexibleSystem(convert.(Atom, atoms), box, bcs; kwargs...)
+atomic_system(atoms::AbstractVector, box, pbcs; kwargs...) = 
+      FlexibleSystem(convert.(Atom, atoms), box, pbcs; kwargs...)
 
 
 """

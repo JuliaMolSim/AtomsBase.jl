@@ -116,7 +116,7 @@ velocity(sys::FlexibleSystem, i::Integer) =
         velocity(sys.particles[i])
 
 velocity(sys::FlexibleSystem, i::Union{AbstractVector, Colon}) = 
-        [ velocity(x) for x in sys.particles[i] ]         
+        [ velocity(x) for x in sys.particles[i] ]
 
 mass(sys::FlexibleSystem, i::Integer) = 
         mass(sys.particles[i])
