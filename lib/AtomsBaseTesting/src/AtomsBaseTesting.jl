@@ -109,7 +109,7 @@ Extra atomic or system properties can be specified using `extra_atprop` and `ext
 and specific standard keys can be ignored using `drop_atprop` and `drop_sysprop`.
 """
 function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
-                          extra_atprop=(; ), extra_sysprop=(; ), cellmatrix=:full, 
+                          extra_atprop=(; ), extra_sysprop=(; ), cellmatrix=:full,
                           n_atoms = 5, )
     @assert D == 3
 
@@ -120,7 +120,7 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
         #                   Note to above: Reasonable velocity range in au
         :species         => ChemicalSpecies.([:H, :H, :C, :N, :He]),
         :charge          => [2, 1, 3.0, -1.0, 0.0]u"e_au",
-        :atomic_mass     => 10rand(n_atoms)u"u",
+        :mass            => 10rand(n_atoms)u"u",
         :vdw_radius      => randn(n_atoms)u"Å",
         :covalent_radius => randn(n_atoms)u"Å",
         :magnetic_moment => [0.0, 0.0, 1.0, -1.0, 0.0],
