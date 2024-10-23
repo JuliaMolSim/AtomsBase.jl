@@ -18,9 +18,7 @@ function show_system(io::IO, system::AbstractSystem{D}) where {D}
     print(io, ")")
 end
 
-# TODO Put the show_ascii behind Preferences
-function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D};
-                     show_ascii=true) where {D}
+function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) where {D}
     pbc  = periodicity(system)
     print(io, typeof(system).name.name, "($(chemical_formula(system))")
     perstr = [p ? "T" : "F" for p in periodicity(system)]
@@ -57,6 +55,8 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D};
         extra_line = true
     end
 
+    # TODO We will make this configurable in a follow-up PR
+    show_ascii = false
     if show_ascii
         ascii = visualize_ascii(system)
         if !isempty(ascii)
