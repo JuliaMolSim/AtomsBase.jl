@@ -3,7 +3,7 @@ using Unitful
 using UnitfulAtomic
 using Test
 
-@testset "Fast system" begin
+@testset "Flexible system" begin
     box = tuple([[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"Å" ...)
     pbcs = (true, false, false)
     dic = Dict{String, Any}("extradata_dic"=>"44")
