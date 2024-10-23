@@ -55,8 +55,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
     end
 
-    # TODO We will make this configurable in a follow-up PR
-    show_ascii = false
+    show_ascii = length(system) > @load_preference("system_visualize_ascii_max_atoms", 10)
     if show_ascii
         ascii = visualize_ascii(system)
         if !isempty(ascii)
