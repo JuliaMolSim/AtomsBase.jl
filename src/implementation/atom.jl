@@ -68,7 +68,7 @@ function _default_velocity(position::AbstractVector{L}) where {L <: Unitful.Leng
     elseif uL == u"bohr" 
         return zeros(TFL, length(position))u"nm/s"
     elseif uL == u"m" 
-        return zeros(TFL, length(position))u"m/s"    
+        return zeros(TFL, length(position))u"m/s"
     end 
     @warn("Cannot infer default velocity for position with unit $(unit(position[1]))")
     return zeros(TFL, length(position)) * (uL / u"s")
