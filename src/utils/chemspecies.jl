@@ -53,7 +53,9 @@ Base.Broadcast.broadcastable(s::ChemicalSpecies) = Ref(s)
 
 # better to convert z -> symbol to catch special cases such as D; e.g. 
 # Should ChemicalSpecies(z) == ChemicalSpecies(z,z,0)? For H this is false.
-ChemicalSpecies(z::Integer) = ChemicalSpecies(_chem_el_info[z].symbol)
+function ChemicalSpecies(z::Integer; kwargs...)
+    ChemicalSpecies(_chem_el_info[z].symbol; kwargs...)
+end
 
 ChemicalSpecies(sym::ChemicalSpecies) = sym
 
@@ -86,7 +88,7 @@ function _nneut_default(z::Integer)
     return nplusp - z
 end
 
-function ChemicalSpecies(sym::Symbol; n_neutrons = -1, info = 0) 
+function ChemicalSpecies(sym::Symbol; n_neutrons = -1, info = 0)
     _islett(c::Char) = 'A' <= uppercase(c) <= 'Z'
 
     # TODO - special-casing deuterium to make tests pass 
@@ -130,7 +132,6 @@ function Base.Symbol(element::ChemicalSpecies)
 
     return Symbol(str)
 end
-    
 
 
 # -------- accessor functions 

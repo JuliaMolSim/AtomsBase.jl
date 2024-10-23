@@ -36,15 +36,10 @@ struct AtomView{S<:AbstractSystem}
     index::Int
 end
 
-function velocity(v::AtomView)
-    vel = velocity(v.system)
-    ismissing(vel) && return missing
-    return vel[v.index]
-end
-
-position(v::AtomView)      = position(v.system, v.index)
-mass(v::AtomView)          = mass(v.system, v.index)
-species(v::AtomView)       = species(v.system, v.index)
+velocity(v::AtomView) = velocity(v.system, v.index)
+position(v::AtomView) = position(v.system, v.index)
+mass(v::AtomView)     = mass(v.system, v.index)
+species(v::AtomView)  = species(v.system, v.index)
 
 atomic_symbol(v::AtomView) = atomic_symbol(species(v))
 atomic_number(v::AtomView) = atomic_number(species(v))

@@ -16,10 +16,10 @@ struct Atom{D, L<:Unitful.Length, V<:Unitful.Velocity, M<:Unitful.Mass}
     data::Dict{Symbol, Any}  # Store arbitrary data about the atom.
 end
 
-velocity(atom::Atom)      = atom.velocity
-position(atom::Atom)      = atom.position
-mass(atom::Atom)   = atom.mass
-species(atom::Atom)       = atom.species
+velocity(atom::Atom) = atom.velocity
+position(atom::Atom) = atom.position
+mass(atom::Atom)     = atom.mass
+species(atom::Atom)  = atom.species
 
 n_dimensions(::Atom{D}) where {D} = D
 
@@ -68,7 +68,7 @@ function _default_velocity(position::AbstractVector{L}) where {L <: Unitful.Leng
     elseif uL == u"bohr" 
         return zeros(TFL, length(position))u"nm/s"
     elseif uL == u"m" 
-        return zeros(TFL, length(position))u"m/s"    
+        return zeros(TFL, length(position))u"m/s"
     end 
     @warn("Cannot infer default velocity for position with unit $(unit(position[1]))")
     return zeros(TFL, length(position)) * (uL / u"s")

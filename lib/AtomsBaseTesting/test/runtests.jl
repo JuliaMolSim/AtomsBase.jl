@@ -9,6 +9,16 @@ include("testmacros.jl")
 
 @testset "AtomsBaseTesting.jl" begin
     @testset "make_test_system" begin
+        let case = make_test_system()
+            # Data that is delivered agrees with the constructed system
+            # TODO Could test more here
+            @test sort(collect(keys(case.atprop)))  == sort(collect(atomkeys(case.system)))
+            @test sort(collect(keys(case.atprop)))  == sort(collect(keys(case.atoms[1])))
+            @test sort(collect(keys(case.sysprop))) == sort(collect(keys(case.system)))
+            @test case.bounding_box  == bounding_box(case.system)
+            @test case.periodicity   == periodicity(case.system)
+        end
+
         let case = make_test_system(; cellmatrix=:full)
             box = reduce(hcat, bounding_box(case.system))
             @test UpperTriangular(box) != box
@@ -33,7 +43,7 @@ include("testmacros.jl")
             @test UpperTriangular(box) == box
             @test LowerTriangular(box) == box
         end
- 
+
         @test  hasatomkey(make_test_system().system,                            :vdw_radius)
         @test !hasatomkey(make_test_system(; drop_atprop=[:vdw_radius]).system, :vdw_radius)
 
@@ -52,9 +62,9 @@ include("testmacros.jl")
         # once we require Julia 1.7
         case = make_test_system()
         system = case.system
-        atoms = case.atoms
-        box = case.box
-        bcs = case.pbcs
+        atoms  = case.atoms
+        box    = case.bounding_box
+        bcs    = case.periodicity
         sysprop = case.sysprop
         # end simplify
 
@@ -71,9 +81,9 @@ include("testmacros.jl")
         # once we require Julia 1.7
         case = make_test_system()
         system = case.system
-        atoms = case.atoms
-        box = case.box
-        bcs = case.pbcs
+        atoms  = case.atoms
+        box    = case.bounding_box
+        bcs    = case.periodicity
         sysprop = case.sysprop
         # end simplify
 
@@ -81,7 +91,7 @@ include("testmacros.jl")
         pop!(sysprop_dict, :multiplicity)
         system_edit = atomic_system(atoms, box, bcs; sysprop_dict...)
 
-        @testfail test_approx_eq(system, system_edit)
+        @testfail test_approx_eq(system, system_edit, quiet=true)
         @testpass test_approx_eq(system, system_edit; ignore_sysprop=[:multiplicity])
         @testpass test_approx_eq(system, system_edit; common_only=true)
     end

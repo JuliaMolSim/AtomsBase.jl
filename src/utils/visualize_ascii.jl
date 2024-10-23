@@ -34,13 +34,17 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
         plot_box = false
     end
 
-    # If one of the box coordinates is negative 
+    # If one of the box coordinates is negative
     any(box .≤ 0) && return ""
 
     # Normalise positions
     normpos = [@. box * mod((shift + austrip(p)) / box, 1.0)
                for p in position(system, :)]
 
+    # For very large boxes first scale them down to a sane size
+    bring_to_10 = log10(maximum(box)) > 2.5 ? 300 / maximum(box) : 1.0
+
+    # Fine-tune the scaling now
     scaling = 1.3
     sx = nothing
     sy = nothing
@@ -48,9 +52,9 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
     canvas = nothing
     while scaling > 0.1
         if D == 2
-            scaled = scaling .* [box[1], 0.0, box[2]]
+            scaled = bring_to_10 .* scaling .* [box[1], 0.0, box[2]]
         else
-            scaled = scaling .* box .* (1.0, 0.25, 0.5)
+            scaled = bring_to_10 .* scaling .* box .* (1.0, 0.25, 0.5)
         end
 
         sx, sy, sz = round.(Int, scaled)

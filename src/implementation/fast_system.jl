@@ -27,7 +27,7 @@ function FastSystem(cϵll::TCELL, positions::AbstractVector{<: SVector{D, L}},
                     species::AbstractVector{S}, masses) where {TCELL, D, L, S} 
     if D != n_dimensions(cϵll)
         throw(ArgumentError("Cell dimension D=$(n_dimensions(cϵll)) does not match particle dimension D=$D."))
-    end                    
+    end
     FastSystem{D, TCELL, L, typeof(masses), S}(
         cϵll, positions, species, masses)
 end
@@ -90,8 +90,6 @@ Base.getindex(system::FastSystem, ::Colon, x::Symbol) = getfield(system, x)
 
 position(s::FastSystem, ::Colon) = s.position
 position(sys::FastSystem, i::Union{Integer, AbstractVector}) = sys.position[i]
-
-velocity(::FastSystem, args...) = missing
 
 mass(s::FastSystem, ::Colon) = s.mass
 mass(sys::FastSystem, i::Union{Integer, AbstractVector}) = sys.mass[i]

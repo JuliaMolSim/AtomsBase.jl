@@ -6,7 +6,7 @@ using LinearAlgebra
 using Unitful
 using UnitfulAtomic
 
-using AtomsBase: AbstractSystem 
+using AtomsBase: AbstractSystem
 
 export test_approx_eq
 export make_test_system
@@ -17,11 +17,9 @@ properties can be ignored during the comparison using the respective kwargs.
 """
 function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
                         rtol=1e-14, ignore_atprop=Symbol[], ignore_sysprop=Symbol[],
-                        common_only=false)
+                        common_only=false, quiet=false)
     rnorm(a, b) = (ustrip(norm(a)) < rtol ? norm(a - b) / 1unit(norm(a))
                                           : norm(a - b) / norm(a))
-
-    _isinfinite(s) = any(isinf, reduce(vcat, bounding_box(s)))
 
     for method in (length, size, periodicity, )
         @test method(s) == method(t)
@@ -32,7 +30,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         @test rnorm(method(s, 1), method(t, 1)) < rtol
     end
 
-    # TODO: add element_symbol back in 
+    # TODO: add element_symbol back in
     for method in (species, atomic_symbol, atomic_number, )
         @test method(s, :) == method(t, :)
         @test method(s, 1) == method(t, 1)
@@ -46,6 +44,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         end
     end
 
+    # test properties of atoms
     if common_only
         test_atprop = [k for k in atomkeys(s) if hasatomkey(t, k)]
     else
@@ -56,7 +55,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         prop in ignore_atprop && continue
         prop in (:velocity, :position) && continue
         if hasatomkey(s, prop) != hasatomkey(t, prop)
-            println("hashatomkey mismatch for $prop")
+            quiet || println("hashatomkey mismatch for $prop")
             @test hasatomkey(s, prop) == hasatomkey(t, prop)
             continue
         end
@@ -72,6 +71,12 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         end
     end
 
+    # Test some things on cell objects
+    @test typeof(cell(s))       == typeof(cell(t))
+    @test periodicity(cell(s))  == periodicity(cell(t))
+    @test n_dimensions(cell(s)) == n_dimensions(cell(t))
+
+    # test properties of systems
     if common_only
         test_sysprop = [k for k in keys(s) if haskey(t, k)]
     else
@@ -81,7 +86,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
     for prop in test_sysprop
         prop in ignore_sysprop && continue
         if haskey(s, prop) != haskey(t, prop)
-            println("haskey mismatch for $prop")
+            quiet || println("haskey mismatch for $prop")
             @test haskey(s, prop) == haskey(t, prop)
             continue
         end
@@ -89,7 +94,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
 
         if s[prop] isa Quantity
             @test rnorm(s[prop], t[prop]) < rtol
-        elseif prop in (:bounding_box, ) && !(_isinfinite(s))
+        elseif prop in (:bounding_box, ) && (cell(s) isa PeriodicCell)
             @test maximum(map(rnorm, s[prop], t[prop])) < rtol
         else
             @test s[prop] == t[prop]
@@ -104,47 +109,10 @@ Extra atomic or system properties can be specified using `extra_atprop` and `ext
 and specific standard keys can be ignored using `drop_atprop` and `drop_sysprop`.
 """
 function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
-                          extra_atprop=(; ), extra_sysprop=(; ), cellmatrix=:full, 
+                          extra_atprop=(; ), extra_sysprop=(; ), cellmatrix=:full,
                           n_atoms = 5, )
     @assert D == 3
 
-    # Generate some random data to store in Atoms
-    atprop = Dict{Symbol,Any}(
-        :position        => [randn(3) for _ = 1:n_atoms]u"Å",
-        :velocity        => [randn(3) for _ = 1:n_atoms] * 10^6*u"m/s",
-        #                   Note: reasonable velocity range in au
-        :atomic_symbol   => [:H, :H, :C, :N, :He],
-        :charge          => [2, 1, 3.0, -1.0, 0.0]u"e_au",
-        :atomic_mass     => 10rand(n_atoms)u"u",
-        :vdw_radius      => randn(n_atoms)u"Å",
-        :covalent_radius => randn(n_atoms)u"Å",
-        :magnetic_moment => [0.0, 0.0, 1.0, -1.0, 0.0],
-    )
-    sysprop = Dict{Symbol,Any}(
-        :extra_data   => 42,
-        :charge       => -1u"e_au",
-        :multiplicity => 2,
-    )
-
-    for prop in drop_atprop
-        pop!(atprop, prop)
-    end
-    for prop in drop_sysprop
-        pop!(sysprop, prop)
-    end
-    sysprop = merge(sysprop, pairs(extra_sysprop))
-    atprop  = merge(atprop,  pairs(extra_atprop))
-
-    atoms = map(1:n_atoms) do i
-        atargs = Dict(k => v[i] for (k, v) in pairs(atprop)
-                      if !(k in (:position, :velocity)))
-        if haskey(atprop, :velocity)
-            Atom(atprop[:atomic_symbol][i], atprop[:position][i], atprop[:velocity][i];
-                 atargs...)
-        else
-            Atom(atprop[:atomic_symbol][i], atprop[:position][i]; atargs...)
-        end
-    end
     if cellmatrix == :lower_triangular
         box = ([1.54732, -0.807289, -0.500870]u"Å",
                [    0.0, 0.4654985, 0.5615117]u"Å",
@@ -162,10 +130,55 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
                [ 0.36113, 1.008144, 0.814712]u"Å",
                [ 0.06828, 0.381122, 2.129081]u"Å")
     end
-    pbcs = (true, true, false)
-    system = atomic_system(atoms, box, pbcs; sysprop...)
 
-    (; system, atoms, atprop=NamedTuple(atprop), sysprop=NamedTuple(sysprop), box, pbcs)
+    # Generate some random data to store in atoms and system
+    atprop = Dict{Symbol,Any}(
+        :position        => [randn(3) for _ = 1:n_atoms]u"Å",
+        :velocity        => [randn(3) for _ = 1:n_atoms] * 10^6*u"m/s",
+        #                   Note to above: Reasonable velocity range in au
+        :species         => ChemicalSpecies.([:H, :H, :C, :N, :He]),
+        :charge          => [2, 1, 3.0, -1.0, 0.0]u"e_au",
+        :mass            => 10rand(n_atoms)u"u",
+        :vdw_radius      => randn(n_atoms)u"Å",
+        :covalent_radius => randn(n_atoms)u"Å",
+        :magnetic_moment => [0.0, 0.0, 1.0, -1.0, 0.0],
+    )
+    sysprop = Dict{Symbol,Any}(
+        :bounding_box => box,
+        :periodicity  => (true, true, false),
+        #
+        :extra_data   => 42,
+        :charge       => -1u"e_au",
+        :multiplicity => 2,
+    )
+
+    for prop in drop_atprop
+        pop!(atprop, prop)
+    end
+    for prop in drop_sysprop
+        pop!(sysprop, prop)
+    end
+    sysprop = merge(sysprop, pairs(extra_sysprop))
+    atprop  = merge(atprop,  pairs(extra_atprop))
+
+    atoms = map(1:n_atoms) do i
+        atargs = Dict(k => v[i] for (k, v) in pairs(atprop) if !(k in (:position, :velocity)))
+        if haskey(atprop, :velocity)
+            Atom(atprop[:species][i], atprop[:position][i], atprop[:velocity][i]; atargs...)
+        else
+            Atom(atprop[:species][i], atprop[:position][i]; atargs...)
+        end
+    end
+    cell = PeriodicCell(; cell_vectors=sysprop[:bounding_box],
+                          periodicity=sysprop[:periodicity])
+
+    sysargs = Dict(k => v for (k, v) in pairs(sysprop)
+                   if !(k in (:bounding_box, :periodicity)))
+    system = FlexibleSystem(atoms, cell; sysargs...)
+
+    (; system, atoms, cell,
+     bounding_box=sysprop[:bounding_box], periodicity=sysprop[:periodicity],
+       atprop=NamedTuple(atprop), sysprop=NamedTuple(sysprop))
 end
 
 end

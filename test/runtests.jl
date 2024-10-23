@@ -10,8 +10,10 @@ if GROUP == "Core"
         include("species.jl")
         include("atom.jl")
         include("fast_system.jl")
+        include("flexible_system.jl")
         include("properties.jl")
         include("printing.jl")
+        include("making_system.jl")  # This should be moved out of AtomsBase one day
     end
 else
     subpkg_path = joinpath(dirname(@__DIR__), "lib", GROUP)
