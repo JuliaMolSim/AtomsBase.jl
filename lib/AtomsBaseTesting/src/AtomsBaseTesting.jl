@@ -17,7 +17,7 @@ properties can be ignored during the comparison using the respective kwargs.
 """
 function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
                         rtol=1e-14, ignore_atprop=Symbol[], ignore_sysprop=Symbol[],
-                        common_only=false)
+                        common_only=false, quiet=false)
     rnorm(a, b) = (ustrip(norm(a)) < rtol ? norm(a - b) / 1unit(norm(a))
                                           : norm(a - b) / norm(a))
 
@@ -55,7 +55,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
         prop in ignore_atprop && continue
         prop in (:velocity, :position) && continue
         if hasatomkey(s, prop) != hasatomkey(t, prop)
-            println("hashatomkey mismatch for $prop")
+            quiet || println("hashatomkey mismatch for $prop")
             @test hasatomkey(s, prop) == hasatomkey(t, prop)
             continue
         end
@@ -86,7 +86,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
     for prop in test_sysprop
         prop in ignore_sysprop && continue
         if haskey(s, prop) != haskey(t, prop)
-            println("haskey mismatch for $prop")
+            quiet || println("haskey mismatch for $prop")
             @test haskey(s, prop) == haskey(t, prop)
             continue
         end
@@ -113,7 +113,25 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
                           n_atoms = 5, )
     @assert D == 3
 
-    # Generate some random data to store in Atoms
+    if cellmatrix == :lower_triangular
+        box = ([1.54732, -0.807289, -0.500870]u"Å",
+               [    0.0, 0.4654985, 0.5615117]u"Å",
+               [    0.0,       0.0, 0.7928950]u"Å")
+    elseif cellmatrix == :upper_triangular
+        box = ([1.54732, 0.0, 0.0]u"Å",
+               [-0.807289, 0.4654985, 0.0]u"Å",
+               [-0.500870, 0.5615117, 0.7928950]u"Å")
+    elseif cellmatrix == :diagonal
+        box = ([1.54732, 0.0, 0.0]u"Å",
+              [0.0, 0.4654985, 0.0]u"Å",
+              [0.0, 0.0, 0.7928950]u"Å")
+    else
+        box = ([1.50304, 0.850344, 0.717239]u"Å",
+               [ 0.36113, 1.008144, 0.814712]u"Å",
+               [ 0.06828, 0.381122, 2.129081]u"Å")
+    end
+
+    # Generate some random data to store in atoms and system
     atprop = Dict{Symbol,Any}(
         :position        => [randn(3) for _ = 1:n_atoms]u"Å",
         :velocity        => [randn(3) for _ = 1:n_atoms] * 10^6*u"m/s",
@@ -126,6 +144,9 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
         :magnetic_moment => [0.0, 0.0, 1.0, -1.0, 0.0],
     )
     sysprop = Dict{Symbol,Any}(
+        :bounding_box => box,
+        :periodicity  => (true, true, false),
+        #
         :extra_data   => 42,
         :charge       => -1u"e_au",
         :multiplicity => 2,
@@ -148,27 +169,16 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
             Atom(atprop[:species][i], atprop[:position][i]; atargs...)
         end
     end
-    if cellmatrix == :lower_triangular
-        box = ([1.54732, -0.807289, -0.500870]u"Å",
-               [    0.0, 0.4654985, 0.5615117]u"Å",
-               [    0.0,       0.0, 0.7928950]u"Å")
-    elseif cellmatrix == :upper_triangular
-        box = ([1.54732, 0.0, 0.0]u"Å",
-               [-0.807289, 0.4654985, 0.0]u"Å",
-               [-0.500870, 0.5615117, 0.7928950]u"Å")
-    elseif cellmatrix == :diagonal
-        box = ([1.54732, 0.0, 0.0]u"Å",
-              [0.0, 0.4654985, 0.0]u"Å",
-              [0.0, 0.0, 0.7928950]u"Å")
-    else
-        box = ([1.50304, 0.850344, 0.717239]u"Å",
-               [ 0.36113, 1.008144, 0.814712]u"Å",
-               [ 0.06828, 0.381122, 2.129081]u"Å")
-    end
-    pbcs = (true, true, false)
-    system = atomic_system(atoms, box, pbcs; sysprop...)
+    cell = PeriodicCell(; cell_vectors=sysprop[:bounding_box],
+                          periodicity=sysprop[:periodicity])
 
-    (; system, atoms, atprop=NamedTuple(atprop), sysprop=NamedTuple(sysprop), box, pbcs)
+    sysargs = Dict(k => v for (k, v) in pairs(sysprop)
+                   if !(k in (:bounding_box, :periodicity)))
+    system = FlexibleSystem(atoms, cell; sysargs...)
+
+    (; system, atoms, cell,
+     bounding_box=sysprop[:bounding_box], periodicity=sysprop[:periodicity],
+       atprop=NamedTuple(atprop), sysprop=NamedTuple(sysprop))
 end
 
 end
