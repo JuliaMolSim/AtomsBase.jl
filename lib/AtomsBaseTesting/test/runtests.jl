@@ -12,9 +12,9 @@ include("testmacros.jl")
         let case = make_test_system()
             # Data that is delivered agrees with the constructed system
             # TODO Could test more here
-            @test sort(collect(keys(case.atprop))  == sort(collect(atomkeys(case.system)))
-            @test sort(collect(keys(case.atprop))  == sort(collect(keys(case.atoms[1])))
-            @test sort(collect(keys(case.sysprop)) == sort(collect(keys(case.system)))
+            @test sort(collect(keys(case.atprop)))  == sort(collect(atomkeys(case.system)))
+            @test sort(collect(keys(case.atprop)))  == sort(collect(keys(case.atoms[1])))
+            @test sort(collect(keys(case.sysprop))) == sort(collect(keys(case.system)))
             @test case.box           == bounding_box(case.system)
             @test case.pbcs          == periodicity(case.system)
         end
