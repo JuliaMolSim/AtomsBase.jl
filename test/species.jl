@@ -37,7 +37,7 @@ using Test
         @test atomic_number(x) == 0
         @test mass(x) == 0u"u"
 
-        @test x = ChemicalSpecies(:X)
+        @test x == ChemicalSpecies(:X)
     end
 
     @test atomic_number( UInt(8) ) == 8
