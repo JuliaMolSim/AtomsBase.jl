@@ -1,8 +1,4 @@
-
-
-
-# --------------------------------------------- 
-#  Simple wrapper for chemical element type 
+# Simple wrapper for chemical element type 
 
 import PeriodicTable
 using Unitful
@@ -39,30 +35,29 @@ ChemicalSpecies(:D)
 ```
 """
 struct ChemicalSpecies
-   atomic_number::Int16    # = Z = number of protons
-   nneut::Int16            # number of neutrons
+   atomic_number::Int16  # = Z = number of protons or 0 if unknown
+   n_neutrons::Int16
    info::UInt32
 end
 
 
-function Base.show(io::IO, element::ChemicalSpecies) 
+function Base.show(io::IO, element::ChemicalSpecies)
     print(io, Symbol(element))
 end
 
 Base.Broadcast.broadcastable(s::ChemicalSpecies) = Ref(s)
 
-# better to convert z -> symbol to catch special cases such as D; e.g. 
+# better to convert z -> symbol to catch special cases such as D; e.g.
 # Should ChemicalSpecies(z) == ChemicalSpecies(z,z,0)? For H this is false.
 function ChemicalSpecies(z::Integer; kwargs...)
     ChemicalSpecies(_chem_el_info[z].symbol; kwargs...)
 end
-
 ChemicalSpecies(sym::ChemicalSpecies) = sym
 
-==(a::ChemicalSpecies, sym::Symbol) = 
+==(a::ChemicalSpecies, sym::Symbol) =
         ((a == ChemicalSpecies(sym)) && (Symbol(a) == sym))
 
-# -------- fast access to the periodic table 
+# -------- fast access to the periodic table
 
 if length(PeriodicTable.elements) != maximum(el.number for el in PeriodicTable.elements)
     error("PeriodicTable.elements is not sorted by atomic number")
@@ -72,18 +67,15 @@ if !all(el.number == i for (i, el) in enumerate(PeriodicTable.elements))
     error("PeriodicTable.elements is not sorted by atomic number")
 end
 
-const _chem_el_info = [ 
-      (symbol = Symbol(PeriodicTable.elements[z].symbol), 
-       atomic_mass = PeriodicTable.elements[z].atomic_mass, ) 
-       for z in 1:length(PeriodicTable.elements)
-      ]
+const _chem_el_info = Dict(
+    z => (; symbol = Symbol(PeriodicTable.elements[z].symbol),
+            atomic_mass = PeriodicTable.elements[z].atomic_mass, )
+    for z in 1:length(PeriodicTable.elements)
+)
+_chem_el_info[0] = (; symbol=:X, atomic_mass=0u"u")
+const _sym2z = Dict{Symbol, UInt8}(data.symbol => z for (z, data) in _chem_el_info)
 
-const _sym2z = Dict{Symbol, UInt8}()
-for z in 1:length(_chem_el_info)
-   _sym2z[_chem_el_info[z].symbol] = z
-end
-
-function _nneut_default(z::Integer) 
+function _nneut_default(z::Integer)
     nplusp = round(Int, ustrip(u"u", _chem_el_info[z].atomic_mass))
     return nplusp - z
 end
@@ -91,11 +83,9 @@ end
 function ChemicalSpecies(sym::Symbol; n_neutrons = -1, info = 0)
     _islett(c::Char) = 'A' <= uppercase(c) <= 'Z'
 
-    # TODO - special-casing deuterium to make tests pass 
-    #        this should be handled better
-    if sym == :D 
-        return ChemicalSpecies(1, 1, info)
-    end
+    # TODO - special-casing a few things ... This should be handled better
+    sym == :D && return ChemicalSpecies(1, 1, info)
+    sym == :T && return ChemicalSpecies(1, 2, info)
 
     # number of neutrons is explicitly specified
     if n_neutrons != -1
@@ -119,16 +109,15 @@ function ChemicalSpecies(sym::Symbol; n_neutrons = -1, info = 0)
     return ChemicalSpecies(Z, n_neutrons, info)
 end
 
-function Base.Symbol(element::ChemicalSpecies) 
+function Base.Symbol(element::ChemicalSpecies)
     str = "$(_chem_el_info[element.atomic_number].symbol)"
-    if element.nneut != _nneut_default(element.atomic_number)
-        str *= "$(element.atomic_number + element.nneut)"
+    if element.n_neutrons != _nneut_default(element.atomic_number)
+        str *= "$(element.atomic_number + element.n_neutrons)"
     end
 
-    # TODO: again special-casing deuterium; to be fixed. 
-    if str == "H2"
-        return :D
-    end 
+    # TODO: again special-casing deuterium and tritium; to be fixed.
+    str == "H2" && return :D
+    str == "H3" && return :T
 
     return Symbol(str)
 end
@@ -149,10 +138,7 @@ Base.convert(::Type{Symbol}, element::ChemicalSpecies) = Symbol(element)
 
 mass(element::ChemicalSpecies) = _chem_el_info[element.atomic_number].atomic_mass
 
-rich_info(element::ChemicalSpecies) = PeriodicTable.elements[element.atomic_number]
-
-element(element::ChemicalSpecies) = rich_info(element)
-
+element(element::ChemicalSpecies) = PeriodicTable.elements[element.atomic_number]
 
 """The element corresponding to a species/atom (or missing)."""
 element(id::Union{Symbol,Integer}) = PeriodicTable.elements[id]  # Keep for better inlining
@@ -185,10 +171,10 @@ Return the symbols corresponding to the elements of the atoms. Note that
 this may be different than `atomic_symbol` for cases where `atomic_symbol`
 is chosen to be more specific (i.e. designate a special atom).
 """
-element_symbol(sys::AbstractSystem, index) = 
+element_symbol(sys::AbstractSystem, index) =
         element_symbol.(sys[index])
 
-element_symbol(species) = 
+element_symbol(species) =
         Symbol(element(atomic_number(species)).symbol)
 
 
