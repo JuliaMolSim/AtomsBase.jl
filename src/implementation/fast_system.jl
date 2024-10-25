@@ -19,7 +19,7 @@ end
 function FastSystem(box::AUTOBOX, 
                     pbc::AUTOPBC, 
                     positions, species, masses)
-    cϵll = PeriodicCell(; cell_vectors = box, periodicity = pbc)
+    cϵll = PeriodicCell(; bounding_box = box, periodicity = pbc)
     FastSystem(cϵll, positions, species, masses)
 end 
 
@@ -41,7 +41,7 @@ end
 
 # Convenience constructor where we don't have to preconstruct all the static stuff...
 function FastSystem(particles, box::AUTOBOX, pbc::AUTOPBC)
-    box1 = _auto_cell_vectors(box)
+    box1 = _auto_bounding_box(box)
     pbc1 = _auto_pbc(pbc, box1)
     D = length(box1)
     if !all(length.(box1) .== D)

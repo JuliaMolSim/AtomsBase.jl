@@ -169,7 +169,7 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
             Atom(atprop[:species][i], atprop[:position][i]; atargs...)
         end
     end
-    cell = PeriodicCell(; cell_vectors=sysprop[:bounding_box],
+    cell = PeriodicCell(; bounding_box=sysprop[:bounding_box],
                           periodicity=sysprop[:periodicity])
 
     sysargs = Dict(k => v for (k, v) in pairs(sysprop)

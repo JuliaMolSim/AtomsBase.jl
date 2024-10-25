@@ -80,7 +80,7 @@ julia> silicon = periodic_system([:Si =>  ones(3)/8,
 function periodic_system(atoms::AbstractVector,
                          box::AUTOBOX;
                          fractional=false, kwargs...)
-    lattice = _auto_cell_vectors(box)
+    lattice = _auto_bounding_box(box)
     pbcs = fill(true, length(lattice))
     !fractional && return atomic_system(atoms, lattice, pbcs; kwargs...)
 

@@ -54,7 +54,7 @@ function FlexibleSystem(
         pbc::AUTOPBC{D};
         kwargs...
     ) where {S, D}
-    cϵll = PeriodicCell(; cell_vectors = box, periodicity = pbc)
+    cϵll = PeriodicCell(; bounding_box = box, periodicity = pbc)
     FlexibleSystem{D, S, typeof(cϵll)}(particles, cϵll, Dict(kwargs...))
 end
 
