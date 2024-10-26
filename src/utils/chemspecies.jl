@@ -40,8 +40,8 @@ ChemicalSpecies(:D)
 """
 struct ChemicalSpecies
    atomic_number::Int16    # = Z = number of protons
-   nneut::Int16            # number of neutrons
-   info::UInt32
+   n_neutrons::Int16            # number of neutrons
+   name::UInt32
 end
 
 
@@ -51,10 +51,22 @@ end
 
 Base.Broadcast.broadcastable(s::ChemicalSpecies) = Ref(s)
 
-# better to convert z -> symbol to catch special cases such as D; e.g. 
-# Should ChemicalSpecies(z) == ChemicalSpecies(z,z,0)? For H this is false.
-function ChemicalSpecies(z::Integer; kwargs...)
-    ChemicalSpecies(_chem_el_info[z].symbol; kwargs...)
+function ChemicalSpecies(asymbol::Symbol; atom_name::AbstractString="", n_neutrons::Int=-1)
+    z = haskey(_sym2z, asymbol) ? _sym2z[asymbol] : 0
+    return ChemicalSpecies(Int(z); atom_name=atom_name, n_neutrons=n_neutrons)
+end 
+
+function ChemicalSpecies(z::Integer; atom_name::AbstractString="", n_neutrons::Int=-1)
+    if length(atom_name) > 4
+        throw(ArgumentError("atom_name has to be max 4 characters"))
+    end
+    if length(atom_name) == 0
+        return ChemicalSpecies(z, n_neutrons, zero(UInt32),)
+    end
+    tmp = repeat(' ', 4 - length(atom_name)) * atom_name
+    tmp2 = SVector{4, UInt8}( tmp[1], tmp[2], tmp[3], tmp[4] )
+    name = reinterpret(reshape, UInt32, tmp2)[1]
+    return ChemicalSpecies(z, n_neutrons, name)
 end
 
 ChemicalSpecies(sym::ChemicalSpecies) = sym
@@ -62,75 +74,44 @@ ChemicalSpecies(sym::ChemicalSpecies) = sym
 ==(a::ChemicalSpecies, sym::Symbol) = 
         ((a == ChemicalSpecies(sym)) && (Symbol(a) == sym))
 
+
+function ==(cs1::ChemicalSpecies, cs2::ChemicalSpecies)
+    if cs1.atomic_number != cs2.atomic_number
+        @info "number"
+        return false
+    elseif (cs1.n_neutrons >= 0 && cs2.n_neutrons >= 0) && cs1.n_neutrons != cs2.n_neutrons
+        @info "neutrons"
+        return false
+    elseif (cs1.name != 0 && cs2.name != 0) && cs1.name != cs2.name
+        @info "name"
+        return false
+    else
+        return true
+    end
+end
+
 # -------- fast access to the periodic table 
 
-if length(PeriodicTable.elements) != maximum(el.number for el in PeriodicTable.elements)
-    error("PeriodicTable.elements is not sorted by atomic number")
-end
+const _sym2z = Dict{Symbol, UInt8}(
+    Symbol(el.symbol) => el.number for el in PeriodicTable.elements
+)
 
-if !all(el.number == i for (i, el) in enumerate(PeriodicTable.elements))
-    error("PeriodicTable.elements is not sorted by atomic number")
-end
+const _z2sym = Dict{UInt8, Symbol}(
+    el.number => Symbol(el.symbol) for el in PeriodicTable.elements
+)
 
-const _chem_el_info = [ 
-      (symbol = Symbol(PeriodicTable.elements[z].symbol), 
-       atomic_mass = PeriodicTable.elements[z].atomic_mass, ) 
-       for z in 1:length(PeriodicTable.elements)
-      ]
+const _z2mass = Dict{UInt8, typeof(PeriodicTable.elements[1].atomic_mass)}(
+    el.number => el.atomic_mass for el in PeriodicTable.elements
+)
 
-const _sym2z = Dict{Symbol, UInt8}()
-for z in 1:length(_chem_el_info)
-   _sym2z[_chem_el_info[z].symbol] = z
-end
 
-function _nneut_default(z::Integer) 
-    nplusp = round(Int, ustrip(u"u", _chem_el_info[z].atomic_mass))
-    return nplusp - z
-end
-
-function ChemicalSpecies(sym::Symbol; n_neutrons = -1, info = 0)
-    _islett(c::Char) = 'A' <= uppercase(c) <= 'Z'
-
-    # TODO - special-casing deuterium to make tests pass 
-    #        this should be handled better
-    if sym == :D 
-        return ChemicalSpecies(1, 1, info)
+function Base.Symbol(element::ChemicalSpecies)
+    tmp = element.atomic_number == 0 ? :X : _z2sym[element.atomic_number]
+    if element.n_neutrons < 0
+        return tmp
     end
-
-    # number of neutrons is explicitly specified
-    if n_neutrons != -1
-        if !( all(_islett, String(sym)) && n_neutrons >= 0)
-            throw(ArgumentError("Invalid arguments for ChemicalSpecies"))
-        end
-        Z = _sym2z[sym]
-        return ChemicalSpecies(Z, n_neutrons, info)
-    end
-
-    # number of neutrons is encoded in the symbol
-    str = String(sym)
-    elem_str = str[1:findlast(_islett, str)]
-    Z = _sym2z[Symbol(elem_str)]
-    num_str = str[findlast(_islett, str)+1:end]
-    if isempty(num_str)
-        n_neutrons = _nneut_default(Z)
-    else
-        n_neutrons = parse(Int, num_str) - Z
-    end
-    return ChemicalSpecies(Z, n_neutrons, info)
-end
-
-function Base.Symbol(element::ChemicalSpecies) 
-    str = "$(_chem_el_info[element.atomic_number].symbol)"
-    if element.nneut != _nneut_default(element.atomic_number)
-        str *= "$(element.atomic_number + element.nneut)"
-    end
-
-    # TODO: again special-casing deuterium; to be fixed. 
-    if str == "H2"
-        return :D
-    end 
-
-    return Symbol(str)
+    n = element.atomic_number + element.n_neutrons
+    return Symbol("$tmp$n")
 end
 
 
@@ -147,7 +128,14 @@ atomic_symbol(element::ChemicalSpecies) = element
 
 Base.convert(::Type{Symbol}, element::ChemicalSpecies) = Symbol(element) 
 
-mass(element::ChemicalSpecies) = _chem_el_info[element.atomic_number].atomic_mass
+function mass(element::ChemicalSpecies)
+    if element.n_neutrons < 0
+        return _z2mass[element.atomic_number]
+    end
+    # needs update for isotopes
+    return 0.0u"u"
+end
+
 
 rich_info(element::ChemicalSpecies) = PeriodicTable.elements[element.atomic_number]
 
@@ -221,3 +209,19 @@ of identifying the type of a `species` (e.g. the element for the case of an atom
 this may be `:D` while `atomic_number` is still `1`.
 """
 atomic_number(sys::AbstractSystem, index) = atomic_number.(species(sys, index))
+
+
+atomic_name(at) = atomic_symbol(at)
+
+atomic_name(sys::AbstractSystem, index) = atomic_name.(species(sys, index))
+
+function atomic_name(cs::ChemicalSpecies)
+   if cs.name == 0
+       return atomic_symbol(cs)
+   else
+       # filter first empty space characters
+       as_characters = Char.( reinterpret(SVector{4, UInt8}, cs.name) )
+       tmp = String( filter( x -> ! isspace(x), as_characters ) )
+       return Symbol( tmp )
+   end
+end
