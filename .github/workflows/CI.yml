@@ -20,11 +20,11 @@ jobs:
         version:
           - '1.9'
           - '1.10'
-          - 'latest'
+          - 'nightly'
         group:
           - Core
           - AtomsBaseTesting
-    continue-on-error: ${{ matrix.version == 'latest' }}
+    continue-on-error: ${{ matrix.version == 'nightly' }}
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
