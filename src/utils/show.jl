@@ -2,12 +2,12 @@ using Printf
 using Preferences
 
 """
-Configures the printing behaviour of `show_system`, which is invoked when a rich `text/htmal`
+Configures the printing behaviour of `show_system`, which is invoked when a rich `text/plain`
 display of an `AbstractSystem` is requested. This is for example the case in a Julia REPL.
 The following options can be configured:
 
-- `max_species_list`: Maximal number of species in a system to trigger a listing of every species
-   along with its Cartesian positions. Default 10
+- `max_species_list`: Maximal number of species in a system (`length(system)`) to trigger a
+   listing of every species along with its Cartesian positions. Default 10
 - `max_species_visualize_ascii`: Maximal number of species in a system to trigger a representation
    in the form of an ascii cartoon using `visualize_ascii`. Default 0, i.e. diseabled.
 """
