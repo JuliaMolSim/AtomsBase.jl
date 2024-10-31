@@ -2,7 +2,7 @@ using Printf
 using Preferences
 
 """
-Configures the default printing behaviour of `show_system`, which is invoked when a rich `text/htmal`
+Configures the printing behaviour of `show_system`, which is invoked when a rich `text/htmal`
 display of an `AbstractSystem` is requested. This is for example the case in a Julia REPL.
 The following options can be configured:
 
@@ -13,13 +13,18 @@ The following options can be configured:
 """
 function set_show_preferences!(; max_species_list=nothing, max_species_visualize_ascii=nothing)
     if !isnothing(max_species_list)
-        @set_preference!("max_species_list", max_species_list)
+        @set_preferences!("max_species_list" => max_species_list)
     end
     if !isnothing(max_species_visualize_ascii)
-        @set_preference!("max_species_visualize_ascii", max_species_visualize_ascii)
+        @set_preferences!("max_species_visualize_ascii" => max_species_visualize_ascii)
     end
     show_preferences()
 end
+
+"""
+Display the current printing behaviour of `show_system`.
+See [`set_show_preferences!](@ref) for more details on the keys.
+"""
 function show_preferences()
     (; max_species_list=@load_preference("max_species_list", 10),
        max_species_visualize_ascii=@load_preference("max_species_visualize_ascii", 0))
@@ -74,7 +79,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
         @printf io "    %-17s : %s\n" string(k) string(v)
     end
-    if length(system) < show_preferences().max_species_list
+    if length(system) ≤ show_preferences().max_species_list
         extra_line && println(io)
         for atom in system
             println(io, "    ", atom)
@@ -82,7 +87,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
     end
 
-    if length(system) < show_preferences().max_species_visualize_ascii
+    if length(system) ≤ show_preferences().max_species_visualize_ascii
         ascii = visualize_ascii(system)
         if !isempty(ascii)
             extra_line && println(io)
