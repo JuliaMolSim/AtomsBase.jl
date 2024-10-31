@@ -1,4 +1,31 @@
 using Printf
+using Preferences
+
+"""
+Configures the default printing behaviour of `show_system`, which is invoked when a rich `text/htmal`
+display of an `AbstractSystem` is requested. This is for example the case in a Julia REPL.
+The following options can be configured:
+
+- `max_species_list`: Maximal number of species in a system to trigger a listing of every species
+   along with its Cartesian positions. Default 10
+- `max_species_visualize_ascii`: Maximal number of species in a system to trigger a representation
+   in the form of an ascii cartoon using `visualize_ascii`. Default 0, i.e. diseabled.
+"""
+function set_show_preferences!(; max_species_list=nothing, max_species_visualize_ascii=nothing)
+    if !isnothing(max_species_list)
+        @set_preference!("max_species_list", max_species_list)
+    end
+    if !isnothing(max_species_visualize_ascii)
+        @set_preference!("max_species_visualize_ascii", max_species_visualize_ascii)
+    end
+    show_preferences()
+end
+function show_preferences()
+    (; max_species_list=@load_preference("max_species_list", 10),
+       max_species_visualize_ascii=@load_preference("max_species_visualize_ascii", 0))
+end
+
+
 
 """
 Suggested function to print AbstractSystem objects to screen
@@ -26,7 +53,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
     println(io, "):")
 
     extra_line = false
-    if any(pbc) 
+    if any(pbc)
         extra_line = true
         box = cell_vectors(system)
         bunit = unit(eltype(first(cell_vectors(system))))
@@ -47,7 +74,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
         @printf io "    %-17s : %s\n" string(k) string(v)
     end
-    if length(system) < 10
+    if length(system) < show_preferences().max_species_list
         extra_line && println(io)
         for atom in system
             println(io, "    ", atom)
@@ -55,8 +82,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
     end
 
-    show_ascii = length(system) > @load_preference("system_visualize_ascii_max_atoms", 10)
-    if show_ascii
+    if length(system) < show_preferences().max_species_visualize_ascii
         ascii = visualize_ascii(system)
         if !isempty(ascii)
             extra_line && println(io)
