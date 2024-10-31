@@ -18,14 +18,13 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6'
           - '1.9'
           - '1.10'
-          - 'nightly'
+          - 'latest'
         group:
           - Core
           - AtomsBaseTesting
-    continue-on-error: ${{ matrix.version == 'nightly' }}
+    continue-on-error: ${{ matrix.version == 'latest' }}
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
