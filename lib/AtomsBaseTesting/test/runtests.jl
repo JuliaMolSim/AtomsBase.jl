@@ -109,5 +109,17 @@ include("testmacros.jl")
         test_approx_eq(hydrogen, hydrogen)
     end
 
+    @testset "Identical systems with just different units" begin
+        box = 10.26 / 2 * [[0, 0, 1], [1, 0, 1], [1, 1, 0]]u"bohr"
+        box_A = [[uconvert.(u"Å", i[j]) for j in 1:3] for i in box]
+        silicon = AtomsBase.periodic_system([:Si =>  ones(3)/8,
+                                   :Si => -ones(3)/8],
+                                   box, fractional=true)
+        silicon_A = AtomsBase.periodic_system([:Si =>  ones(3)/8,
+                                   :Si => -ones(3)/8],
+                                   box_A, fractional=true)
+        @testpass AtomsBaseTesting.test_approx_eq(silicon, silicon_A)
+    end
+
     # TODO More tests would be useful
 end

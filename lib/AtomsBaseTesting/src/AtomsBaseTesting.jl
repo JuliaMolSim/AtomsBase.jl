@@ -72,7 +72,9 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
     end
 
     # Test some things on cell objects
-    @test typeof(cell(s))       == typeof(cell(t))
+    if cell(s) isa PeriodicCell
+        @test maximum(map(rnorm, bounding_box(cell(s)), bounding_box(cell(t)))) < rtol
+    end
     @test periodicity(cell(s))  == periodicity(cell(t))
     @test n_dimensions(cell(s)) == n_dimensions(cell(t))
 
