@@ -24,7 +24,7 @@ end
     s3 = ChemicalSpecies(:D) 
     @test atomic_number(s3) == 1
     @test element_symbol(s3) == :H
-    @test s3.nneut == 1
+    @test s3.n_neutrons == 1
 end 
 
 @testset "Chemical formula with system" begin

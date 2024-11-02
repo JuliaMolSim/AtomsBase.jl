@@ -55,13 +55,26 @@ end
 Base.Broadcast.broadcastable(s::ChemicalSpecies) = Ref(s)
 
 function ChemicalSpecies(asymbol::Symbol; atom_name::AbstractString="", n_neutrons::Int=-1)
+    str_symbol = String(asymbol)
+    tmp = 0
+    if length(str_symbol) > 1 && isnumeric(str_symbol[end])
+        # we exclude the case where n_neutrons > 99
+        if  length(str_symbol) > 2 && isnumeric(str_symbol[end])
+            tmp = parse(Int, str_symbol[end-1:end])
+            str_symbol = str_symbol[1:end-2]
+        else
+            tmp = parse(Int, str_symbol[end])
+            str_symbol = str_symbol[1:end-1]
+        end
+    end
+    asymbol = Symbol(str_symbol)
     z = haskey(_sym2z, asymbol) ? _sym2z[asymbol] : 0
+    n_neutrons = tmp == 0 ? n_neutrons : tmp - z
     if asymbol in [:D, :T]
         z = 1
         n_neutrons = asymbol == :D ? 1 : 2
     end
-    aname = z == 0 ? String(asymbol) : atom_name
-    return ChemicalSpecies(Int(z); atom_name=aname, n_neutrons=n_neutrons)
+    return ChemicalSpecies(Int(z); atom_name=atom_name, n_neutrons=n_neutrons)
 end 
 
 function ChemicalSpecies(z::Integer; atom_name::AbstractString="", n_neutrons::Int=-1)
@@ -111,12 +124,12 @@ const _z2mass = Dict{UInt8, typeof(PeriodicTable.elements[1].atomic_mass)}(
 
 
 function Base.Symbol(element::ChemicalSpecies)
-    if element.name != 0
-        # filter first empty space characters
-        as_characters = Char.( reinterpret(SVector{4, UInt8}, element.name) )
-        tmp = String( filter( x -> ! isspace(x), as_characters ) )
-        return Symbol( tmp )
-    end
+    #if element.name != 0
+    #    # filter first empty space characters
+    #    as_characters = Char.( reinterpret(SVector{4, UInt8}, element.name) )
+    #    tmp = String( filter( x -> ! isspace(x), as_characters ) )
+    #    return Symbol( tmp )
+    #end
     tmp = element.atomic_number == 0 ? :X : _z2sym[element.atomic_number]
     if element.n_neutrons < 0
         return tmp
