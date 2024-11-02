@@ -56,7 +56,12 @@ Base.Broadcast.broadcastable(s::ChemicalSpecies) = Ref(s)
 
 function ChemicalSpecies(asymbol::Symbol; atom_name::AbstractString="", n_neutrons::Int=-1)
     z = haskey(_sym2z, asymbol) ? _sym2z[asymbol] : 0
-    return ChemicalSpecies(Int(z); atom_name=atom_name, n_neutrons=n_neutrons)
+    if asymbol in [:D, :T]
+        z = 1
+        n_neutrons = asymbol == :D ? 1 : 2
+    end
+    aname = z == 0 ? String(asymbol) : atom_name
+    return ChemicalSpecies(Int(z); atom_name=aname, n_neutrons=n_neutrons)
 end 
 
 function ChemicalSpecies(z::Integer; atom_name::AbstractString="", n_neutrons::Int=-1)
@@ -80,13 +85,10 @@ ChemicalSpecies(sym::ChemicalSpecies) = sym
 
 function ==(cs1::ChemicalSpecies, cs2::ChemicalSpecies)
     if cs1.atomic_number != cs2.atomic_number
-        @info "number"
         return false
     elseif (cs1.n_neutrons >= 0 && cs2.n_neutrons >= 0) && cs1.n_neutrons != cs2.n_neutrons
-        @info "neutrons"
         return false
     elseif (cs1.name != 0 && cs2.name != 0) && cs1.name != cs2.name
-        @info "name"
         return false
     else
         return true
@@ -109,9 +111,21 @@ const _z2mass = Dict{UInt8, typeof(PeriodicTable.elements[1].atomic_mass)}(
 
 
 function Base.Symbol(element::ChemicalSpecies)
+    if element.name != 0
+        # filter first empty space characters
+        as_characters = Char.( reinterpret(SVector{4, UInt8}, element.name) )
+        tmp = String( filter( x -> ! isspace(x), as_characters ) )
+        return Symbol( tmp )
+    end
     tmp = element.atomic_number == 0 ? :X : _z2sym[element.atomic_number]
     if element.n_neutrons < 0
         return tmp
+    end
+    if element.atomic_number == 1 && element.n_neutrons == 1
+        return :D
+    end
+    if element.atomic_number == 1 && element.n_neutrons == 2
+        return :T
     end
     n = element.atomic_number + element.n_neutrons
     return Symbol("$tmp$n")
@@ -219,19 +233,3 @@ of identifying the type of a `species` (e.g. the element for the case of an atom
 this may be `:D` while `atomic_number` is still `1`.
 """
 atomic_number(sys::AbstractSystem, index) = atomic_number.(species(sys, index))
-
-
-atomic_name(at) = atomic_symbol(at)
-
-atomic_name(sys::AbstractSystem, index) = atomic_name.(species(sys, index))
-
-function atomic_name(cs::ChemicalSpecies)
-   if cs.name == 0
-       return atomic_symbol(cs)
-   else
-       # filter first empty space characters
-       as_characters = Char.( reinterpret(SVector{4, UInt8}, cs.name) )
-       tmp = String( filter( x -> ! isspace(x), as_characters ) )
-       return Symbol( tmp )
-   end
-end
