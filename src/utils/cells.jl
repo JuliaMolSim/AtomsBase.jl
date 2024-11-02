@@ -50,9 +50,7 @@ n_dimensions(::PeriodicCell{D}) where {D} = D
 
 # kwarg constructor for PeriodicCell
 
-function PeriodicCell(; cell_vectors=nothing, periodicity, cell_vectors=nothing)
-    !isnothing(cell_vectors) && @warn "cell_vectors kwarg is deprecated and will be removed"
-    cell_vectors = something(cell_vectors, cell_vectors)
+function PeriodicCell(; cell_vectors=nothing, periodicity)
     PeriodicCell(_auto_cell_vectors(cell_vectors),
                  _auto_pbc(periodicity, cell_vectors))
 end
