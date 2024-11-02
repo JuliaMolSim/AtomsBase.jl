@@ -6,17 +6,18 @@ Configures the printing behaviour of `show_system`, which is invoked when a rich
 display of an `AbstractSystem` is requested. This is for example the case in a Julia REPL.
 The following options can be configured:
 
-- `max_species_list`: Maximal number of species in a system (`length(system)`) to trigger a
-   listing of every species along with its Cartesian positions. Default 10
-- `max_species_visualize_ascii`: Maximal number of species in a system to trigger a representation
-   in the form of an ascii cartoon using `visualize_ascii`. Default 0, i.e. diseabled.
+- `max_particles_list`: Maximal number of particles in a system until `show_system`
+  includes a listing of every particle. Default: 10
+- `max_particles_visualize_ascii`: Maximal number of particles in a system
+  until `show_system` includes a representation of the system in the form of
+  an ascii cartoon using `visualize_ascii`. Default 0, i.e. disabled.
 """
-function set_show_preferences!(; max_species_list=nothing, max_species_visualize_ascii=nothing)
-    if !isnothing(max_species_list)
-        @set_preferences!("max_species_list" => max_species_list)
+function set_show_preferences!(; max_particles_list=nothing, max_particles_visualize_ascii=nothing)
+    if !isnothing(max_particles_list)
+        @set_preferences!("max_particles_list" => max_particles_list)
     end
-    if !isnothing(max_species_visualize_ascii)
-        @set_preferences!("max_species_visualize_ascii" => max_species_visualize_ascii)
+    if !isnothing(max_particles_visualize_ascii)
+        @set_preferences!("max_particles_visualize_ascii" => max_particles_visualize_ascii)
     end
     show_preferences()
 end
@@ -26,11 +27,9 @@ Display the current printing behaviour of `show_system`.
 See [`set_show_preferences!](@ref) for more details on the keys.
 """
 function show_preferences()
-    (; max_species_list=@load_preference("max_species_list", 10),
-       max_species_visualize_ascii=@load_preference("max_species_visualize_ascii", 0))
+    (; max_particles_list=@load_preference("max_particles_list", 10),
+       max_particles_visualize_ascii=@load_preference("max_particles_visualize_ascii", 0))
 end
-
-
 
 """
 Suggested function to print AbstractSystem objects to screen
@@ -79,7 +78,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
         @printf io "    %-17s : %s\n" string(k) string(v)
     end
-    if length(system) ≤ show_preferences().max_species_list
+    if length(system) ≤ show_preferences().max_particles_list
         extra_line && println(io)
         for atom in system
             println(io, "    ", atom)
@@ -87,7 +86,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
     end
 
-    if length(system) ≤ show_preferences().max_species_visualize_ascii
+    if length(system) ≤ show_preferences().max_particles_visualize_ascii
         ascii = visualize_ascii(system)
         if !isempty(ascii)
             extra_line && println(io)
