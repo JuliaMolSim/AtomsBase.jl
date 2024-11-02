@@ -15,7 +15,8 @@ export bounding_box,
        atomic_number,
        atomic_symbol,
        atomkeys,
-       hasatomkey
+       hasatomkey,
+       atomic_name
 
 
 #

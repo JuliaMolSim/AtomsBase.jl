@@ -16,7 +16,10 @@ include("isotope_masses.jl")
 
 """
 Encodes a chemical species by wrapping an integer that represents the atomic 
-number, the number of protons, and additional unspecified information as a `UInt32`. 
+number, the number of protons, and additional name as max 4 characters.
+
+The name variable can be used as atom name in PDB format or
+some other way to mark same kind of atoms from one another.
 
 Constructors for standard chemical elements
 ```julia
@@ -38,8 +41,39 @@ ChemicalSpecies(:C; n_neutrons = 7)
 ChemicalSpecies(6; n_neutrons = 7)
 ChemicalSpecies(:C13)
 # deuterium
-ChemicalSpecies(:D) 
+ChemicalSpecies(:D)
 ```
+
+Constructors for names
+```julia
+ChemicalSpecies(:C; atomic_name=:MyC)
+ChemicalSpecies(:C13; atomic_name=:MyC)
+```
+
+Comparisons with different isotopes and names
+```julia
+# true
+ChemicalSpecies(:C13) == ChemicalSpecies(:C)
+
+# false
+ChemicalSpecies(:C12) == ChemicalSpecies(:C13)
+
+# true
+ChemicalSpecies(:C; atomic_name=:MyC) == ChemicalSpecies(:C)
+
+# true
+ChemicalSpecies(:C12; atomic_name=:MyC) == ChemicalSpecies(:C12)
+
+# false
+ChemicalSpecies(:C; atomic_name=:MyC) == ChemicalSpecies(:C12)
+
+# true
+ChemicalSpecies(:C; atomic_name=:MyC) == ChemicalSpecies(:C12; atomic_name=:MyC)
+
+# true
+ChemicalSpecies(:C12; atomic_name=:MyC) == ChemicalSpecies(:C)
+```
+
 """
 struct ChemicalSpecies
    atomic_number::Int16    # = Z = number of protons
@@ -54,7 +88,7 @@ end
 
 Base.Broadcast.broadcastable(s::ChemicalSpecies) = Ref(s)
 
-function ChemicalSpecies(asymbol::Symbol; atom_name::AbstractString="", n_neutrons::Int=-1)
+function ChemicalSpecies(asymbol::Symbol; atomic_name::Symbol=Symbol(""), n_neutrons::Int=-1)
     str_symbol = String(asymbol)
     tmp = 0
     if length(str_symbol) > 1 && isnumeric(str_symbol[end])
@@ -74,10 +108,11 @@ function ChemicalSpecies(asymbol::Symbol; atom_name::AbstractString="", n_neutro
         z = 1
         n_neutrons = asymbol == :D ? 1 : 2
     end
-    return ChemicalSpecies(Int(z); atom_name=atom_name, n_neutrons=n_neutrons)
+    return ChemicalSpecies(Int(z); atomic_name=atomic_name, n_neutrons=n_neutrons)
 end 
 
-function ChemicalSpecies(z::Integer; atom_name::AbstractString="", n_neutrons::Int=-1)
+function ChemicalSpecies(z::Integer; atomic_name::Symbol=Symbol(""), n_neutrons::Int=-1)
+    atom_name = String(atomic_name)
     if length(atom_name) > 4
         throw(ArgumentError("atom_name has to be max 4 characters"))
     end
@@ -103,6 +138,8 @@ function ==(cs1::ChemicalSpecies, cs2::ChemicalSpecies)
         return false
     elseif (cs1.name != 0 && cs2.name != 0) && cs1.name != cs2.name
         return false
+    elseif cs1.name != cs2.name && cs1.n_neutrons != cs2.n_neutrons
+        return false
     else
         return true
     end
@@ -124,12 +161,6 @@ const _z2mass = Dict{UInt8, typeof(PeriodicTable.elements[1].atomic_mass)}(
 
 
 function Base.Symbol(element::ChemicalSpecies)
-    #if element.name != 0
-    #    # filter first empty space characters
-    #    as_characters = Char.( reinterpret(SVector{4, UInt8}, element.name) )
-    #    tmp = String( filter( x -> ! isspace(x), as_characters ) )
-    #    return Symbol( tmp )
-    #end
     tmp = element.atomic_number == 0 ? :X : _z2sym[element.atomic_number]
     if element.n_neutrons < 0
         return tmp
@@ -246,3 +277,29 @@ of identifying the type of a `species` (e.g. the element for the case of an atom
 this may be `:D` while `atomic_number` is still `1`.
 """
 atomic_number(sys::AbstractSystem, index) = atomic_number.(species(sys, index))
+
+
+
+
+"""
+    atomic_name(species)
+    atomic_name(sys::AbstractSystem, i)
+
+Return atomic name (`Symbol`) for `species` or vector of names for `sys`.
+
+Defaults to [`atomic_symbol`](@ref), if `name` field is zero or not defined.
+"""
+function atomic_name(cs::ChemicalSpecies)
+   if cs.name == 0
+       return atomic_symbol(cs)
+   else
+       # filter first empty space characters
+       as_characters = Char.( reinterpret(SVector{4, UInt8}, cs.name) )
+       tmp = String( filter( x -> ! isspace(x), as_characters ) )
+       return Symbol( tmp )
+   end
+end
+
+atomic_name(at) = atomic_symbol(at)
+
+atomic_name(sys::AbstractSystem, index) = atomic_name.(species(sys, index))
