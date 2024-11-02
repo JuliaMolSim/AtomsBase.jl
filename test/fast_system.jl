@@ -15,11 +15,11 @@ using StaticArrays
     @test size(system)   == (2, )
     @test mass(system, :) == [12.011, 12.011]u"u"
     @test periodicity(system) == pbcs
-    @test bounding_box(system) == box
+    @test cell_vectors(system) == box
     @test system[:periodicity] == pbcs
-    @test system[:bounding_box] == box
+    @test system[:cell_vectors] == box
     @test element(system[1]) == element(:C)
-    @test keys(system) == (:bounding_box, :periodicity)
+    @test keys(system) == (:cell_vectors, :periodicity)
     @test haskey(system, :periodicity)
     @test system[:periodicity][1] == true
     @test atomkeys(system) == (:position, :species, :mass)
@@ -42,7 +42,7 @@ using StaticArrays
     @test !haskey(system[1], :abc)
     @test get(system[1], :dagger, 3) == 3
 
-    @test collect(pairs(system)) == [(:bounding_box => box), (:periodicity => pbcs)]
+    @test collect(pairs(system)) == [(:cell_vectors => box), (:periodicity => pbcs)]
     @test collect(pairs(system[1])) == [
         :position => position(atoms[1]),
         :species => ChemicalSpecies(:C),
@@ -52,7 +52,7 @@ using StaticArrays
     # check type stability
     # TODO: this test needs to be fixed, right now it just tests equality and not 
     #       type stability 
-    # get_b_vector(syst) = bounding_box(syst)[2]
+    # get_b_vector(syst) = cell_vectors(syst)[2]
     # @test @inferred(get_b_vector(system)) == SVector{3}([0.0, 1.0, 0.0]u"m")
     # @test @inferred(position(system, 1)) == SVector{3}([0.25, 0.25, 0.25]u"m")
     # @test ismissing(@inferred(velocity(system, 2)))

@@ -28,7 +28,7 @@ using PeriodicTable
         @test length(flexible) == 2
         @test size(flexible)   == (2, )
 
-        @test bounding_box(flexible) == ([1, 0, 0]u"m", [0, 1, 0]u"m", [0, 0, 1]u"m")
+        @test cell_vectors(flexible) == ([1, 0, 0]u"m", [0, 1, 0]u"m", [0, 0, 1]u"m")
         @test periodicity(flexible) == (true, true, false)
         @test n_dimensions(flexible) == 3
         @test position(flexible, :) == [[0.25, 0.25, 0.25], [0.75, 0.75, 0.75]]u"m"

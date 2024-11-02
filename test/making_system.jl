@@ -32,9 +32,9 @@ using Test
         @test periodicity(system) == (true, true, true)
         @test cell(system) isa PeriodicCell
         @test position(system, :) == [[0.0, -0.625, 0.0], [1.25, 0.0, 0.0], [0.0, 0.0, 0.0]]u"Å"
-        @test bounding_box(system)[1] == box[1]
-        @test bounding_box(system)[2] == box[2]
-        @test bounding_box(system)[3] == box[3]
+        @test cell_vectors(system)[1] == box[1]
+        @test cell_vectors(system)[2] == box[2]
+        @test cell_vectors(system)[3] == box[3]
         @test system[:extradata] == 48
         @test system[:dic]["extradata_dic"] == "49"
     end

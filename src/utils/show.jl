@@ -11,9 +11,9 @@ function show_system(io::IO, system::AbstractSystem{D}) where {D}
 
     if !any(pbc)
         box_str = ["[" * join(ustrip.(bvector), ", ") * "]"
-                   for bvector in bounding_box(system)]
-        bunit = unit(eltype(first(bounding_box(system))))
-        print(io, ", bounding_box = [", join(box_str, ", "), "]u\"$bunit\"")
+                   for bvector in cell_vectors(system)]
+        bunit = unit(eltype(first(cell_vectors(system))))
+        print(io, ", cell_vectors = [", join(box_str, ", "), "]u\"$bunit\"")
     end
     print(io, ")")
 end
@@ -28,11 +28,11 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
     extra_line = false
     if any(pbc) 
         extra_line = true
-        box = bounding_box(system)
-        bunit = unit(eltype(first(bounding_box(system))))
+        box = cell_vectors(system)
+        bunit = unit(eltype(first(cell_vectors(system))))
         for (i, bvector) in enumerate(box)
             if i == 1
-                @printf io "    %-17s : [" "bounding_box"
+                @printf io "    %-17s : [" "cell_vectors"
             else
                 print(io, " "^25)
             end
@@ -43,7 +43,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
     end
 
     for (k, v) in pairs(system)
-        k in (:bounding_box, :periodicity) && continue
+        k in (:cell_vectors, :periodicity) && continue
         extra_line = true
         @printf io "    %-17s : %s\n" string(k) string(v)
     end

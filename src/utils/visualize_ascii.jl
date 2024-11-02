@@ -13,10 +13,10 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
     # See output.py in the GPAW sources
 
     # Unit cell matrix (vectors column-by-column) and plotting box (xyz)
-    cell  = austrip.(reduce(hcat, bounding_box(system)))
+    cell  = austrip.(reduce(hcat, cell_vectors(system)))
     box   = Vector(diag(cell))
     shift = zero(box)
-    plot_box = D > 1
+    plot_cell = D > 1
 
     is_right_handed = det(cell) > 0
     is_right_handed || return ""
@@ -31,7 +31,7 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
         centre_atoms = austrip.(sum(position(system, :)) / length(system))
         shift = box / 2 - centre_atoms
 
-        plot_box = false
+        plot_cell = false
     end
 
     # If one of the box coordinates is negative
@@ -71,7 +71,7 @@ function visualize_ascii(system::AbstractSystem{D}) where {D}
     pos2d = [1 .+ round.(Int, projector * p .+ eps(Float64)) for p in normpos]
 
     # Draw box onto canvas
-    if plot_box
+    if plot_cell
         # 7 Corners:
         canvas[2      + sy, 1 + sy     ] = '.'
         canvas[2 + sx + sy, 1 + sy     ] = '.'

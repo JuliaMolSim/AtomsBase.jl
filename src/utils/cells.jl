@@ -17,7 +17,7 @@ struct IsolatedCell{D, T} end
 IsolatedCell(D, T = typeof(1.0 * u"bohr")) =
       IsolatedCell{D, T}()
 
-bounding_box(cell::IsolatedCell{D, T}) where {D, T} =
+cell_vectors(cell::IsolatedCell{D, T}) where {D, T} =
       ntuple(i -> SVector(ntuple(j -> i == j ? T(Inf) : zero(T), D)...), D)
 
 periodicity(cell::IsolatedCell{D}) where {D} =
@@ -38,11 +38,11 @@ with choice of open or periodic boundary condition in each cell
 vector direction.
 """
 struct PeriodicCell{D, T}
-   bounding_box::NTuple{D, SVector{D, T}}
+   cell_vectors::NTuple{D, SVector{D, T}}
    periodicity::NTuple{D, Bool}
 end
 
-bounding_box(cell::PeriodicCell) = cell.bounding_box
+cell_vectors(cell::PeriodicCell) = cell.cell_vectors
 
 periodicity(cell::PeriodicCell) = cell.periodicity
 
@@ -50,24 +50,24 @@ n_dimensions(::PeriodicCell{D}) where {D} = D
 
 # kwarg constructor for PeriodicCell
 
-function PeriodicCell(; bounding_box=nothing, periodicity, cell_vectors=nothing)
+function PeriodicCell(; cell_vectors=nothing, periodicity, cell_vectors=nothing)
     !isnothing(cell_vectors) && @warn "cell_vectors kwarg is deprecated and will be removed"
-    bounding_box = something(cell_vectors, bounding_box)
-    PeriodicCell(_auto_bounding_box(bounding_box),
-                 _auto_pbc(periodicity, bounding_box))
+    cell_vectors = something(cell_vectors, cell_vectors)
+    PeriodicCell(_auto_cell_vectors(cell_vectors),
+                 _auto_pbc(periodicity, cell_vectors))
 end
 
 PeriodicCell(cl::Union{AbstractSystem, PeriodicCell}) =
-         PeriodicCell(; bounding_box = bounding_box(cl),
+         PeriodicCell(; cell_vectors = cell_vectors(cl),
                         periodicity = periodicity(cl) )
 
 # ---------------------- pretty printing
 
 function Base.show(io::IO, cϵll::PeriodicCell{D}) where {D}
-   u = unit(first(cϵll.bounding_box[1][1]))
+   u = unit(first(cϵll.cell_vectors[1][1]))
    print(io, "PeriodicCell(", prod(p -> p ? "T" : "F", periodicity(cϵll)), ", ")
    for d = 1:D 
-      print(io, ustrip.(cϵll.bounding_box[d]), u)
+      print(io, ustrip.(cϵll.cell_vectors[d]), u)
       if d < D; print(io, ", "); end 
    end 
    print(")")
@@ -80,8 +80,8 @@ end
 
 # allowed input types that convert automatically to the 
 # intended format for cell vectors,  NTuple{D, SVector{D, T}}
-const AUTOBOX = Union{NTuple{D, <: AbstractVector}, 
-                      AbstractVector{<: AbstractVector}} where {D}
+const AUTOCELL = Union{NTuple{D, <: AbstractVector}, 
+                       AbstractVector{<: AbstractVector}} where {D}
 
 # allowed input types that convert automatically to the 
 # intended format for pbc,  NTuple{D, Bool}
@@ -91,7 +91,7 @@ const AUTOPBC = Union{Bool,
 
 # different ways to construct cell vectors
 
-function _auto_bounding_box(vecs::Tuple)
+function _auto_cell_vectors(vecs::Tuple)
    D = length(vecs)
    if !all(length.(vecs) .== D)
       throw(ArgumentError("All cell vectors must have the same length"))
@@ -99,8 +99,8 @@ function _auto_bounding_box(vecs::Tuple)
    return ntuple(i -> SVector{D}(vecs[i]), D)
 end
 
-_auto_bounding_box(vecs::AbstractVector{<: AbstractVector}) =
-      _auto_bounding_box(tuple(vecs...))
+_auto_cell_vectors(vecs::AbstractVector{<: AbstractVector}) =
+      _auto_cell_vectors(tuple(vecs...))
 
 # .... could consider allowing construction from a matrix but
 #      that introduced an ambiguity (transpose?) that we may
@@ -111,18 +111,11 @@ _auto_bounding_box(vecs::AbstractVector{<: AbstractVector}) =
 _auto_pbc1(pbc::Bool)  = pbc
 _auto_pbc1(::Nothing)  = false
 
-_auto_pbc(bc::Tuple, bounding_box = nothing) =
+_auto_pbc(bc::Tuple, cell_vectors = nothing) =
       map(_auto_pbc1, bc)
 
-_auto_pbc(bc::AbstractVector, bounding_box = nothing) =
+_auto_pbc(bc::AbstractVector, cell_vectors = nothing) =
       _auto_pbc(tuple(bc...))
 
-_auto_pbc(bc::Union{Bool, Nothing}, bounding_box) =
-      ntuple(i -> _auto_pbc1(bc), length(bounding_box))
-
-
-# infinite box could use Inf for thebounding box vectors e.g. as follows
-# NOTE: this used to be exported, but I don't see the rationale for this
-
-_infinite_box(::Val{D}, T) where {D} =
-      ntuple(i -> SVector(ntuple(j -> (i == j) ? T(Inf) : zero(T), D)...), D)
+_auto_pbc(bc::Union{Bool, Nothing}, cell_vectors) =
+      ntuple(i -> _auto_pbc1(bc), length(cell_vectors))

@@ -29,14 +29,14 @@ using Test
     @test system[1:2, :mass]  == mass.([ChemicalSpecies(:Si), ChemicalSpecies(:C)])
     @test system[[1, 3], :mass]  == mass.([ChemicalSpecies(:Si), ChemicalSpecies(:H)])
     @test system[[false, true, true], :species] == ChemicalSpecies.([:C, :H])
-    @test system[:bounding_box] == box
+    @test system[:cell_vectors] == box
     @test atomkeys(system) == (:position, :velocity, :species, :mass)
     @test hasatomkey(system, :mass)
     @test !hasatomkey(system, :blubber)
     @test get(system, :blubber, :adidi) == :adidi
 
     @test collect(pairs(system)) == [
-        :bounding_box => box, :periodicity => pbcs,
+        :cell_vectors => box, :periodicity => pbcs,
         :extradata => 45, :dic => dic
     ]
     @test collect(pairs(system[1])) == [

@@ -16,8 +16,8 @@ cell(sys::FlexibleSystem) = sys.cell
 
 # System property access
 function Base.getindex(system::FlexibleSystem, x::Symbol)
-    if x === :bounding_box
-        bounding_box(system)
+    if x === :cell_vectors
+        cell_vectors(system)
     elseif x === :periodicity
         periodicity(system)
     else
@@ -26,10 +26,10 @@ function Base.getindex(system::FlexibleSystem, x::Symbol)
 end
 
 function Base.haskey(system::FlexibleSystem, x::Symbol)
-    x in (:bounding_box, :periodicity) || haskey(system.data, x)
+    x in (:cell_vectors, :periodicity) || haskey(system.data, x)
 end
 
-Base.keys(system::FlexibleSystem) = (:bounding_box, :periodicity, keys(system.data)...)
+Base.keys(system::FlexibleSystem) = (:cell_vectors, :periodicity, keys(system.data)...)
 
 # Atom and atom property access
 Base.getindex(system::FlexibleSystem, i::Integer) = system.particles[i]
@@ -41,8 +41,8 @@ Base.getindex(system::FlexibleSystem, ::Colon, x::Symbol) = [at[x] for at in sys
 
 
 """
-    FlexibleSystem(particles, bounding_box, periodicity; kwargs...)
-    FlexibleSystem(particles; bounding_box, periodicity, kwargs...)
+    FlexibleSystem(particles, cell_vectors, periodicity; kwargs...)
+    FlexibleSystem(particles; cell_vectors, periodicity, kwargs...)
     FlexibleSystem(particles, cell; kwargs...)
 
 Construct a flexible system, a versatile data structure for atomistic systems,
@@ -50,16 +50,16 @@ which puts an emphasis on flexibility rather than speed.
 """
 function FlexibleSystem(
         particles::AbstractVector{S},
-        box::AUTOBOX{D},
-        pbc::AUTOPBC{D};
+        cell_vectors::AUTOCELL{D},
+        periodicity::AUTOPBC{D};
         kwargs...
     ) where {S, D}
-    cϵll = PeriodicCell(; bounding_box = box, periodicity = pbc)
+    cϵll = PeriodicCell(; cell_vectors, periodicity)
     FlexibleSystem{D, S, typeof(cϵll)}(particles, cϵll, Dict(kwargs...))
 end
 
-function FlexibleSystem(particles; bounding_box, periodicity, kwargs...)
-    FlexibleSystem(particles, bounding_box, periodicity; kwargs...)
+function FlexibleSystem(particles; cell_vectors, periodicity, kwargs...)
+    FlexibleSystem(particles, cell_vectors, periodicity; kwargs...)
 end
 
 function FlexibleSystem(particles::AbstractVector, cell; kwargs...) 
@@ -88,13 +88,13 @@ Update constructor. Construct a new system where one or more properties are chan
 which are given as `kwargs`. A subtype of `AbstractSystem` is returned, by default
 a `FlexibleSystem`, but depending on the type of the passed system this might differ.
 
-Supported `kwargs` include `particles`, `atoms`, `bounding_box` and `periodicity`
+Supported `kwargs` include `particles`, `atoms`, `cell_vectors` and `periodicity`
 as well as user-specific custom properties.
 
 # Examples
 Change the bounding box and the atoms of the passed system
 ```julia-repl
-julia> AbstractSystem(system; bounding_box= ..., atoms = ... )
+julia> AbstractSystem(system; cell_vectors= ..., atoms = ... )
 ```
 """
 AbstractSystem(system::AbstractSystem; kwargs...) = FlexibleSystem(system; kwargs...)

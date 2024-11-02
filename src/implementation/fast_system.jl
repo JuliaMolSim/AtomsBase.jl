@@ -16,10 +16,10 @@ struct FastSystem{D, TCELL, L <: Unitful.Length, M <: Unitful.Mass, S} <: Abstra
 end
 
 # Constructor to fetch the types
-function FastSystem(box::AUTOBOX, 
-                    pbc::AUTOPBC, 
+function FastSystem(cell_vectors::AUTOCELL,
+                    periodicity::AUTOPBC,
                     positions, species, masses)
-    cϵll = PeriodicCell(; bounding_box = box, periodicity = pbc)
+    cϵll = PeriodicCell(; cell_vectors, periodicity)
     FastSystem(cϵll, positions, species, masses)
 end 
 
@@ -40,8 +40,8 @@ function FastSystem(system::AbstractSystem)
 end
 
 # Convenience constructor where we don't have to preconstruct all the static stuff...
-function FastSystem(particles, box::AUTOBOX, pbc::AUTOPBC)
-    box1 = _auto_bounding_box(box)
+function FastSystem(particles, cell_vectors::AUTOCELL, pbc::AUTOPBC)
+    box1 = _auto_cell_vectors(cell_vectors)
     pbc1 = _auto_pbc(pbc, box1)
     D = length(box1)
     if !all(length.(box1) .== D)
@@ -66,16 +66,16 @@ Base.getindex(sys::FastSystem, i::Integer)  = AtomView(sys, i)
 
 # System property access
 function Base.getindex(system::FastSystem, x::Symbol)
-    if x === :bounding_box
-        bounding_box(system)
+    if x === :cell_vectors
+        cell_vectors(system)
     elseif x === :periodicity
         periodicity(system)
     else
         throw(KeyError(x))
     end
 end
-Base.haskey(::FastSystem, x::Symbol) = x in (:bounding_box, :periodicity)
-Base.keys(::FastSystem) = (:bounding_box, :periodicity)
+Base.haskey(::FastSystem, x::Symbol) = x in (:cell_vectors, :periodicity)
+Base.keys(::FastSystem) = (:cell_vectors, :periodicity)
 
 # Atom and atom property access
 atomkeys(::FastSystem) = (:position, :species, :mass)
