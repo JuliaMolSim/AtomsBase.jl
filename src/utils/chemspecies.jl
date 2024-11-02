@@ -11,6 +11,9 @@ import Base: ==, convert, show, length
 
 export ChemicalSpecies
 
+# masses are saved in a different file to not clutter this file
+include("isotope_masses.jl")
+
 """
 Encodes a chemical species by wrapping an integer that represents the atomic 
 number, the number of protons, and additional unspecified information as a `UInt32`. 
@@ -130,10 +133,17 @@ Base.convert(::Type{Symbol}, element::ChemicalSpecies) = Symbol(element)
 
 function mass(element::ChemicalSpecies)
     if element.n_neutrons < 0
-        return _z2mass[element.atomic_number]
+        if haskey(_z2mass, element.atomic_number)
+            return _z2mass[element.atomic_number]
+        else
+            return 0.0u"u"
+        end
     end
-    # needs update for isotopes
-    return 0.0u"u"
+    akey = (element.atomic_number, element.n_neutrons)
+    if haskey(_isotope_masses, akey)
+        return _isotope_masses[akey] * u"u"
+    end
+    return missing
 end
 
 
