@@ -68,10 +68,10 @@ ChemicalSpecies(:C12; atomic_name=:MyC) == ChemicalSpecies(:C12)
 ChemicalSpecies(:C; atomic_name=:MyC) == ChemicalSpecies(:C12)
 
 # true
-ChemicalSpecies(:C; atomic_name=:MyC) == ChemicalSpecies(:C12; atomic_name=:MyC)
+ChemicalSpecies(:C12; atomic_name=:MyC) == ChemicalSpecies(:C)
 
 # true
-ChemicalSpecies(:C12; atomic_name=:MyC) == ChemicalSpecies(:C)
+ChemicalSpecies(:C; atomic_name=:MyC) == ChemicalSpecies(:C12; atomic_name=:MyC)
 ```
 
 """
@@ -114,7 +114,7 @@ end
 function ChemicalSpecies(z::Integer; atomic_name::Symbol=Symbol(""), n_neutrons::Int=-1)
     atom_name = String(atomic_name)
     if length(atom_name) > 4
-        throw(ArgumentError("atom_name has to be max 4 characters"))
+        throw(ArgumentError("atomic_name has to be max 4 characters"))
     end
     if length(atom_name) == 0
         return ChemicalSpecies(z, n_neutrons, zero(UInt32),)
@@ -138,7 +138,9 @@ function ==(cs1::ChemicalSpecies, cs2::ChemicalSpecies)
         return false
     elseif (cs1.name != 0 && cs2.name != 0) && cs1.name != cs2.name
         return false
-    elseif cs1.name != cs2.name && cs1.n_neutrons != cs2.n_neutrons
+    elseif (cs1.n_neutrons < 0 && cs1.name == 0) || (cs2.n_neutrons < 0 && cs2.name == 0)
+        return true
+    elseif cs1.n_neutrons != cs2.n_neutrons && cs1.name != cs2.name
         return false
     else
         return true

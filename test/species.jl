@@ -30,4 +30,28 @@ end
 @test "$(ChemicalSpecies(:C; n_neutrons=6))" == "C12"
 @test "$(ChemicalSpecies(:C; n_neutrons=7))" == "C13"
 
+
+@test ChemicalSpecies(:C13) == ChemicalSpecies(:C)
+@test ChemicalSpecies(:C12) != ChemicalSpecies(:C13)
+@test ChemicalSpecies(:C; atomic_name=:MyC) == ChemicalSpecies(:C)
+@test ChemicalSpecies(:C12; atomic_name=:MyC) == ChemicalSpecies(:C12)
+@test ChemicalSpecies(:C; atomic_name=:MyC) != ChemicalSpecies(:C12)
+@test ChemicalSpecies(:C12; atomic_name=:MyC) == ChemicalSpecies(:C)
+@test ChemicalSpecies(:C; atomic_name=:MyC) == ChemicalSpecies(:C12; atomic_name=:MyC)
+@test ChemicalSpecies(:D) != ChemicalSpecies(:T)
+@test ChemicalSpecies(:H) == ChemicalSpecies(:D)
+@test ChemicalSpecies(:H) == ChemicalSpecies(:T)
+@test ChemicalSpecies(:H1) != ChemicalSpecies(:D)
+@test ChemicalSpecies(:H1) == ChemicalSpecies(1; n_neutrons=0)
+
+@test mass(ChemicalSpecies(:C)) != mass(ChemicalSpecies(:C12))
+@test mass(ChemicalSpecies(:C)) != mass(ChemicalSpecies(:C13))
+@test mass(ChemicalSpecies(:C12)) != mass(ChemicalSpecies(:C13))
+
+@test atomic_name(ChemicalSpecies(:C)) == atomic_symbol(ChemicalSpecies(:C))
+@test atomic_name(ChemicalSpecies(:C; atomic_name=:MyC)) == :MyC
+
+tmp = ChemicalSpecies(:C12; atomic_name=:MyC)
+@test atomic_name(tmp) != atomic_symbol(tmp)
+
 end
