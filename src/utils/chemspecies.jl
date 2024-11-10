@@ -46,8 +46,8 @@ ChemicalSpecies(:D)
 
 Constructors for names
 ```julia
-ChemicalSpecies(:C; atomic_name=:MyC)
-ChemicalSpecies(:C13; atomic_name=:MyC)
+ChemicalSpecies(:C; atom_name=:MyC)
+ChemicalSpecies(:C13; atom_name=:MyC)
 ```
 
 Comparisons with different isotopes and names
@@ -59,19 +59,19 @@ ChemicalSpecies(:C13) == ChemicalSpecies(:C)
 ChemicalSpecies(:C12) == ChemicalSpecies(:C13)
 
 # true
-ChemicalSpecies(:C; atomic_name=:MyC) == ChemicalSpecies(:C)
+ChemicalSpecies(:C; atom_name=:MyC) == ChemicalSpecies(:C)
 
 # true
-ChemicalSpecies(:C12; atomic_name=:MyC) == ChemicalSpecies(:C12)
+ChemicalSpecies(:C12; atom_name=:MyC) == ChemicalSpecies(:C12)
 
 # false
-ChemicalSpecies(:C; atomic_name=:MyC) == ChemicalSpecies(:C12)
+ChemicalSpecies(:C; atom_name=:MyC) == ChemicalSpecies(:C12)
 
 # true
-ChemicalSpecies(:C12; atomic_name=:MyC) == ChemicalSpecies(:C)
+ChemicalSpecies(:C12; atom_name=:MyC) == ChemicalSpecies(:C)
 
 # true
-ChemicalSpecies(:C; atomic_name=:MyC) == ChemicalSpecies(:C12; atomic_name=:MyC)
+ChemicalSpecies(:C; atom_name=:MyC) == ChemicalSpecies(:C12; atom_name=:MyC)
 ```
 
 """
@@ -88,7 +88,7 @@ end
 
 Base.Broadcast.broadcastable(s::ChemicalSpecies) = Ref(s)
 
-function ChemicalSpecies(asymbol::Symbol; atomic_name::Symbol=Symbol(""), n_neutrons::Int=-1)
+function ChemicalSpecies(asymbol::Symbol; atom_name::Symbol=Symbol(""), n_neutrons::Int=-1)
     str_symbol = String(asymbol)
     tmp = 0
     if length(str_symbol) > 1 && isnumeric(str_symbol[end])
@@ -108,13 +108,13 @@ function ChemicalSpecies(asymbol::Symbol; atomic_name::Symbol=Symbol(""), n_neut
         z = 1
         n_neutrons = asymbol == :D ? 1 : 2
     end
-    return ChemicalSpecies(Int(z); atomic_name=atomic_name, n_neutrons=n_neutrons)
+    return ChemicalSpecies(Int(z); atom_name=atom_name, n_neutrons=n_neutrons)
 end 
 
-function ChemicalSpecies(z::Integer; atomic_name::Symbol=Symbol(""), n_neutrons::Int=-1)
-    atom_name = String(atomic_name)
+function ChemicalSpecies(z::Integer; atom_name::Symbol=Symbol(""), n_neutrons::Int=-1)
+    atom_name = String(atom_name)
     if length(atom_name) > 4
-        throw(ArgumentError("atomic_name has to be max 4 characters"))
+        throw(ArgumentError("atom_name has to be max 4 characters"))
     end
     if length(atom_name) == 0
         return ChemicalSpecies(z, n_neutrons, zero(UInt32),)
@@ -284,14 +284,14 @@ atomic_number(sys::AbstractSystem, index) = atomic_number.(species(sys, index))
 
 
 """
-    atomic_name(species)
-    atomic_name(sys::AbstractSystem, i)
+    atom_name(species)
+    atom_name(sys::AbstractSystem, i)
 
 Return atomic name (`Symbol`) for `species` or vector of names for `sys`.
 
 Defaults to [`atomic_symbol`](@ref), if `name` field is zero or not defined.
 """
-function atomic_name(cs::ChemicalSpecies)
+function atom_name(cs::ChemicalSpecies)
    if cs.name == 0
        return atomic_symbol(cs)
    else
@@ -302,6 +302,6 @@ function atomic_name(cs::ChemicalSpecies)
    end
 end
 
-atomic_name(at) = atomic_symbol(at)
+atom_name(at) = atomic_symbol(at)
 
-atomic_name(sys::AbstractSystem, index) = atomic_name.(species(sys, index))
+atom_name(sys::AbstractSystem, index) = atom_name.(species(sys, index))
