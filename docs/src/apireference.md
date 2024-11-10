@@ -49,6 +49,7 @@ velocity
 set_velocity!
 atomic_number
 atomic_symbol
+atom_name
 element_symbol
 element 
 ```
