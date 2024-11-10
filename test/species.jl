@@ -66,17 +66,30 @@ tmp = ChemicalSpecies(:C12; atom_name=:MyC)
 @test mass(ChemicalSpecies(:X)) == 0.0u"u"
 @test ismissing( mass(ChemicalSpecies(:H31)) )
 
-@testset "ChemicalSpecies in FastSystem" begin
+@testset "ChemicalSpecies in Atom and FastSystem" begin
    box = ([1, 0, 0]u"m", [0, 1, 0]u"m", [0, 0, 1]u"m")
    pbcs = (true, true, false)
    atoms = Atom[ChemicalSpecies(:C; atom_name=:MyC) => [0.25, 0.25, 0.25]u"m",
                :C12 => [0.75, 0.75, 0.75]u"m"]
    system = FastSystem(atoms, box, pbcs)
 
+   @test atom_name(atoms[1]) == :MyC
+   @test atom_name(atoms[2]) == :C12
+   @test atomic_symbol(atoms[1]) == :C
+   @test atomic_symbol(atoms[2]) == :C12
+
+   @test mass(atoms[1]) == mass(ChemicalSpecies(:C))
+   @test mass(atoms[2]) == mass(ChemicalSpecies(:C12))
+
    @test atom_name(system, 1) == :MyC
    @test atom_name(system, 2) == :C12
    @test atomic_symbol(system, 1) == :C
    @test atomic_symbol(system, 2) == :C12
+
+   @test atom_name(system[1]) == :MyC
+   @test atom_name(system[2]) == :C12
+   @test atomic_symbol(system[1]) == :C
+   @test atomic_symbol(system[2]) == :C12
 
    @test mass(system, 1) == mass(ChemicalSpecies(:C))
    @test mass(system, 2) == mass(ChemicalSpecies(:C12))
