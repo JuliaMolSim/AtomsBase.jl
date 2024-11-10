@@ -296,7 +296,7 @@ function atomic_name(cs::ChemicalSpecies)
        return atomic_symbol(cs)
    else
        # filter first empty space characters
-       as_characters = Char.( reinterpret(SVector{4, UInt8}, cs.name) )
+       as_characters = Char.( reinterpret(SVector{4, UInt8}, [cs.name])[1] )
        tmp = String( filter( x -> ! isspace(x), as_characters ) )
        return Symbol( tmp )
    end
