@@ -29,15 +29,22 @@ end
 @test "$(ChemicalSpecies(8, 8, 0))" == "O16"
 @test "$(ChemicalSpecies(:C; n_neutrons=6))" == "C12"
 @test "$(ChemicalSpecies(:C; n_neutrons=7))" == "C13"
+@test ChemicalSpecies(:H) == :H
+@test ChemicalSpecies(:D) == :D
+@test ChemicalSpecies(:T) == :T
+@test ChemicalSpecies(:X) == :X
 
+@test_throws ArgumentError ChemicalSpecies(:C; atom_name=:MyLongC)
 
-@test ChemicalSpecies(:C13) == ChemicalSpecies(:C)
+@test ChemicalSpecies(:H) != ChemicalSpecies(:C)
+@test ChemicalSpecies(:C13) == ChemicalSpecies(:C) 
 @test ChemicalSpecies(:C12) != ChemicalSpecies(:C13)
 @test ChemicalSpecies(:C; atom_name=:MyC) == ChemicalSpecies(:C)
 @test ChemicalSpecies(:C12; atom_name=:MyC) == ChemicalSpecies(:C12)
 @test ChemicalSpecies(:C; atom_name=:MyC) != ChemicalSpecies(:C12)
 @test ChemicalSpecies(:C12; atom_name=:MyC) == ChemicalSpecies(:C)
 @test ChemicalSpecies(:C; atom_name=:MyC) == ChemicalSpecies(:C12; atom_name=:MyC)
+@test ChemicalSpecies(:C; atom_name=:MyC) != ChemicalSpecies(:C; atom_name=:noC)
 @test ChemicalSpecies(:D) != ChemicalSpecies(:T)
 @test ChemicalSpecies(:H) == ChemicalSpecies(:D)
 @test ChemicalSpecies(:H) == ChemicalSpecies(:T)
@@ -53,5 +60,26 @@ end
 
 tmp = ChemicalSpecies(:C12; atom_name=:MyC)
 @test atom_name(tmp) != atomic_symbol(tmp)
+
+@test mass(ChemicalSpecies(:C)) != mass(ChemicalSpecies(:C12))
+@test mass(ChemicalSpecies(:C12)) != mass(ChemicalSpecies(:C13))
+@test mass(ChemicalSpecies(:X)) == 0.0u"u"
+@test ismissing( mass(ChemicalSpecies(:H31)) )
+
+@testset "ChemicalSpecies in FastSystem" begin
+   box = ([1, 0, 0]u"m", [0, 1, 0]u"m", [0, 0, 1]u"m")
+   pbcs = (true, true, false)
+   atoms = Atom[ChemicalSpecies(:C; atom_name=:MyC) => [0.25, 0.25, 0.25]u"m",
+               :C12 => [0.75, 0.75, 0.75]u"m"]
+   system = FastSystem(atoms, box, pbcs)
+
+   @test atom_name(system, 1) == :MyC
+   @test atom_name(system, 2) == :C12
+   @test atomic_symbol(system, 1) == :C
+   @test atomic_symbol(system, 2) == :C12
+
+   @test mass(system, 1) == mass(ChemicalSpecies(:C))
+   @test mass(system, 2) == mass(ChemicalSpecies(:C12))
+end
 
 end
