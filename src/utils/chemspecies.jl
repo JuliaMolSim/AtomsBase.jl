@@ -92,10 +92,15 @@ function ChemicalSpecies(asymbol::Symbol; atom_name::Symbol=Symbol(""), n_neutro
     str_symbol = String(asymbol)
     tmp = 0
     if length(str_symbol) > 1 && isnumeric(str_symbol[end])
-        # we exclude the case where n_neutrons > 99
-        if  length(str_symbol) > 2 && isnumeric(str_symbol[end])
-            tmp = parse(Int, str_symbol[end-1:end])
-            str_symbol = str_symbol[1:end-2]
+        # We only consider cases where number of nucleons is < 1000
+        if  length(str_symbol) > 2 && isnumeric(str_symbol[end-1])
+            if length(str_symbol) > 3 && isnumeric(str_symbol[end-2])
+                tmp = parse(Int, str_symbol[end-2:end])
+                str_symbol = str_symbol[1:end-3]
+            else
+                tmp = parse(Int, str_symbol[end-1:end])
+                str_symbol = str_symbol[1:end-2]
+            end
         else
             tmp = parse(Int, str_symbol[end])
             str_symbol = str_symbol[1:end-1]

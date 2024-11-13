@@ -33,6 +33,9 @@ end
 @test ChemicalSpecies(:D) == :D
 @test ChemicalSpecies(:T) == :T
 @test ChemicalSpecies(:X) == :X
+@test ChemicalSpecies(:U238) == :U238
+@test ChemicalSpecies(:Cl35) == :Cl35
+@test ChemicalSpecies(:He3) == :He3
 
 @test_throws ArgumentError ChemicalSpecies(:C; atom_name=:MyLongC)
 
