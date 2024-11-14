@@ -181,8 +181,8 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
     (; system, atoms, cell,
        cell_vectors=sysprop[:cell_vectors],
        periodicity=sysprop[:periodicity],
-       atoms_properties=NamedTuple(atprop),
-       system_properties=NamedTuple(sysprop))
+       atprop=NamedTuple(atprop),
+       sysprop=NamedTuple(sysprop))
 end
 
 end
