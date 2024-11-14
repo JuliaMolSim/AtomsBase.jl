@@ -167,7 +167,7 @@ An update constructor for systems is supported as well (see [`AbstractSystem`](@
 ````@example system
 using AtomsBase: AbstractSystem
 AbstractSystem(hydrogen; 
-               bounding_box=([5.0, 0.0, 0.0]u"Å", 
+               cell_vectors=([5.0, 0.0, 0.0]u"Å", 
                              [0.0, 5.0, 0.0]u"Å", 
                              [0.0, 0.0, 5.0]u"Å"))
 ````
@@ -182,7 +182,7 @@ implementing the `AbstractSystem` interface.
 Similar to the atoms, system objects similarly support a functional-style access to system properties
 as well as a dict-style access:
 ````@example system
-bounding_box(hydrogen)
+cell_vectors(hydrogen)
 ````
 ````@example system
 hydrogen[:periodicity]
@@ -214,19 +214,19 @@ for some standard atomic system setups.
 For example to setup a hydrogen system with periodic BCs, we can issue
 ````@example
 using Unitful, UnitfulAtomic, AtomsBase  # hide
-bounding_box = ([10.0, 0.0, 0.0]u"Å", [0.0, 10.0, 0.0]u"Å", [0.0, 0.0, 10.0]u"Å")
+cell_vectors = ([10.0, 0.0, 0.0]u"Å", [0.0, 10.0, 0.0]u"Å", [0.0, 0.0, 10.0]u"Å")
 hydrogen = periodic_system([:H => [0, 0, 1.]u"Å",
                             :H => [0, 0, 3.]u"Å"],
-                           bounding_box)
+                           cell_vectors)
 ````
 To setup a silicon unit cell we can use fractional coordinates
 (which is common for solid-state simulations):
 ````@example
 using Unitful, UnitfulAtomic, AtomsBase  # hide
-bounding_box = 10.26 / 2 .*  ([0, 0, 1]u"bohr", [1, 0, 1]u"bohr", [1, 1, 0]u"bohr")
+cell_vectors = 10.26 / 2 .*  ([0, 0, 1]u"bohr", [1, 0, 1]u"bohr", [1, 1, 0]u"bohr")
 silicon = periodic_system([:Si =>  ones(3)/8,
                            :Si => -ones(3)/8],
-                           bounding_box, fractional=true)
+                           cell_vectors, fractional=true)
 ````
 Alternatively we can also place an isolated H2 molecule in vacuum, which is the standard setup for molecular simulations:
 ````@example
