@@ -95,6 +95,10 @@ function ChemicalSpecies(asymbol::Symbol; atom_name::Symbol=Symbol(""), n_neutro
         # We only consider cases where number of nucleons is < 1000
         if  length(str_symbol) > 2 && isnumeric(str_symbol[end-1])
             if length(str_symbol) > 3 && isnumeric(str_symbol[end-2])
+                if isnumeric(str_symbol[end-3])
+                    # we now have >= 1000 nucleons so we error
+                    throw( ArgumentError("Number of nucleons is >= 1000") )
+                end
                 tmp = parse(Int, str_symbol[end-2:end])
                 str_symbol = str_symbol[1:end-3]
             else
@@ -107,7 +111,7 @@ function ChemicalSpecies(asymbol::Symbol; atom_name::Symbol=Symbol(""), n_neutro
         end
     end
     asymbol = Symbol(str_symbol)
-    z = haskey(_sym2z, asymbol) ? _sym2z[asymbol] : 0
+    z = get(_sym2z, asymbol, 0)
     n_neutrons = tmp == 0 ? n_neutrons : tmp - z
     if asymbol in [:D, :T]
         z = 1
@@ -168,7 +172,7 @@ const _z2mass = Dict{UInt8, typeof(PeriodicTable.elements[1].atomic_mass)}(
 
 
 function Base.Symbol(element::ChemicalSpecies)
-    tmp = element.atomic_number == 0 ? :X : _z2sym[element.atomic_number]
+    tmp = get(_z2sym, element.atomic_number, :X)
     if element.n_neutrons < 0
         return tmp
     end
@@ -198,17 +202,10 @@ Base.convert(::Type{Symbol}, element::ChemicalSpecies) = Symbol(element)
 
 function mass(element::ChemicalSpecies)
     if element.n_neutrons < 0
-        if haskey(_z2mass, element.atomic_number)
-            return _z2mass[element.atomic_number]
-        else
-            return 0.0u"u"
-        end
+        return get(_z2mass, element.atomic_number, 0.0u"u")
     end
     akey = (element.atomic_number, element.n_neutrons)
-    if haskey(_isotope_masses, akey)
-        return _isotope_masses[akey] * u"u"
-    end
-    return missing
+    return get(_isotope_masses, akey, missing) * u"u"
 end
 
 
@@ -284,8 +281,6 @@ of identifying the type of a `species` (e.g. the element for the case of an atom
 this may be `:D` while `atomic_number` is still `1`.
 """
 atomic_number(sys::AbstractSystem, index) = atomic_number.(species(sys, index))
-
-
 
 
 """
