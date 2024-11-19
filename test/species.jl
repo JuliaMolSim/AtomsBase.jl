@@ -39,6 +39,8 @@ end
 
 @test_throws ArgumentError ChemicalSpecies(:C; atom_name=:MyLongC)
 @test_throws ArgumentError ChemicalSpecies(:U2389)
+@test_throws ArgumentError ChemicalSpecies(:Q)
+@test_throws ArgumentError ChemicalSpecies(:Q23)
 
 @test ChemicalSpecies(:H) != ChemicalSpecies(:C)
 @test ChemicalSpecies(:C13) == ChemicalSpecies(:C) 

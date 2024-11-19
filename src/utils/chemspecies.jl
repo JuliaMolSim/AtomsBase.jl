@@ -111,6 +111,9 @@ function ChemicalSpecies(asymbol::Symbol; atom_name::Symbol=Symbol(""), n_neutro
         end
     end
     asymbol = Symbol(str_symbol)
+    if ! haskey(_sym2z, asymbol) && ! ( asymbol in (:X, :D, :T) )
+        throw( ArgumentError("Could not recognize atom symbol $asymbol") )
+    end
     z = get(_sym2z, asymbol, 0)
     n_neutrons = tmp == 0 ? n_neutrons : tmp - z
     if asymbol in [:D, :T]
