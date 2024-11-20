@@ -38,9 +38,9 @@ function show_system(io::IO, system::AbstractSystem{D}) where {D}
     pbc = periodicity(system)
     print(io, typeof(system).name.name, "($(chemical_formula(system))")
     perstr = [p ? "T" : "F" for p in pbc]
-    print(io, ", pbc = ", join(perstr, ""))
+    print(io, ", periodicity = ", join(perstr, ""))
 
-    if !any(pbc)
+    if any(pbc)
         box_str = ["[" * join(ustrip.(bvector), ", ") * "]"
                    for bvector in cell_vectors(system)]
         bunit = unit(eltype(first(cell_vectors(system))))
@@ -53,7 +53,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
     pbc  = periodicity(system)
     print(io, typeof(system).name.name, "($(chemical_formula(system))")
     perstr = [p ? "T" : "F" for p in periodicity(system)]
-    print(io, ", pbc = ", join(perstr, ""))
+    print(io, ", periodicity = ", join(perstr, ""))
     println(io, "):")
 
     extra_line = false
