@@ -22,7 +22,7 @@ using Test
 end
 
 @testset "Printing atomic systems" begin
-    at = Atom(:Si, zeros(3) * u"m", zeros(3)u"m/s"; extradata=42)
+    at = Atom(:Si, zeros(3) * u"m", ones(3)u"m/s"; extradata=42)
     show(stdout, MIME("text/plain"), at)
     box = tuple([[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"bohr" ...)
     flexible_system = periodic_system([at], box)
