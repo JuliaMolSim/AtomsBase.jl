@@ -73,7 +73,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
 
     # Test some things on cell objects
     if cell(s) isa PeriodicCell
-        @test maximum(map(rnorm, bounding_box(cell(s)), bounding_box(cell(t)))) < rtol
+        @test maximum(map(rnorm, cell_vectors(cell(s)), cell_vectors(cell(t)))) < rtol
     end
     @test periodicity(cell(s))  == periodicity(cell(t))
     @test n_dimensions(cell(s)) == n_dimensions(cell(t))
@@ -96,7 +96,7 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
 
         if s[prop] isa Quantity
             @test rnorm(s[prop], t[prop]) < rtol
-        elseif prop in (:bounding_box, ) && (cell(s) isa PeriodicCell)
+        elseif prop in (:cell_vectors, ) && (cell(s) isa PeriodicCell)
             @test maximum(map(rnorm, s[prop], t[prop])) < rtol
         else
             @test s[prop] == t[prop]
@@ -146,7 +146,7 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
         :magnetic_moment => [0.0, 0.0, 1.0, -1.0, 0.0],
     )
     sysprop = Dict{Symbol,Any}(
-        :bounding_box => box,
+        :cell_vectors => box,
         :periodicity  => (true, true, false),
         #
         :extra_data   => 42,
@@ -171,16 +171,18 @@ function make_test_system(D=3; drop_atprop=Symbol[], drop_sysprop=Symbol[],
             Atom(atprop[:species][i], atprop[:position][i]; atargs...)
         end
     end
-    cell = PeriodicCell(; cell_vectors=sysprop[:bounding_box],
+    cell = PeriodicCell(; cell_vectors=sysprop[:cell_vectors],
                           periodicity=sysprop[:periodicity])
 
     sysargs = Dict(k => v for (k, v) in pairs(sysprop)
-                   if !(k in (:bounding_box, :periodicity)))
+                   if !(k in (:cell_vectors, :periodicity)))
     system = FlexibleSystem(atoms, cell; sysargs...)
 
     (; system, atoms, cell,
-     bounding_box=sysprop[:bounding_box], periodicity=sysprop[:periodicity],
-       atprop=NamedTuple(atprop), sysprop=NamedTuple(sysprop))
+       cell_vectors=sysprop[:cell_vectors],
+       periodicity=sysprop[:periodicity],
+       atprop=NamedTuple(atprop),
+       sysprop=NamedTuple(sysprop))
 end
 
 end

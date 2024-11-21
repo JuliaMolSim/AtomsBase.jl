@@ -1,7 +1,7 @@
 import Base.position
 import PeriodicTable
 
-export bounding_box,
+export cell_vectors,
        periodicity,
        cell,
        n_dimensions,
@@ -34,24 +34,24 @@ abstract type AbstractSystem{D} end
 
 
 """
-    bounding_box(sys::AbstractSystem{D})
+    cell_vectors(sys::AbstractSystem{D})
 
-Return a tuple of length `D` of vectors of length `D` that describe the 
-"box" in which the system `sys` is defined.
+Return a tuple of length `D` of vectors of length `D` that describe the
+cell in which the system `sys` is defined.
 """
-function bounding_box end
+function cell_vectors end
 
 """
-    set_bounding_box!(sys::AbstractSystem{D}, bb::NTuple{D, SVector{D, L}})
+    set_cell_vectors!(sys::AbstractSystem{D}, bb::NTuple{D, SVector{D, L}})
 """
-function set_bounding_box! end
+function set_cell_vectors! end
 
 
 """
     periodicity(sys::AbstractSystem{D})
 
 Return a `NTuple{D, Bool}` indicating whether the system is periodic along a
-cell vector as specified by `bounding_box`.
+cell vector as specified by `cell_vectors`.
 """
 function periodicity end 
 
@@ -169,7 +169,7 @@ n_dimensions(::AbstractSystem{D}) where {D} = D
 
 #  interface functions to connect Systems and cells 
 
-bounding_box(system::AbstractSystem) = bounding_box(cell(system))
+cell_vectors(system::AbstractSystem) = cell_vectors(cell(system))
 
 periodicity(system::AbstractSystem) = periodicity(cell(system))
 

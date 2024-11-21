@@ -45,14 +45,14 @@ A system is specified by a computational cell and particles within that cell (or
 - [`AtomsBase.cell(system)](@ref) : returns an object `cell` that specifies the computational cell. Two reference implementations, [`PeriodicCell`](@ref) and [`IsolatedCell`](@ref) that should serve most purposes are provided. 
 
 A cell object must implement methods for the following functions: 
-- [`AtomsBase.bounding_box(cell)`](@ref) : returns `NTuple{D, SVector{D, T}}` the cell vectors that specify the computational domain if it is finite. For isolated systems, the return values are unspecified.
-- [`AtomsBase.periodicity(cell)`](@ref) : returns `NTuple{D, Bool}`, booleans that specify whether the system is periodic in the direction of the `D` cell vectors provided by `bounding_box`. For isolated systems `periodicity` must return `(false, ..., false)`.
+- [`AtomsBase.cell_vectors(cell)`](@ref) : returns `NTuple{D, SVector{D, T}}` the cell vectors that specify the computational domain if it is finite. For isolated systems, the return values are unspecified.
+- [`AtomsBase.periodicity(cell)`](@ref) : returns `NTuple{D, Bool}`, booleans that specify whether the system is periodic in the direction of the `D` cell vectors provided by `cell_vectors`. For isolated systems `periodicity` must return `(false, ..., false)`.
 - [`AtomsBase.n_dimensions(cell)`](@ref) : returns the dimensionality of the computational cell, it must match the dimensionality of the system. 
 
 
-AtomsBase provides `bounding_box` and `periodicity` methods so that they can be called with a system as argument, i.e., 
+AtomsBase provides `cell_vectors` and `periodicity` methods so that they can be called with a system as argument, i.e., 
 ```julia
-bounding_box(system) = bounding_box(cell(system))
+cell_vectors(system) = cell_vectors(cell(system))
 periodicity(system)  =  periodicity(cell(system))
 ```
 
@@ -95,7 +95,7 @@ The optional setter / mutation interface consists of the following functions to 
 - [`set_position!(system, i, x)`](@ref) 
 - [`set_mass!(system, i, x)`](@ref)
 - [`set_species!(system, i, x)`](@ref) 
-- [`set_bounding_box!(cell, bb)`](@ref) 
+- [`set_cell_vectors!(cell, bb)`](@ref) 
 - [`set_periodicity!(cell, pbc)`](@ref) 
 - `deleteat!(system, i)` : delete atoms `i` (or atoms `i` if a list of `":`)
 - `append!(system1, system2)` : append system 2 to system 1, provided they are "compatible". 

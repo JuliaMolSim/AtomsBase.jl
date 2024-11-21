@@ -23,8 +23,8 @@ ChemicalSpecies
 ## System properties
 
 ```@docs
-bounding_box
-set_bounding_box!
+cell_vectors
+set_cell_vectors!
 periodicity
 set_periodicity!
 cell 

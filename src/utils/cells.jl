@@ -8,19 +8,19 @@ export IsolatedCell,
 # ------------------------------------------------------------------ 
 
 """
-      IsolatedCell{D, T} 
+      IsolatedCell{D, T}
 
-Defines a computational domain / cell describing an open system. 
+Defines a computational domain / cell describing an open system.
 """
-struct IsolatedCell{D, T} end 
+struct IsolatedCell{D, T} end
 
-IsolatedCell(D, T = typeof(1.0 * u"bohr")) = 
+IsolatedCell(D, T = typeof(1.0 * u"bohr")) =
       IsolatedCell{D, T}()
 
-bounding_box(cell::IsolatedCell{D, T}) where {D, T} = 
+cell_vectors(cell::IsolatedCell{D, T}) where {D, T} =
       ntuple(i -> SVector(ntuple(j -> i == j ? T(Inf) : zero(T), D)...), D)
 
-periodicity(cell::IsolatedCell{D}) where {D} = 
+periodicity(cell::IsolatedCell{D}) where {D} =
       ntuple(_ -> false, D)
 
 n_dimensions(::IsolatedCell{D}) where {D} = D
@@ -32,17 +32,17 @@ n_dimensions(::IsolatedCell{D}) where {D} = D
 # ------------------------------------------------------------------ 
 
 """
-Implementation of a computational cell for particle systems 
-   within AtomsBase.jl. `PeriodicCell` specifies a parallepiped shaped cell 
-   with choice of open or periodic boundary condition in each cell 
-   vector direction. 
+Implementation of a computational cell for particle systems
+within AtomsBase.jl. `PeriodicCell` specifies a parallepiped shaped cell
+with choice of open or periodic boundary condition in each cell
+vector direction.
 """
 struct PeriodicCell{D, T}
    cell_vectors::NTuple{D, SVector{D, T}}
    periodicity::NTuple{D, Bool}
 end
 
-bounding_box(cell::PeriodicCell) = cell.cell_vectors
+cell_vectors(cell::PeriodicCell) = cell.cell_vectors
 
 periodicity(cell::PeriodicCell) = cell.periodicity
 
@@ -50,12 +50,13 @@ n_dimensions(::PeriodicCell{D}) where {D} = D
 
 # kwarg constructor for PeriodicCell
 
-PeriodicCell(; cell_vectors, periodicity) =
-      PeriodicCell(_auto_cell_vectors(cell_vectors),
-            _auto_pbc(periodicity, cell_vectors))
+function PeriodicCell(; cell_vectors=nothing, periodicity)
+    PeriodicCell(_auto_cell_vectors(cell_vectors),
+                 _auto_pbc(periodicity, cell_vectors))
+end
 
 PeriodicCell(cl::Union{AbstractSystem, PeriodicCell}) =
-         PeriodicCell(; cell_vectors = bounding_box(cl),
+         PeriodicCell(; cell_vectors = cell_vectors(cl),
                         periodicity = periodicity(cl) )
 
 # ---------------------- pretty printing
@@ -77,8 +78,8 @@ end
 
 # allowed input types that convert automatically to the 
 # intended format for cell vectors,  NTuple{D, SVector{D, T}}
-const AUTOBOX = Union{NTuple{D, <: AbstractVector}, 
-                      AbstractVector{<: AbstractVector}} where {D}
+const AUTOCELL = Union{NTuple{D, <: AbstractVector}, 
+                       AbstractVector{<: AbstractVector}} where {D}
 
 # allowed input types that convert automatically to the 
 # intended format for pbc,  NTuple{D, Bool}
@@ -116,10 +117,3 @@ _auto_pbc(bc::AbstractVector, cell_vectors = nothing) =
 
 _auto_pbc(bc::Union{Bool, Nothing}, cell_vectors) =
       ntuple(i -> _auto_pbc1(bc), length(cell_vectors))
-
-
-# infinite box could use Inf for thebounding box vectors e.g. as follows
-# NOTE: this used to be exported, but I don't see the rationale for this
-
-_infinite_box(::Val{D}, T) where {D} =
-      ntuple(i -> SVector(ntuple(j -> (i == j) ? T(Inf) : zero(T), D)...), D)

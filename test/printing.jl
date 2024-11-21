@@ -15,12 +15,12 @@ using Test
     @test repr(flexible_system) == "FlexibleSystem(CSi, pbc = TTT)"
     # TODO:  I'm not sure why the expended expression should be printed in 
     #        this setting. Still needs to be looked at please; same below 
-    # FlexibleSystem(CSi, pbc = TTT, bounding_box = [[10.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 7.0]]u"a₀")"""
+    # FlexibleSystem(CSi, pbc = TTT, cell_vectors = [[10.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 7.0]]u"a₀")"""
     show(stdout, MIME("text/plain"), flexible_system)
 
     fast_system = FastSystem(flexible_system)
     @test repr(fast_system) == "FastSystem(CSi, pbc = TTT)"
-    # FastSystem(CSi, periodic = TTT, bounding_box = [[10.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 7.0]]u"a₀")
+    # FastSystem(CSi, periodic = TTT, cell_vectors = [[10.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 7.0]]u"a₀")
     show(stdout, MIME("text/plain"), fast_system)
     show(stdout, MIME("text/plain"), fast_system[1])
 end
