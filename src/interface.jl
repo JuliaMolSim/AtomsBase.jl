@@ -15,7 +15,8 @@ export cell_vectors,
        atomic_number,
        atomic_symbol,
        atomkeys,
-       hasatomkey
+       hasatomkey,
+       atom_name
 
 
 #

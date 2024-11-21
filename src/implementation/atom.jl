@@ -23,6 +23,7 @@ species(atom::Atom)  = atom.species
 
 n_dimensions(::Atom{D}) where {D} = D
 
+atom_name(atom::Atom)     = atom_name(species(atom))
 atomic_symbol(atom::Atom) = atomic_symbol(species(atom))
 atomic_number(atom::Atom) = atomic_number(species(atom))
 element(atom::Atom)       = element(species(atom))
@@ -51,7 +52,7 @@ function Atom(identifier::AtomId,
               position::AbstractVector{L},
               velocity::AbstractVector{V} = _default_velocity(position); 
               species = ChemicalSpecies(identifier),
-              mass::M=element(species).atomic_mass,
+              mass::M=mass(species),
               kwargs...) where {L <: Unitful.Length, V <: Unitful.Velocity, M <: Unitful.Mass}
     Atom{length(position), L, V, M}(position, velocity, species,
                                     mass, Dict(kwargs...))

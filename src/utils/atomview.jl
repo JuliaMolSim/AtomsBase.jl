@@ -41,6 +41,7 @@ position(v::AtomView) = position(v.system, v.index)
 mass(v::AtomView)     = mass(v.system, v.index)
 species(v::AtomView)  = species(v.system, v.index)
 
+atom_name(v::AtomView)     = atom_name(species(v))
 atomic_symbol(v::AtomView) = atomic_symbol(species(v))
 atomic_number(v::AtomView) = atomic_number(species(v))
 n_dimensions(v::AtomView)  = n_dimensions(v.system)
