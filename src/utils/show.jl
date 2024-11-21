@@ -1,4 +1,35 @@
 using Printf
+using Preferences
+
+"""
+Configures the printing behaviour of `show_system`, which is invoked when a rich `text/plain`
+display of an `AbstractSystem` is requested. This is for example the case in a Julia REPL.
+The following options can be configured:
+
+- `max_particles_list`: Maximal number of particles in a system until `show_system`
+  includes a listing of every particle. Default: 10
+- `max_particles_visualize_ascii`: Maximal number of particles in a system
+  until `show_system` includes a representation of the system in the form of
+  an ascii cartoon using `visualize_ascii`. Default 0, i.e. disabled.
+"""
+function set_show_preferences!(; max_particles_list=nothing, max_particles_visualize_ascii=nothing)
+    if !isnothing(max_particles_list)
+        @set_preferences!("max_particles_list" => max_particles_list)
+    end
+    if !isnothing(max_particles_visualize_ascii)
+        @set_preferences!("max_particles_visualize_ascii" => max_particles_visualize_ascii)
+    end
+    show_preferences()
+end
+
+"""
+Display the current printing behaviour of `show_system`.
+See [`set_show_preferences!](@ref) for more details on the keys.
+"""
+function show_preferences()
+    (; max_particles_list=@load_preference("max_particles_list", 10),
+       max_particles_visualize_ascii=@load_preference("max_particles_visualize_ascii", 0))
+end
 
 """
 Suggested function to print AbstractSystem objects to screen
@@ -7,9 +38,9 @@ function show_system(io::IO, system::AbstractSystem{D}) where {D}
     pbc = periodicity(system)
     print(io, typeof(system).name.name, "($(chemical_formula(system))")
     perstr = [p ? "T" : "F" for p in pbc]
-    print(io, ", pbc = ", join(perstr, ""))
+    print(io, ", periodicity = ", join(perstr, ""))
 
-    if !any(pbc)
+    if any(pbc)
         box_str = ["[" * join(ustrip.(bvector), ", ") * "]"
                    for bvector in cell_vectors(system)]
         bunit = unit(eltype(first(cell_vectors(system))))
@@ -22,11 +53,11 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
     pbc  = periodicity(system)
     print(io, typeof(system).name.name, "($(chemical_formula(system))")
     perstr = [p ? "T" : "F" for p in periodicity(system)]
-    print(io, ", pbc = ", join(perstr, ""))
+    print(io, ", periodicity = ", join(perstr, ""))
     println(io, "):")
 
     extra_line = false
-    if any(pbc) 
+    if any(pbc)
         extra_line = true
         box = cell_vectors(system)
         bunit = unit(eltype(first(cell_vectors(system))))
@@ -47,7 +78,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
         @printf io "    %-17s : %s\n" string(k) string(v)
     end
-    if length(system) < 10
+    if length(system) ≤ show_preferences().max_particles_list
         extra_line && println(io)
         for atom in system
             println(io, "    ", atom)
@@ -55,9 +86,7 @@ function show_system(io::IO, ::MIME"text/plain", system::AbstractSystem{D}) wher
         extra_line = true
     end
 
-    # TODO We will make this configurable in a follow-up PR
-    show_ascii = false
-    if show_ascii
+    if length(system) ≤ show_preferences().max_particles_visualize_ascii
         ascii = visualize_ascii(system)
         if !isempty(ascii)
             extra_line && println(io)

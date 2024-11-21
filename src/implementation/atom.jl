@@ -50,8 +50,8 @@ Supported `kwargs` include `species`, `mass`, as well as user-specific custom pr
 """
 function Atom(identifier::AtomId,
               position::AbstractVector{L},
-              velocity::AbstractVector{V} = _default_velocity(position); 
-              species = ChemicalSpecies(identifier),
+              velocity::AbstractVector{V}=_default_velocity(position);
+              species=ChemicalSpecies(identifier),
               mass::M=mass(species),
               kwargs...) where {L <: Unitful.Length, V <: Unitful.Velocity, M <: Unitful.Mass}
     Atom{length(position), L, V, M}(position, velocity, species,
