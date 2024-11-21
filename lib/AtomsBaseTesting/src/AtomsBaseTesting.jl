@@ -72,11 +72,15 @@ function test_approx_eq(s::AbstractSystem, t::AbstractSystem;
     end
 
     # Test some things on cell objects
-    if cell(s) isa PeriodicCell
-        @test maximum(map(rnorm, cell_vectors(cell(s)), cell_vectors(cell(t)))) < rtol
-    end
     @test periodicity(cell(s))  == periodicity(cell(t))
     @test n_dimensions(cell(s)) == n_dimensions(cell(t))
+    if cell(s) isa PeriodicCell
+        for (dim, periodic) in enumerate(periodicity(cell(s)))
+            if periodic
+                @test rnorm(cell_vectors(cell(s))[dim], cell_vectors(cell(t))[dim]) < rtol
+            end
+        end
+    end
 
     # test properties of systems
     if common_only
