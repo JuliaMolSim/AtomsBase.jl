@@ -12,11 +12,11 @@ using Test
     box = tuple([[10, 0.0, 0.0], [0.0, 5, 0.0], [0.0, 0.0, 7]]u"bohr" ...)
 
     flexible_system = periodic_system(atoms, box; fractional=true, data=-12)
-    @test repr(flexible_system) == """FlexibleSystem(CSi, periodicity = TTT, bounding_box = [[10.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 7.0]]u"a₀")"""
+    @test repr(flexible_system) == """FlexibleSystem(CSi, periodicity = TTT, cell_vectors = [[10.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 7.0]]u"a₀")"""
     show(stdout, MIME("text/plain"), flexible_system)
 
     fast_system = FastSystem(flexible_system)
-    @test repr(fast_system) == """FastSystem(CSi, periodicity = TTT, bounding_box = [[10.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 7.0]]u"a₀")"""
+    @test repr(fast_system) == """FastSystem(CSi, periodicity = TTT, cell_vectors = [[10.0, 0.0, 0.0], [0.0, 5.0, 0.0], [0.0, 0.0, 7.0]]u"a₀")"""
     show(stdout, MIME("text/plain"), fast_system)
     show(stdout, MIME("text/plain"), fast_system[1])
 end
