@@ -13,8 +13,8 @@ See [FastSystem](@ref Struct-of-Arrays-/-FastSystem) for an example of system
 using `AtomView` as its species type.
 
 ## Example
-```jldoctest; setup=:(using AtomsBase, Unitful; atoms = Atom[:C => [0.25, 0.25, 0.25]u"Å", :C => [0.75, 0.75, 0.75]u"Å"]; box = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"Å"; boundary_conditions = [Periodic(), Periodic(), DirichletZero()])
-julia> system = FastSystem(atoms, box, boundary_conditions);
+```jldoctest; setup=:(using AtomsBase, Unitful; atoms = Atom[:C => [0.25, 0.25, 0.25]u"Å", :C => [0.75, 0.75, 0.75]u"Å"]; cell_vectorn = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]u"Å"; boundary_conditions = [Periodic(), Periodic(), DirichletZero()])
+julia> system = FastSystem(atoms, cell_vectorn, boundary_conditions);
 
 julia> atom = system[2]
 AtomView(C, atomic_number = 6, mass = 12.011 u):

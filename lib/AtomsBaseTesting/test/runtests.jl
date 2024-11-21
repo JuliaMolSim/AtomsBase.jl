@@ -15,30 +15,30 @@ include("testmacros.jl")
             @test sort(collect(keys(case.atprop)))  == sort(collect(atomkeys(case.system)))
             @test sort(collect(keys(case.atprop)))  == sort(collect(keys(case.atoms[1])))
             @test sort(collect(keys(case.sysprop))) == sort(collect(keys(case.system)))
-            @test case.bounding_box  == bounding_box(case.system)
+            @test case.cell_vectors  == cell_vectors(case.system)
             @test case.periodicity   == periodicity(case.system)
         end
 
         let case = make_test_system(; cellmatrix=:full)
-            box = reduce(hcat, bounding_box(case.system))
+            box = reduce(hcat, cell_vectors(case.system))
             @test UpperTriangular(box) != box
             @test LowerTriangular(box) != box
             @test Diagonal(box) != box
         end
         let case = make_test_system(; cellmatrix=:upper_triangular)
-            box = reduce(hcat, bounding_box(case.system))
+            box = reduce(hcat, cell_vectors(case.system))
             @test UpperTriangular(box) == box
             @test LowerTriangular(box) != box
             @test Diagonal(box) != box
         end
         let case = make_test_system(; cellmatrix=:lower_triangular)
-            box = reduce(hcat, bounding_box(case.system))
+            box = reduce(hcat, cell_vectors(case.system))
             @test UpperTriangular(box) != box
             @test LowerTriangular(box) == box
             @test Diagonal(box) != box
         end
         let case = make_test_system(; cellmatrix=:diagonal)
-            box = reduce(hcat, bounding_box(case.system))
+            box = reduce(hcat, cell_vectors(case.system))
             @test Diagonal(box) == box
             @test UpperTriangular(box) == box
             @test LowerTriangular(box) == box
@@ -63,7 +63,7 @@ include("testmacros.jl")
         case = make_test_system()
         system = case.system
         atoms  = case.atoms
-        box    = case.bounding_box
+        box    = case.cell_vectors
         bcs    = case.periodicity
         sysprop = case.sysprop
         # end simplify
@@ -82,7 +82,7 @@ include("testmacros.jl")
         case = make_test_system()
         system = case.system
         atoms  = case.atoms
-        box    = case.bounding_box
+        box    = case.cell_vectors
         bcs    = case.periodicity
         sysprop = case.sysprop
         # end simplify
@@ -107,6 +107,18 @@ include("testmacros.jl")
             :H => [0, 0, 1.]u"Å",
         ])
         test_approx_eq(hydrogen, hydrogen)
+    end
+
+    @testset "Identical systems with just different units" begin
+        box = 10.26 / 2 * [[0, 0, 1], [1, 0, 1], [1, 1, 0]]u"bohr"
+        box_A = [[uconvert.(u"Å", i[j]) for j in 1:3] for i in box]
+        silicon = AtomsBase.periodic_system([:Si =>  ones(3)/8,
+                                   :Si => -ones(3)/8],
+                                   box, fractional=true)
+        silicon_A = AtomsBase.periodic_system([:Si =>  ones(3)/8,
+                                   :Si => -ones(3)/8],
+                                   box_A, fractional=true)
+        @testpass AtomsBaseTesting.test_approx_eq(silicon, silicon_A)
     end
 
     # TODO More tests would be useful

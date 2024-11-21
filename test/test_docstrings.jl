@@ -13,11 +13,11 @@ using Test
 # atomic_system docstring
 
 try 
-   bounding_box = [[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]u"Å"
+   cell_vectors = [[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]]u"Å"
    pbcs = (true, true, false)
    hydrogen = atomic_system([:H => [0, 0, 1.]u"bohr",
                                  :H => [0, 0, 3.]u"bohr"],
-                                  bounding_box, pbcs)
+                                  cell_vectors, pbcs)
    @test true
 catch 
    @error("atomic_system docstring failed to run")
@@ -40,10 +40,10 @@ end
 # periodic_system docstring 1 
 
 try 
-   bounding_box = ([10.0, 0.0, 0.0]u"Å", [0.0, 10.0, 0.0]u"Å", [0.0, 0.0, 10.0]u"Å")
+   cell_vectors = ([10.0, 0.0, 0.0]u"Å", [0.0, 10.0, 0.0]u"Å", [0.0, 0.0, 10.0]u"Å")
    hydrogen = periodic_system([:H => [0, 0, 1.]u"bohr",
                                       :H => [0, 0, 3.]u"bohr"],
-                                     bounding_box)
+                                     cell_vectors)
    @test true 
 catch e 
    @error("periodic_system docstring 1 failed to run")
