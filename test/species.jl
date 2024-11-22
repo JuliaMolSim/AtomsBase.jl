@@ -61,7 +61,7 @@ end
 @test mass(ChemicalSpecies(:C)) != mass(ChemicalSpecies(:C13))
 @test mass(ChemicalSpecies(:C12)) != mass(ChemicalSpecies(:C13))
 
-@test atom_name(ChemicalSpecies(:C)) == atomic_symbol(ChemicalSpecies(:C))
+@test atom_name(ChemicalSpecies(:C)) == Symbol(atomic_symbol(ChemicalSpecies(:C)))
 @test atom_name(ChemicalSpecies(:C; atom_name=:MyC)) == :MyC
 
 tmp = ChemicalSpecies(:C12; atom_name=:MyC)

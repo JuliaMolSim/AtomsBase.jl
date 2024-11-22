@@ -199,7 +199,7 @@ atomic_number(z::Integer) = z
 
 atomic_number(s::Symbol) = _sym2z[s]
 
-atomic_symbol(element::ChemicalSpecies) = element 
+atomic_symbol(element::ChemicalSpecies) = element
 
 Base.convert(::Type{Symbol}, element::ChemicalSpecies) = Symbol(element) 
 
@@ -248,11 +248,16 @@ Return the symbols corresponding to the elements of the atoms. Note that
 this may be different than `atomic_symbol` for cases where `atomic_symbol`
 is chosen to be more specific (i.e. designate a special atom).
 """
-element_symbol(sys::AbstractSystem, index) = 
+element_symbol(sys::AbstractSystem, index) =
         element_symbol.(sys[index])
 
-element_symbol(species) = 
+function element_symbol(species)
+    if atomic_number(species) == 0
+        :X
+    else
         Symbol(element(atomic_number(species)).symbol)
+    end
+end
 
 
 """
@@ -296,7 +301,7 @@ Defaults to [`atomic_symbol`](@ref), if `name` field is zero or not defined.
 """
 function atom_name(cs::ChemicalSpecies)
    if cs.name == 0
-       return atomic_symbol(cs)
+       return Symbol(atomic_symbol(cs))  # atomic_symbol is a ChemicalSpecies
    else
        # filter first empty space characters
        as_characters = Char.( reinterpret(SVector{4, UInt8}, [cs.name])[1] )
