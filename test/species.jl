@@ -105,6 +105,7 @@ tmp = ChemicalSpecies(:C12; atom_name=:MyC)
 
    @test element_symbol(system, 1) == :C
    @test element_symbol(system, 2) == :C
+   @test element_symbol(system, :) == [:C, :C]
 end
 
 end
