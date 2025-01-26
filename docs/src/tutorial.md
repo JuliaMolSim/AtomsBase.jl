@@ -44,7 +44,7 @@ basis = PlaneWaveBasis(model, Ecut=30, kgrid=(5, 5, 5)
 self_consistent_field(basis).energy.total
 ```
 For more high-level examples see also:
-- The [DFTK documentation page on AtomsBase](https://docs.dftk.org/stable/examples/atomsbase/).
+- The [DFTK documentation page on AtomsBase](https://docs.dftk.org/stable/ecosystem/atomsbase/).
 - The [AtomsIO documentation](https://mfherbst.github.io/AtomsIO.jl/stable)
 
 
