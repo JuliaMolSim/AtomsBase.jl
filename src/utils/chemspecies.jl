@@ -139,9 +139,24 @@ end
 
 ChemicalSpecies(sym::ChemicalSpecies) = sym
 
-==(a::ChemicalSpecies, sym::Symbol) = 
-        ((a == ChemicalSpecies(sym)) && (Symbol(a) == sym))
+function ==(a::ChemicalSpecies, sym::Symbol)
+    # We need to catch ArgumentError here as e.g.
+    # ChemicalSpecies(:H) == :not_atom
+    # does throw an error but should return false
+    local tmp
+    try 
+        tmp = ChemicalSpecies(sym)
+    catch e
+        if e isa ArgumentError
+            return false
+        else
+            rethrow()
+        end
+    end
+    return (a == tmp) && (Symbol(a) == sym)
+end
 
+==(sym::Symbol, a::ChemicalSpecies) = ==(a, sym)
 
 function ==(cs1::ChemicalSpecies, cs2::ChemicalSpecies)
     if cs1.atomic_number != cs2.atomic_number
