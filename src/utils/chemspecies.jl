@@ -143,9 +143,8 @@ function ==(a::ChemicalSpecies, sym::Symbol)
     # We need to catch ArgumentError here as e.g.
     # ChemicalSpecies(:H) == :not_atom
     # does throw an error but should return false
-    local tmp
-    try 
-        tmp = ChemicalSpecies(sym)
+    tmp = try
+        ChemicalSpecies(sym)
     catch e
         if e isa ArgumentError
             return false
