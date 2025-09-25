@@ -36,6 +36,15 @@ end
 @test ChemicalSpecies(:U238) == :U238
 @test ChemicalSpecies(:Cl35) == :Cl35
 @test ChemicalSpecies(:He3) == :He3
+@test ChemicalSpecies(:H) != :not_atom
+@test :H == ChemicalSpecies(:H)
+@test :D == ChemicalSpecies(:D)
+@test :T == ChemicalSpecies(:T)
+@test :X == ChemicalSpecies(:X)
+@test :Fe56 == ChemicalSpecies(:Fe56)
+@test :Al27 == ChemicalSpecies(:Al27)
+@test :He4 == ChemicalSpecies(:He4)
+@test :not_atom != ChemicalSpecies(:O)
 
 @test_throws ArgumentError ChemicalSpecies(:C; atom_name=:MyLongC)
 @test_throws ArgumentError ChemicalSpecies(:U2389)
@@ -66,6 +75,7 @@ end
 
 tmp = ChemicalSpecies(:C12; atom_name=:MyC)
 @test atom_name(tmp) != atomic_symbol(tmp)
+@test atomic_symbol(tmp) != atom_name(tmp)
 
 @test mass(ChemicalSpecies(:C)) != mass(ChemicalSpecies(:C12))
 @test mass(ChemicalSpecies(:C12)) != mass(ChemicalSpecies(:C13))
