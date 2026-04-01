@@ -71,7 +71,7 @@ julia> hydrogen = periodic_system([:H => [0, 0, 1.]u"bohr",
 
 Setup a silicon unit cell using fractional positions
 ```julia-repl
-julia> box = 10.26 / 2 * [[0, 0, 1], [1, 0, 1], [1, 1, 0]]u"bohr"
+julia> box = 10.26 / 2 * [[0, 1, 1], [1, 0, 1], [1, 1, 0]]u"bohr"
 julia> silicon = periodic_system([:Si =>  ones(3)/8,
                                   :Si => -ones(3)/8],
                                  box, fractional=true)
