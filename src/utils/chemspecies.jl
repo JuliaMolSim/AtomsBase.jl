@@ -7,7 +7,7 @@
 import PeriodicTable
 using Unitful
 
-import Base: ==, convert, show, length
+import Base: ==, convert, show, length, isless, isequal, hash
 
 export ChemicalSpecies
 
@@ -72,6 +72,18 @@ ChemicalSpecies(:C12; atom_name=:MyC) == ChemicalSpecies(:C)
 
 # true
 ChemicalSpecies(:C; atom_name=:MyC) == ChemicalSpecies(:C12; atom_name=:MyC)
+```
+
+Sorting and identity
+
+`ChemicalSpecies` supports `isless`, `isequal` and `hash`, so vectors can be
+`sort`ed and species can be used as keys in `Set`/`Dict`. These impose a strict
+total order on the raw fields `(atomic_number, n_neutrons, name)` and are
+therefore *stricter* than the wildcard `==` above. For example `:C == :C13` is
+`true` (matching), but `isequal(ChemicalSpecies(:C), ChemicalSpecies(:C13))` is
+`false`. An unspecified isotope/name sorts before a specified one.
+```julia
+sort(ChemicalSpecies.([:O, :H, :C]))  # -> [H, C, O]
 ```
 
 """
@@ -173,7 +185,23 @@ function ==(cs1::ChemicalSpecies, cs2::ChemicalSpecies)
     end
 end
 
-# -------- fast access to the periodic table 
+# `isless`/`isequal`/`hash` impose a strict total order on the RAW fields
+# (atomic_number, n_neutrons, name), which is what enables sorting and correct
+# use in `Set`/`Dict`/`unique`. This is deliberately different from `==`, which
+# is a wildcard *matching* relation (e.g. `:C == :C13` but `!isequal(:C, :C13)`).
+# Consequently, an unspecified isotope (`n_neutrons == -1`) sorts before any
+# specified isotope of the same element, and an unspecified name (`name == 0`)
+# sorts first. The `name` tie-break is deterministic but not alphabetical, since
+# `name` is a byte-packed `UInt32`.
+_key(cs::ChemicalSpecies) = (cs.atomic_number, cs.n_neutrons, cs.name)
+
+isless(a::ChemicalSpecies, b::ChemicalSpecies) = isless(_key(a), _key(b))
+
+isequal(a::ChemicalSpecies, b::ChemicalSpecies) = isequal(_key(a), _key(b))
+
+hash(cs::ChemicalSpecies, h::UInt) = hash(_key(cs), hash(:ChemicalSpecies, h))
+
+# -------- fast access to the periodic table
 
 const _sym2z = Dict{Symbol, UInt8}(
     Symbol(el.symbol) => el.number for el in PeriodicTable.elements
