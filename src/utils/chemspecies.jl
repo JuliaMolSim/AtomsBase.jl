@@ -79,10 +79,9 @@ ChemicalSpecies(:C; atom_name=:MyC) == ChemicalSpecies(:C12; atom_name=:MyC)
 `==` is a *matching* relation: an unspecified isotope (`n_neutrons < 0`) or
 unspecified name (`name == 0`) acts as a wildcard that matches anything, as in
 the examples above. This is convenient for queries (e.g. "is this atom carbon?")
-but it is deliberately not a strict equality — it is not even transitive
-(`:C == :C13` and `:C == :C12`, yet `:C12 != :C13`).
+but not a strict equality.
 
-In contrast `isequal` (together with `hash`) is *strict* equality of the raw
+In contrast `isequal` is *strict* equality of the raw
 fields `(atomic_number, n_neutrons, name)`, and `isless` is a strict total order
 on those same fields. These are what `sort`, `Set`, `Dict` and `unique` rely on,
 so they are provided as the well-behaved counterparts to `==`.

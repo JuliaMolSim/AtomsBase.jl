@@ -22,7 +22,7 @@ The function [`AtomsBase.species(sys, i)`](@ref) return the particle species of 
 - [`ChemicalSpecies`](@ref) : a prototype implementation and recommended default for the species of an atom.
 
 !!! note "`==` versus `isequal` for `ChemicalSpecies`"
-    `ChemicalSpecies` distinguishes two notions of comparison. `==` is a *matching* relation: an unspecified isotope or atom name acts as a wildcard, so e.g. `ChemicalSpecies(:C) == ChemicalSpecies(:C13)` is `true`. This is handy for queries (e.g. "is this atom carbon?"), but it is not a strict equality and is not even transitive (`:C == :C13` and `:C == :C12`, yet `:C12 != :C13`).
+    `ChemicalSpecies` distinguishes two notions of comparison. `==` is a *matching* relation: an unspecified isotope or atom name acts as a wildcard, so e.g. `ChemicalSpecies(:C) == ChemicalSpecies(:C13)` is `true`. This is handy for queries (e.g. "is this atom carbon?"), but it is not a strict equality.
     In contrast `isequal` (with the corresponding `hash`) is *strict* equality of all fields, and `isless` provides a strict total order. These are the well-behaved counterparts used by `sort`, `Set`, `Dict` and `unique`, so `isequal(ChemicalSpecies(:C), ChemicalSpecies(:C13))` is `false`.
 
 ## Convenience functions
