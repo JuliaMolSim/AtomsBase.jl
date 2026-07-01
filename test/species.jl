@@ -85,6 +85,36 @@ tmp = ChemicalSpecies(:C12; atom_name=:MyC)
 @test element_symbol(ChemicalSpecies(:C)) == :C
 @test element_symbol(ChemicalSpecies(:C13)) == :C
 
+@testset "ordering / identity" begin
+   # sort by atomic number
+   @test sort( ChemicalSpecies.([:O, :H, :C, :N]) ) == ChemicalSpecies.([:H, :C, :N, :O])
+   @test issorted( ChemicalSpecies.([:H, :C, :N, :O]) )
+   @test !issorted( ChemicalSpecies.([:O, :H]) )
+
+   # pairwise isless across elements
+   @test isless( ChemicalSpecies(:H), ChemicalSpecies(:C) )
+   @test !isless( ChemicalSpecies(:C), ChemicalSpecies(:H) )
+
+   # isotope ordering: unspecified isotope sorts first, then by neutron count
+   @test isless( ChemicalSpecies(:C), ChemicalSpecies(:C12) )
+   @test isless( ChemicalSpecies(:C12), ChemicalSpecies(:C13) )
+   @test sort( ChemicalSpecies.([:C13, :C, :C12]) ) == ChemicalSpecies.([:C, :C12, :C13])
+
+   # isequal / hash are strict, unlike the wildcard ==
+   @test ChemicalSpecies(:C) == ChemicalSpecies(:C13)         # wildcard match
+   @test !isequal( ChemicalSpecies(:C), ChemicalSpecies(:C13) )
+   @test !isequal( ChemicalSpecies(:C; atom_name=:MyC), ChemicalSpecies(:C) )
+   @test isequal( ChemicalSpecies(:C12), ChemicalSpecies(:C12) )
+   @test hash( ChemicalSpecies(:C12) ) == hash( ChemicalSpecies(:C12) )
+
+   # Set / Dict / unique behave correctly (rely on isequal + hash)
+   @test length( Set( ChemicalSpecies.([:C, :C, :C13, :C13]) ) ) == 2
+   @test length( unique( ChemicalSpecies.([:C, :C, :O]) ) ) == 2
+   d = Dict( ChemicalSpecies(:C12) => 1 )
+   @test d[ ChemicalSpecies(:C12) ] == 1
+   @test !haskey( d, ChemicalSpecies(:C13) )
+end
+
 @testset "ChemicalSpecies in Atom and FastSystem" begin
    box = ([1, 0, 0]u"m", [0, 1, 0]u"m", [0, 0, 1]u"m")
    pbcs = (true, true, false)
